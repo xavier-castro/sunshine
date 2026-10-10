@@ -18,7 +18,7 @@ import "../Sidebar.js" as Sidebar
 // a project; a project dragged into Pages is a page again). A click on a
 // section's name folds it, and it stays folded. At the foot, small: import,
 // templates, the archive, the trash and the settings; then a newer version,
-// if there's one, and who makes Uber Notebook, on X.
+// if there's one, and who makes Sunshine, on X.
 //
 // What's in it is yours (Settings → Appearance → Sidebar, or a right-click
 // on it): all of it but Pages and Settings can be left out.
@@ -689,7 +689,7 @@ Rectangle {
     width: parent.width - 16
     spacing: 6
 
-    // Uber Notebook: its icon and name (a click: Settings → About), and the
+    // Sunshine: its icon and name (a click: Settings → About), and the
     // sidebar hidden.
     Item {
       width: parent.width
@@ -1373,7 +1373,7 @@ Rectangle {
       }
     }
     Item { width: 1; height: 2 }
-    // A newer version, if there's one; who makes Uber Notebook, on X.
+    // A newer version, if there's one; who makes Sunshine, on X.
     SideFooter {
       objectName: "sidebarFooter"
       width: parent.width

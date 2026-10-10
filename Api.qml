@@ -18,7 +18,7 @@ import "Scope.js" as Scope
 import "Profiles.js" as Profiles
 import "Defaults.js" as Defaults
 
-// Uber Notebook's commands for AI agents and scripts: `omarchy-shell uber-notebook
+// Sunshine's commands for AI agents and scripts: `omarchy-shell sunshine
 // <command>` (Service.qml hands them on). They work on the same pages as the
 // window, through the same store, so what they add shows up as you watch,
 // links and reminders work, and nothing but the app writes its files.
@@ -49,7 +49,7 @@ QtObject {
   property var profiles: null
   // Settings as they are now (Service.qml's), for `preferences`.
   property var settings: null
-  // Whether there's a newer Uber Notebook (Updates.qml), and backups (Backups.qml).
+  // Whether there's a newer Sunshine (Updates.qml), and backups (Backups.qml).
   property var updates: null
   property var backups: null
 
@@ -57,7 +57,7 @@ QtObject {
   // While an agent works in the panel (Service.qml: Scope.js), what it may do.
   property var agentScope: null
   // That scope while the command going now is the panel's agent's (its
-  // uber-notebook-agent commands, Service.qml); null for yours, a script's
+  // sunshine-agent commands, Service.qml); null for yours, a script's
   // or a terminal's agent's.
   property var caller: null
   // Files a command is given, read for it ("max:path" -> { text, error, at,
@@ -111,7 +111,7 @@ QtObject {
     // same site is asked about itself.)
     viewDoes("askAgentPermission", { key: "contact " + (caller.talk || "") + " " + url, agent: who, action: "contact", target: host,
       why: "to get a link's title and picture", detail: url, talk: caller.talk || "", grants: caller.grants || null, run: read })
-    return "added as its link only: the user is asked in the panel before Uber Notebook contacts " + host
+    return "added as its link only: the user is asked in the panel before Sunshine contacts " + host
   }
 
   // A removal the panel's agent asks for (`kind`: "trash", "contact",
@@ -202,7 +202,7 @@ QtObject {
       }) === true && asked
     })
     if (!asked) return fail("not without the user's yes, and they can't be asked now: save or copy the file into your folder (" + scope.dir + ") and give that path")
-    return answer({ ok: true, asked: true, note: "the user is asked in the panel to let Uber Notebook take " + need.join(", ") + ": it's done when they say yes (no need to run it again)" })
+    return answer({ ok: true, asked: true, note: "the user is asked in the panel to let Sunshine take " + need.join(", ") + ": it's done when they say yes (no need to run it again)" })
   }
   // The command run, `scope` the caller, in the profile it was asked in
   // (`folder`, its notes): never in another opened since. A file still
@@ -220,7 +220,7 @@ QtObject {
     }
     return out
   }
-  // Uber Notebook's own folders, as full paths: every profile's notes (the
+  // Sunshine's own folders, as full paths: every profile's notes (the
   // open one's too) and the backups'.
   function keptFolders() {
     var out = []
@@ -275,12 +275,12 @@ QtObject {
   function fail(message) { return JSON.stringify({ ok: false, error: message }) }
 
   function unready() {
-    if (noProfile) return "Uber Notebook has no profile yet: make one with addProfile (or the user can, opening Uber Notebook)"
+    if (noProfile) return "Sunshine has no profile yet: make one with addProfile (or the user can, opening Sunshine)"
     // (All of it: its pages, People and the calendar, of the profile open now;
     // none while another's being opened: the one before is still there a
     // moment, and a command meant for the next never lands in it.)
-    if (files && files.switching === true) return "Uber Notebook's pages aren't loaded yet: try again in a moment"
-    if (!workspace || !workspace.ready || !workspace.contactsLoaded || !workspace.calendarLoaded) return "Uber Notebook's pages aren't loaded yet: try again in a moment"
+    if (files && files.switching === true) return "Sunshine's pages aren't loaded yet: try again in a moment"
+    if (!workspace || !workspace.ready || !workspace.contactsLoaded || !workspace.calendarLoaded) return "Sunshine's pages aren't loaded yet: try again in a moment"
     return ""
   }
 
@@ -340,7 +340,7 @@ QtObject {
       return got.error ? { error: "couldn't read " + p + ": " + got.error } : { text: got.text }
     }
     if (got) return { error: "reading that file first (only a plain file, at most " + Math.round(max / 1048576) + " MB): run the same command again in a moment" }
-    return { error: "Uber Notebook is reading other files: run the same command again in a moment" }
+    return { error: "Sunshine is reading other files: run the same command again in a moment" }
   }
   // What was read for `key` (or is being read), or null: none, or kept too
   // long (a read two minutes old, or one a minute in the reading, goes).
@@ -394,12 +394,12 @@ QtObject {
   function help() {
     return answer({
       ok: true,
-      app: "Uber Notebook (Omarchy's notes app): its Pages, a tree of pages made of blocks",
-      run: "omarchy-shell uber-notebook <command> [arguments]",
+      app: "Sunshine (Omarchy's notes app): its Pages, a tree of pages made of blocks",
+      run: "omarchy-shell sunshine <command> [arguments]",
       commands: [
         { use: "list", does: "every page: id, title, icon, path (the pages it's inside)" },
         { use: "find <words>", does: "pages with all the words in their title or text, best first, with a snippet" },
-        { use: "read <id>", does: "the page as Markdown (pages it links to as uber-notebook://page/<id>)" },
+        { use: "read <id>", does: "the page as Markdown (pages it links to as sunshine://page/<id>)" },
         { use: "add <title> <file.md>", does: "a new page in the Inbox from a Markdown file; an empty title takes the file's first # heading" },
         { use: "addTo <page id> <title> <file.md>", does: "a new page inside that page (\"\" for the top of Pages)" },
         { use: "append <id> <file.md>", does: "the Markdown added at the end of a page" },
@@ -459,10 +459,10 @@ QtObject {
         { use: "notebook <id>", does: "a notebook's pages in order: id, n, title, day, text (its first words)" },
         { use: "readNotebook <id> <page id>", does: "a notebook's page as Markdown" },
         { use: "addToNotebook <id> <file.md>", does: "a new page at the end of a notebook from a Markdown file" },
-        { use: "open <id>", does: "shows the page in Uber Notebook's window" },
+        { use: "open <id>", does: "shows the page in Sunshine's window" },
         { use: "profiles", does: "the user's profiles (notes kept apart: personal, work, the demo...): id, name, folder, open, demo; every other command works on the open one" },
         { use: "profile <name or id>", does: "opens another profile (only when the user asks)" },
-        { use: "addProfile <name> <folder> <open>", does: "a new profile, its notes in folder (\"\" for ~/Documents/Uber Notebook <name>; an empty folder starts fresh, one with Uber Notebook's notes opens them), opened if open is true; it starts empty, with the templates" },
+        { use: "addProfile <name> <folder> <open>", does: "a new profile, its notes in folder (\"\" for ~/Documents/Sunshine <name>; an empty folder starts fresh, one with Sunshine's notes opens them), opened if open is true; it starts empty, with the templates" },
         { use: "renameProfile <name or id> <new name>", does: "a profile's name" },
         { use: "profileFolder <name or id> <folder>", does: "a profile's notes looked for in another folder (nothing is moved)" },
         { use: "removeProfile <name or id>", does: "takes a profile off the list (not the open one); its notes stay in their folder" },
@@ -471,7 +471,7 @@ QtObject {
         { use: "backups", does: "the backups in the backup folder, newest first: name, file, made, size, automatic; and how the last one went (last, lastFailed, working)" },
         { use: "restoreBackup <file> <open>", does: "a backup put back (only when the user asks): each profile in it a new profile in a new folder (nothing there is changed); open true opens the first" },
         { use: "skill", does: "this skill (SKILL.md) as Markdown: how an AI uses these commands; give it to any AI that can run commands on this computer" },
-        { use: "appVersion", does: "the version running, and whether there's a newer one: latest, updateAvailable, status (current, available, none: no releases yet, failed), checked, releases, and update: how the user installs it (a command they run in a terminal; Uber Notebook doesn't install anything itself)" },
+        { use: "appVersion", does: "the version running, and whether there's a newer one: latest, updateAvailable, status (current, available, none: no releases yet, failed), checked, releases, and update: how the user installs it (a command they run in a terminal; Sunshine doesn't install anything itself)" },
         { use: "checkUpdate", does: "asks GitHub for the newest version now; appVersion says what it found a few seconds later" },
         { use: "releaseNotes", does: "what's new, as Markdown: the newer releases' notes, or (up to date) this version's" }
       ],
@@ -483,8 +483,8 @@ QtObject {
         + "::next, the next one's, ::end; two to six, at the page's own level (add, append, or insertAfter or replace a block "
         + "that isn't inside another). read gives them so",
       markdown: "Headings, lists, - [ ] to-dos, code blocks with their language, > [!NOTE] callouts, "
-        + "[[Page title]] (a link to that page), #tag (a tag), [@Fri 2 Oct](uber-notebook://date/2026-10-02) (a date) and "
-        + "[\u23f0 Fri 2 Oct 9:30](uber-notebook://remind/2026-10-02T09:30) (a reminder: a notification then)"
+        + "[[Page title]] (a link to that page), #tag (a tag), [@Fri 2 Oct](sunshine://date/2026-10-02) (a date) and "
+        + "[\u23f0 Fri 2 Oct 9:30](sunshine://remind/2026-10-02T09:30) (a reminder: a notification then)"
     })
   }
 
@@ -539,11 +539,11 @@ QtObject {
     keep(id)
     var page = workspace.readPageNow(id)
     if (!page) return fail(notRead(id))
-    if (page.format && page.format.locked) return fail("that page is locked: unlock it in Uber Notebook first")
+    if (page.format && page.format.locked) return fail("that page is locked: unlock it in Sunshine first")
     var had = page.project || { status: "active", due: "" }
     var next = st === "none" ? null : Workspace.cleanProject({ status: st || had.status, due: d === "-" ? had.due : d })
     var took = viewDoes("setProjectOfOpenPage", id, next)
-    if (took === "locked") return fail("that page is locked: unlock it in Uber Notebook first")
+    if (took === "locked") return fail("that page is locked: unlock it in Sunshine first")
     if (took !== true) {
       if (next) page.project = next
       else delete page.project
@@ -711,7 +711,7 @@ QtObject {
     var synced = []
     var md = Markdown.fromDocPage(page, function(pid) {
       var e = api.workspace.index.pages[pid]
-      return e && !Workspace.inTrash(api.workspace.index, pid) ? { title: e.title || "Untitled", icon: e.icon, file: "uber-notebook://page/" + pid } : null
+      return e && !Workspace.inTrash(api.workspace.index, pid) ? { title: e.title || "Untitled", icon: e.icon, file: "sunshine://page/" + pid } : null
     }, { fences: true, contactOf: function(cid) { return api.workspace.contactById(cid) },
       syncedPage: function(sid) { synced.push(sid); return live(sid) ? api.workspace.readPageNow(sid) : null } })
     if (stillReading(synced)) return fail("reading a page it syncs first: run the same command again in a moment")
@@ -861,12 +861,12 @@ QtObject {
     keep(id)
     // Open in the window: it adds them itself.
     var took = viewDoes("appendToOpenPage", id, blocks)
-    if (took === "locked") return fail("that page is locked: unlock it in Uber Notebook first")
+    if (took === "locked") return fail("that page is locked: unlock it in Sunshine first")
     if (took === true) return answer({ ok: true, id: id, added: blocks.length })
     writeOpen()
     var page = workspace.readPageNow(id)
     if (!page) return fail(notRead(id))
-    if (page.format && page.format.locked) return fail("that page is locked: unlock it in Uber Notebook first")
+    if (page.format && page.format.locked) return fail("that page is locked: unlock it in Sunshine first")
     var n = Workspace.appendBlocks(page, blocks)
     page.modified = new Date().toISOString()
     workspace.savePage(page)
@@ -905,7 +905,7 @@ QtObject {
     writeOpen()
     var page = workspace.readPageNow(id)
     if (!page) return fail(notRead(id))
-    if (page.format && page.format.locked) return fail("that page is locked: unlock it in Uber Notebook first")
+    if (page.format && page.format.locked) return fail("that page is locked: unlock it in Sunshine first")
     var spot = Workspace.locate(page, String(block || ""))
     if (!spot) return fail("there's no block with that id on the page (blocks <page id> gives them)")
     if (Workspace.isStructure(spot.block.type)) return fail("that block holds columns: change the blocks inside them instead")
@@ -922,7 +922,7 @@ QtObject {
     keep(id)
     // Open in the window: it changes the page itself, as a step you can undo.
     var took = viewDoes(how === "replace" ? "replaceInOpenPage" : "insertInOpenPage", id, { block: spot.block.uid, blocks: list })
-    if (took === "locked") return fail("that page is locked: unlock it in Uber Notebook first")
+    if (took === "locked") return fail("that page is locked: unlock it in Sunshine first")
     if (took !== true) {
       if (how === "replace") Workspace.putBlocks(page, spot.at, spot.end - spot.at + 1, list, spot.depth)
       else Workspace.putBlocks(page, spot.end + 1, 0, list, spot.depth)
@@ -953,7 +953,7 @@ QtObject {
   // A page's file changed now: fn(page) changes it (false: nothing to do; a
   // string: what's wrong). Kept in its history first (`keepIt`); the window
   // shows it as it is now.
-  // A page that couldn't be read at once: just after Uber Notebook started,
+  // A page that couldn't be read at once: just after Sunshine started,
   // being read now (the same command again has it); else not readable.
   readonly property string readingFirst: "reading that page first: run the same command again in a moment"
   function notRead(id) { return workspace.isWarming(id) ? readingFirst : "couldn't read that page" }
@@ -1013,7 +1013,7 @@ QtObject {
     return err ? fail(err) : answer({ ok: true, id: id, icon: clean })
   }
 
-  // One of Uber Notebook's covers ("gradient:0" to "gradient:11"), or "" for none.
+  // One of Sunshine's covers ("gradient:0" to "gradient:11"), or "" for none.
   function cover(id, which) {
     var not = unready()
     if (not) return fail(not)
@@ -1419,7 +1419,7 @@ QtObject {
     var list = pathList(text)
     if (list.length === 1 && !files.isImagePath(list[0])) {
       var dir = list[0].replace(/\/+$/, "")
-      files.execText(["/usr/bin/bash", "-c", Library.LIST_SCRIPT, "uber-notebook-pictures", dir], function(ok, out) {
+      files.execText(["/usr/bin/bash", "-c", Library.LIST_SCRIPT, "sunshine-pictures", dir], function(ok, out) {
         var names = String(out || "").split("\n").map(function(l) { var m = /^f\t[0-9.]+\t(.+)$/.exec(l); return m ? dir + "/" + m[1] : "" })
           .filter(function(p) { return p && files.isImagePath(p) }).sort()
         done(names.slice(0, 200))
@@ -1795,7 +1795,7 @@ QtObject {
     if (!c) return fail("give their id (contacts lists everyone)")
     return agentRemoval("contact", c.id, "take " + Contacts.nameOf(c) + " out of People", function() {
       workspace.setContacts(Contacts.without(workspace.contacts, c.id))
-      return answer({ ok: true, id: c.id, name: Contacts.nameOf(c), note: "taken out of People (Undo in People puts them back while Uber Notebook runs)" })
+      return answer({ ok: true, id: c.id, name: Contacts.nameOf(c), note: "taken out of People (Undo in People puts them back while Sunshine runs)" })
     })
   }
 
@@ -1876,7 +1876,7 @@ QtObject {
   // (The notebooks of the profile open now: none while another's being
   // opened, the one before still there a moment.)
   function notebooksUnready() {
-    if (noProfile) return "Uber Notebook has no profile yet: make one with addProfile (or the user can, opening Uber Notebook)"
+    if (noProfile) return "Sunshine has no profile yet: make one with addProfile (or the user can, opening Sunshine)"
     if (!files || !files.index || files.switching === true || files.ready === false) return "the notebooks aren't loaded yet: try again in a moment"
     return ""
   }
@@ -1936,7 +1936,7 @@ QtObject {
 
   function profileOut(p) {
     var open = profiles.current !== null && profiles.current.id === p.id
-    return { id: p.id, name: p.name, folder: p.folder || "~/Documents/Uber Notebook", open: open, demo: p.demo }
+    return { id: p.id, name: p.name, folder: p.folder || "~/Documents/Sunshine", open: open, demo: p.demo }
   }
   function profileOf(which) {
     var w = String(which || "").trim()

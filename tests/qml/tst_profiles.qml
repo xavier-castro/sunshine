@@ -1,6 +1,6 @@
 import QtQuick
 import QtTest
-import "../.." as UberNotebook
+import "../.." as Sunshine
 import "../../app"
 import "../../Settings.js" as Settings
 import "../../Workspace.js" as Workspace
@@ -20,15 +20,15 @@ Item {
   // (The files follow the open profile's folder, as Store.qml does: none
   // before there's a profile.)
   FakeFiles { id: files; rootPath: profiles.current !== null ? Settings.resolveFolder(service.settings.folder, "/tmp", true) : "" }
-  UberNotebook.Profiles { id: profiles; service: service; files: files; dataFolder: "/tmp/uber-notebook-data" }
-  UberNotebook.Workspace {
+  Sunshine.Profiles { id: profiles; service: service; files: files; dataFolder: "/tmp/sunshine-data" }
+  Sunshine.Workspace {
     id: ws
     files: files
     starter: profiles.current !== null && profiles.current.demo ? "examples" : "templates"
   }
 
   // (Its Inbox the open profile's, kept as its setting, as Service.qml has it.)
-  UberNotebook.Api {
+  Sunshine.Api {
     id: api; workspace: ws; files: files; profiles: profiles; noProfile: profiles.firstRun
     inbox: service.settings.inbox || ""
     onInboxMade: function(id) { service.setSetting("inbox", id) }
@@ -98,7 +98,7 @@ Item {
       var first = named(win(), "firstRun")
       verify(first !== null, "it asks")
       compare(named(first, "profileName").text, "Personal")
-      compare(named(first, "profileFolder").text, "~/Documents/Uber Notebook", "the usual place, for the first")
+      compare(named(first, "profileFolder").text, "~/Documents/Sunshine", "the usual place, for the first")
       compare(Object.keys(files.disk).length, 0, "nothing made anywhere yet")
       // Its own folder, picked.
       service.nextFolder = "/tmp/Notes/Mine"
@@ -118,14 +118,14 @@ Item {
       // A profile of your own starts with the templates, no examples.
       pagesOpen()
       verify(Workspace.templates(ws.index).length >= 5, "the templates")
-      compare(titles().indexOf("Welcome to Uber Notebook"), -1, "no examples")
+      compare(titles().indexOf("Welcome to Sunshine"), -1, "no examples")
       compare(ws.contacts.contacts.length, 0, "nobody in People")
       compare(named(win(), "profileSwitchName").text, "Home", "the switch says which")
     }
 
     function test_2_another_one_and_switching() {
       fresh()
-      verify(profiles.add("Personal", "~/Documents/Uber Notebook", true) === "")
+      verify(profiles.add("Personal", "~/Documents/Sunshine", true) === "")
       service.setSetting("inbox", "aaaa-inbox")
       service.setSetting("lastPage", "aaaa-page")
       // From the dropdown: New profile.
@@ -136,11 +136,11 @@ Item {
       var name = null
       tryVerify(function() { name = find(win(), function(it) { return it.objectName === "profileName" && it.visible }); return name !== null && name.input.activeFocus }, 1000)
       type("Business")
-      compare(named(win(), "profileFolder").text, "~/Documents/Uber Notebook Business", "suggested from its name")
+      compare(named(win(), "profileFolder").text, "~/Documents/Sunshine Business", "suggested from its name")
       keyClick(Qt.Key_Return)
       tryVerify(function() { return profiles.current && profiles.current.name === "Business" }, 1000)
       verify(service.savedOpen > 0, "what was open, written first")
-      compare(service.settings.folder, "~/Documents/Uber Notebook Business")
+      compare(service.settings.folder, "~/Documents/Sunshine Business")
       compare(service.settings.inbox, "", "its own Inbox, not Personal's")
       compare(service.settings.lastPage, "")
       service.setSetting("inbox", "bbbb-inbox")
@@ -152,12 +152,12 @@ Item {
       tryVerify(function() { return profiles.current.name === "Personal" }, 1000)
       compare(service.settings.inbox, "aaaa-inbox")
       compare(service.settings.lastPage, "aaaa-page")
-      compare(service.settings.folder, "~/Documents/Uber Notebook")
+      compare(service.settings.folder, "~/Documents/Sunshine")
       var business = profiles.list.filter(function(p) { return p.name === "Business" })[0]
       compare(business.saved.inbox, "bbbb-inbox", "Business keeps its")
       // A name or a folder that's taken.
       compare(profiles.add("business", "~/Elsewhere", false), "There's a profile called that already")
-      compare(profiles.add("Other", "~/Documents/Uber Notebook/Other", false), "“Personal” keeps its notes there")
+      compare(profiles.add("Other", "~/Documents/Sunshine/Other", false), "“Personal” keeps its notes there")
     }
 
     // Each profile its own Inbox: one made in a profile (its first quick
@@ -166,7 +166,7 @@ Item {
     function test_2b_each_profile_its_own_inbox() {
       fresh()
       function j(t) { return JSON.parse(t) }
-      verify(profiles.add("Personal", "~/Documents/Uber Notebook", true) === "")
+      verify(profiles.add("Personal", "~/Documents/Sunshine", true) === "")
       var personal = profiles.current.id
       pagesOpen()
       tryVerify(function() { return ws.loaded }, 2000)
@@ -176,7 +176,7 @@ Item {
       verify(Workspace.isUuid(inboxP), inboxP)
       compare(api.inbox, inboxP)
       // A new profile: none yet, its own made there.
-      verify(profiles.add("Client", "~/Documents/Uber Notebook Client", true) === "")
+      verify(profiles.add("Client", "~/Documents/Sunshine Client", true) === "")
       compare(api.inbox, "", "Client's, not Personal's")
       pagesOpen()
       tryVerify(function() { return ws.loaded }, 2000)
@@ -205,10 +205,10 @@ Item {
       // From the first run.
       click(named(named(win(), "firstRun"), "firstRunDemo"))
       tryVerify(function() { return profiles.current && profiles.current.demo }, 1000)
-      compare(service.settings.folder, "/tmp/uber-notebook-data/demo")
+      compare(service.settings.folder, "/tmp/sunshine-data/demo")
       pagesOpen()
-      tryVerify(function() { return titles().indexOf("Welcome to Uber Notebook") >= 0 }, 2000, "the examples")
-      compare(app.docView.page.title, "Welcome to Uber Notebook")
+      tryVerify(function() { return titles().indexOf("Welcome to Sunshine") >= 0 }, 2000, "the examples")
+      compare(app.docView.page.title, "Welcome to Sunshine")
       // A profile of your own, then back to the demo from the dropdown (no new one).
       verify(profiles.add("Mine", "~/Mine", true) === "")
       compare(profiles.list.length, 2)
@@ -221,7 +221,7 @@ Item {
       compare(profiles.list.length, 2)
       // Started over: a new folder, the examples again.
       profiles.restartDemo()
-      verify(/^\/tmp\/uber-notebook-data\/demo-[a-z0-9]+$/.test(service.settings.folder), service.settings.folder)
+      verify(/^\/tmp\/sunshine-data\/demo-[a-z0-9]+$/.test(service.settings.folder), service.settings.folder)
       compare(profiles.list.filter(function(p) { return p.demo }).length, 1)
     }
 
@@ -266,13 +266,13 @@ Item {
     // another folder is simply the next one.
     function test_3d_the_same_folder_picked_again() {
       fresh()
-      verify(profiles.add("Personal", "~/Documents/Uber Notebook", true) === "")
+      verify(profiles.add("Personal", "~/Documents/Sunshine", true) === "")
       verify(profiles.add("Side", "~/Side", false) === "")
       var id = profiles.current.id
       compare(files.retried, 0)
-      compare(profiles.setFolder(id, "~/Documents/Uber Notebook"), "")
+      compare(profiles.setFolder(id, "~/Documents/Sunshine"), "")
       compare(files.retried, 1, "looked at again")
-      compare(service.settings.folder, "~/Documents/Uber Notebook")
+      compare(service.settings.folder, "~/Documents/Sunshine")
       var side = profiles.list.filter(function(p) { return p.name === "Side" })[0]
       compare(profiles.setFolder(side.id, "~/Side"), "")
       compare(files.retried, 1, "not the one open: nothing to look at")
@@ -288,7 +288,7 @@ Item {
     // Notes from before profiles were opened before.
     function test_3e_new_till_opened() {
       fresh()
-      verify(profiles.add("Personal", "~/Documents/Uber Notebook", true) === "")
+      verify(profiles.add("Personal", "~/Documents/Sunshine", true) === "")
       tryVerify(function() { return profiles.current !== null && profiles.current.fresh === undefined }, 1000, "opened: not new any more")
       verify(profiles.add("Side", "~/Side", false) === "")
       wait(50)
@@ -349,7 +349,7 @@ Item {
 
     function test_4_settings() {
       fresh()
-      verify(profiles.add("Personal", "~/Documents/Uber Notebook", true) === "")
+      verify(profiles.add("Personal", "~/Documents/Sunshine", true) === "")
       verify(profiles.add("Side", "~/Side", false) === "")
       // (Opened: not new any more, the list as it is from now.)
       tryVerify(function() { return profiles.current.fresh === undefined }, 1000)
@@ -397,22 +397,22 @@ Item {
       verify(j(api.add("Notes", "/tmp/in/x.md")).error.indexOf("no profile yet") >= 0, "nothing to work on yet")
       var w = j(api.addProfile("Work", "", "true"))
       verify(w.ok, JSON.stringify(w))
-      compare(w.folder, "~/Documents/Uber Notebook", "the first: the usual place")
+      compare(w.folder, "~/Documents/Sunshine", "the first: the usual place")
       compare(profiles.current.name, "Work")
       var c = j(api.addProfile("Client", "", "false"))
-      compare(c.folder, "~/Documents/Uber Notebook Client", "beside it, named for it")
+      compare(c.folder, "~/Documents/Sunshine Client", "beside it, named for it")
       compare(profiles.current.name, "Work", "not opened")
       compare(j(api.addProfile("work", "", "false")).error, "There's a profile called that already")
       var list = j(api.profileList())
       compare(list.map(function(p) { return p.name + (p.open ? "*" : "") }).join(","), "Work*,Client")
       compare(j(api.renameProfile("client", "Acme")).name, "Acme")
       compare(j(api.profileFolder("Acme", "~/Clients/Acme")).folder, "~/Clients/Acme")
-      compare(j(api.profileFolder("Acme", "~/Documents/Uber Notebook/Acme")).error, "“Work” keeps its notes there")
+      compare(j(api.profileFolder("Acme", "~/Documents/Sunshine/Acme")).error, "“Work” keeps its notes there")
       compare(j(api.removeProfile("Work")).error, "Open another profile first")
       compare(j(api.openProfile("Acme")).profile, "Acme")
       compare(service.settings.folder, "~/Clients/Acme")
       var gone = j(api.removeProfile("Work"))
-      verify(gone.ok && gone.note.indexOf("~/Documents/Uber Notebook") >= 0, JSON.stringify(gone))
+      verify(gone.ok && gone.note.indexOf("~/Documents/Sunshine") >= 0, JSON.stringify(gone))
       compare(j(api.openProfile("nope")).ok, false)
       // The demo.
       compare(j(api.demo(false)).profile, "Demo")
@@ -426,27 +426,27 @@ Item {
 
     function test_5_notes_from_before_profiles() {
       // Notes in the usual place: they're "Personal", open.
-      fresh({ sounds: false }, { "/tmp/Documents/Uber Notebook/library.json": "{}" })
+      fresh({ sounds: false }, { "/tmp/Documents/Sunshine/library.json": "{}" })
       compare(profiles.list.length, 1)
       compare(profiles.current.name, "Personal")
-      compare(service.settings.folder, "~/Documents/Uber Notebook")
+      compare(service.settings.folder, "~/Documents/Sunshine")
       verify(!profiles.firstRun)
       // A folder set in Settings, and notes in the usual place too: both, the set one open.
-      fresh({ sounds: false, folder: "~/Documents/Uber Notebook Demo", inbox: "keep-inbox" }, { "/tmp/Documents/Uber Notebook/Pages/index.json": "{}" })
-      compare(profiles.list.map(function(p) { return p.name }).join(","), "Uber Notebook Demo,Personal")
-      compare(profiles.current.name, "Uber Notebook Demo")
+      fresh({ sounds: false, folder: "~/Documents/Sunshine Demo", inbox: "keep-inbox" }, { "/tmp/Documents/Sunshine/Pages/index.json": "{}" })
+      compare(profiles.list.map(function(p) { return p.name }).join(","), "Sunshine Demo,Personal")
+      compare(profiles.current.name, "Sunshine Demo")
       compare(service.settings.inbox, "keep-inbox", "its settings, as they were")
       // Its Inbox in the usual place's notes: Personal's, not the open one's.
-      fresh({ sounds: false, folder: "~/Documents/Uber Notebook Demo", inbox: "real-inbox", lastPage: "demo-page" }, {
-        "/tmp/Documents/Uber Notebook/library.json": "{}", "/tmp/Documents/Uber Notebook/Pages/real-inbox.json": "{}",
-        "/tmp/Documents/Uber Notebook Demo/Pages/demo-page.json": "{}" })
-      compare(profiles.current.name, "Uber Notebook Demo")
+      fresh({ sounds: false, folder: "~/Documents/Sunshine Demo", inbox: "real-inbox", lastPage: "demo-page" }, {
+        "/tmp/Documents/Sunshine/library.json": "{}", "/tmp/Documents/Sunshine/Pages/real-inbox.json": "{}",
+        "/tmp/Documents/Sunshine Demo/Pages/demo-page.json": "{}" })
+      compare(profiles.current.name, "Sunshine Demo")
       compare(service.settings.inbox, "", "not the demo's")
       compare(service.settings.lastPage, "demo-page", "the demo's page, its")
       compare(profiles.list.filter(function(p) { return p.name === "Personal" })[0].saved.inbox, "real-inbox")
       profiles.use("Personal")
       compare(service.settings.inbox, "real-inbox", "Personal's, back when it's open")
-      compare(service.settings.folder, "~/Documents/Uber Notebook")
+      compare(service.settings.folder, "~/Documents/Sunshine")
       // Nothing anywhere: the first run.
       fresh()
       verify(profiles.firstRun)
@@ -457,14 +457,14 @@ Item {
 
     // Once the profiles are in: every one's notes folder made yours alone,
     // not only the one opened (one from before was open to others); in your
-    // home folder itself, only what Uber Notebook keeps there.
+    // home folder itself, only what Sunshine keeps there.
     function test_6_every_profiles_folder_made_private() {
-      fresh({ sounds: false, profile: "p-a", folder: "~/Documents/Uber Notebook", profiles: [
-        { id: "p-a", name: "Personal", folder: "~/Documents/Uber Notebook" },
+      fresh({ sounds: false, profile: "p-a", folder: "~/Documents/Sunshine", profiles: [
+        { id: "p-a", name: "Personal", folder: "~/Documents/Sunshine" },
         { id: "p-b", name: "Work", folder: "/tmp/data/Work" },
         { id: "p-c", name: "Home", folder: "/tmp" }] }, { "/tmp/field-journal-a1b2/notebook.json": "{}" })
       var made = files.madePrivate
-      verify(made.indexOf("/tmp/Documents/Uber Notebook") >= 0, JSON.stringify(made))
+      verify(made.indexOf("/tmp/Documents/Sunshine") >= 0, JSON.stringify(made))
       verify(made.indexOf("/tmp/data/Work") >= 0, "not only the one open: " + JSON.stringify(made))
       verify(made.indexOf("/tmp") < 0, "never your home folder itself")
       verify(made.indexOf("/tmp/Pages") >= 0 && made.indexOf("/tmp/library.json") >= 0 && made.indexOf("/tmp/.trash") >= 0, "what's kept there: " + JSON.stringify(made))
@@ -496,12 +496,12 @@ Item {
     function test_6d_set_folder_and_profile_from_the_commands() {
       fresh()
       compare(profiles.setByCommand("folder", "~/Start"), null, "no profile yet")
-      verify(profiles.add("Personal", "~/Documents/Uber Notebook", true) === "")
+      verify(profiles.add("Personal", "~/Documents/Sunshine", true) === "")
       verify(profiles.add("Work", "~/Work", false) === "")
       var me = profiles.current.id
       var work = profiles.list.filter(function(p) { return p.name === "Work" })[0]
       verify(profiles.setByCommand("folder", "~/Work/Inside") !== "", "another profile's folder: refused")
-      compare(service.settings.folder, "~/Documents/Uber Notebook")
+      compare(service.settings.folder, "~/Documents/Sunshine")
       compare(profiles.setByCommand("folder", "~/Moved"), "")
       compare(service.settings.folder, "~/Moved")
       var mine = profiles.list.filter(function(p) { return p.id === me })[0]
@@ -554,7 +554,7 @@ Item {
     // say): closed, unanswered, as another profile starts opening.
     function test_6g_a_question_not_answered_in_the_next_profile() {
       fresh()
-      verify(profiles.add("Personal", "~/Documents/Uber Notebook", true) === "")
+      verify(profiles.add("Personal", "~/Documents/Sunshine", true) === "")
       var answered = false
       app.docView.confirmRequested("Delete for good?", "Only for the profile before", "Delete", function() { answered = true })
       tryVerify(function() { return find(win(), function(it) { return it.text === "Only for the profile before" }) !== null }, 1000, "asked")
@@ -592,7 +592,7 @@ Item {
     // is never saved into it.
     function test_6h_settings_open_as_another_profile_opens() {
       fresh()
-      verify(profiles.add("Personal", "~/Documents/Uber Notebook", true) === "")
+      verify(profiles.add("Personal", "~/Documents/Sunshine", true) === "")
       service.setSetting("mirror", true)
       service.setSetting("mirrorFolder", "~/Vault/Personal")
       verify(profiles.add("Work", "~/Work", false) === "")
@@ -623,7 +623,7 @@ Item {
     // gives nothing.
     function test_6e_a_search_of_the_profile_before() {
       fresh()
-      verify(profiles.add("Personal", "~/Documents/Uber Notebook", true) === "")
+      verify(profiles.add("Personal", "~/Documents/Sunshine", true) === "")
       app.showSpace("notebooks")
       var shelf = app.shelfView
       var field = null
@@ -657,12 +657,12 @@ Item {
     // agents; one not opened is made; once it's done, it opens.
     function test_6b_not_while_an_audio_note_records() {
       fresh()
-      verify(profiles.add("Personal", "~/Documents/Uber Notebook", true) === "")
+      verify(profiles.add("Personal", "~/Documents/Sunshine", true) === "")
       verify(profiles.add("Work", "~/Work", false) === "")
       var work = profiles.list.filter(function(p) { return p.name === "Work" })[0]
       var rec = service.recorder
       var got = null
-      compare(rec.start("audio", "a-block", "/tmp/Documents/Uber Notebook/Pages/assets/note.ogg", function(ok, r) { got = r }), "")
+      compare(rec.start("audio", "a-block", "/tmp/Documents/Sunshine/Pages/assets/note.ogg", function(ok, r) { got = r }), "")
       // From the dropdown: not opened, and said.
       click(named(win(), "profileSwitch"))
       var choice = null
@@ -670,8 +670,8 @@ Item {
       click(choice)
       tryVerify(function() { return find(win(), function(it) { return it.text === "Stop the recording first" }) !== null }, 1000, "said")
       compare(profiles.current.name, "Personal")
-      compare(service.settings.folder, "~/Documents/Uber Notebook")
-      compare(files.rootPath, "/tmp/Documents/Uber Notebook")
+      compare(service.settings.folder, "~/Documents/Sunshine")
+      compare(files.rootPath, "/tmp/Documents/Sunshine")
       // Every other way.
       compare(profiles.use(work.id), "Stop the recording first")
       compare(profiles.add("Client", "~/Client", true), "Stop the recording first")
@@ -689,13 +689,13 @@ Item {
       compare(JSON.parse(api.profileFolder("Personal", "~/Moved")).error, "Stop the recording first")
       compare(JSON.parse(api.demo(false)).error, "Stop the recording first")
       compare(profiles.current.name, "Personal", "still the one it's recorded in")
-      compare(service.settings.folder, "~/Documents/Uber Notebook")
+      compare(service.settings.folder, "~/Documents/Sunshine")
       // Stopped, and being saved (made louder): not yet either.
       rec.phase = "finishing"
       verify(/being saved/.test(profiles.use(work.id)))
       rec.phase = "recording"
       rec.stop()
-      compare(got.file, "/tmp/Documents/Uber Notebook/Pages/assets/note.ogg")
+      compare(got.file, "/tmp/Documents/Sunshine/Pages/assets/note.ogg")
       // Done: it opens.
       compare(profiles.use(work.id), "")
       compare(profiles.current.name, "Work")

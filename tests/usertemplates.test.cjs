@@ -21,7 +21,7 @@ check("filled in as it's used", () => {
   load("Dates.js").setTwelveHour(false);
   assert.equal(T.fill("{{time}}", false, now, fmt), "9:05", "or a 24-hour one");
   load("Dates.js").setTwelveHour(true);
-  assert.equal(T.fill("<b>{{date}}</b>", true, now, fmt), '<b><a href="uber-notebook://date/2026-10-02">@Fri 2 Oct</a></b>', "in a line, a date in Pages");
+  assert.equal(T.fill("<b>{{date}}</b>", true, now, fmt), '<b><a href="sunshine://date/2026-10-02">@Fri 2 Oct</a></b>', "in a line, a date in Pages");
   assert.equal(T.fill("{{nope}} and {{", false, now, fmt), "{{nope}} and {{", "only what it knows");
   assert.equal(T.fill("no braces", true, now, fmt), "no braces");
 });

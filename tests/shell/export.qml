@@ -81,7 +81,7 @@ ShellRoot {
       // whether its picture's in it.
       store.exec(["/usr/bin/bash", "-c", "for f in \"$1\"/Exports/*.\"$2\"; do [ -f \"$f\" ] || continue; printf '%s\\t' \"${f##*/}\"; /usr/bin/head -c 4 \"$f\" | /usr/bin/od -An -c | /usr/bin/tr -d ' \\n'; "
         + "if [ \"$2\" = docx ]; then printf '\\t'; /usr/bin/python3 -I -S -c 'import sys,zipfile; z=zipfile.ZipFile(sys.argv[1]); import re; rels=\"\".join(z.read(n).decode(\"utf-8\",\"replace\") for n in z.namelist() if n.endswith(\".rels\")); print(sum(1 for n in z.namelist() if n.startswith(\"word/media/\")), any(\"/image\\\"\" in r and \"External\" in r for r in re.findall(\"<Relationship [^>]*>\", rels)))' \"$f\"; else echo; fi; done; "
-        + "ls -d \"$XDG_RUNTIME_DIR\"/uber-notebook-export-* 2>/dev/null | /usr/bin/wc -l", "x", d, kind], function(ok, out) {
+        + "ls -d \"$XDG_RUNTIME_DIR\"/sunshine-export-* 2>/dev/null | /usr/bin/wc -l", "x", d, kind], function(ok, out) {
         var lines = String(out).trim().split("\n")
         var row = lines[0] ? lines[0].split("\t") : []
         if (kind === "pdf") say("a PDF, by Chromium, in the Exports folder", /^Export test \d{4}-\d\d-\d\d \d{4}\.pdf$/.test(row[0] || "") && row[1] === "%PDF", lines.join(" | ") + " :: " + root.said.join(" / "))

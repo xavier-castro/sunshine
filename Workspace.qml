@@ -16,7 +16,7 @@ import "Starter.js" as Starter
 import "Agent.js" as Agent
 
 // Pages on disk: the workspace in the Pages folder of your notebooks folder
-// (~/Documents/Uber Notebook/Pages), a JSON file per page, named by its UUID, and
+// (~/Documents/Sunshine/Pages), a JSON file per page, named by its UUID, and
 // index.json with the tree of pages (Workspace.js says what they may hold).
 //
 // It reads and writes through the notebooks' store (`files`): every file is
@@ -150,7 +150,7 @@ Item {
       if (gen !== ws.generation) return
       ws.keepUnreadable(ws.indexPath(), failed)
       var ix = ws.cleaned(ws.indexPath(), got[ws.indexPath()] || "", Workspace.cleanIndex)
-      files.exec(["/usr/bin/bash", "-c", ws.listScript, "uber-notebook-list", ws.folder], function(listed, output) {
+      files.exec(["/usr/bin/bash", "-c", ws.listScript, "sunshine-list", ws.folder], function(listed, output) {
         if (gen !== ws.generation) return
         var onDisk = String(output || "").split("\n").map(function(n) { return n.replace(/\.json$/, "") }).filter(Workspace.isUuid)
         var present = {}
@@ -222,12 +222,12 @@ Item {
     // damaged too: never taken for an empty file, and written over.)
     var parsed = raw ? files.parseJson(raw) : null
     if (parsed === null && String(raw || "").trim() !== "") {
-      console.warn("Uber Notebook: " + path + " couldn't be read: it isn't JSON")
+      console.warn("Sunshine: " + path + " couldn't be read: it isn't JSON")
       keepUnreadable(path, [path])
       return clean(null)
     }
     try { return clean(parsed) } catch (e) {
-      console.warn("Uber Notebook: " + path + " couldn't be read: " + e)
+      console.warn("Sunshine: " + path + " couldn't be read: " + e)
       keepUnreadable(path, [path])
       return clean(null)
     }
@@ -334,7 +334,7 @@ Item {
     return text === null ? null : Workspace.cleanPage(files.parseJson(text), id)
   }
 
-  // A page a command asked for before it was read (just after Uber Notebook
+  // A page a command asked for before it was read (just after Sunshine
   // starts, while the rest are read in the background): read now, first, so
   // the command run again has it (isWarming(id) meanwhile). One that can't
   // be read isn't tried again for ten seconds: "couldn't read" meanwhile.
@@ -552,7 +552,7 @@ Item {
   property var versionNames: ({})
   function listVersions(id, done) {
     if (!Workspace.isUuid(id)) { done([]); return }
-    files.exec(["/usr/bin/bash", "-c", listScript, "uber-notebook-list", Workspace.historyDir(files.rootPath, id)], function(ok, output) {
+    files.exec(["/usr/bin/bash", "-c", listScript, "sunshine-list", Workspace.historyDir(files.rootPath, id)], function(ok, output) {
       var list = ok ? Workspace.versionList(String(output || "").split("\n")) : []
       ws.versionNames[id] = list.map(function(v) { return v.name })
       done(list)
@@ -608,7 +608,7 @@ Item {
   // ---- reminders ---------------------------------------------------------------------------
 
   // A reminder comes as an Omarchy notification with what the block says;
-  // clicking it opens the page. One that came while Uber Notebook wasn't running
+  // clicking it opens the page. One that came while Sunshine wasn't running
   // comes when it starts, if it was in the last 12 hours.
   readonly property int lateness: 12 * 3600000
 
@@ -744,7 +744,7 @@ Item {
     if (!calendarLoaded || files.switching === true) { if (done) done(""); return }
     function to(base) {
       if (gen !== ws.generation || files.switching === true) { if (done) done(""); return }
-      var path = base + "/Uber Notebook calendar " + Qt.formatDateTime(new Date(), "yyyy-MM-dd HHmm") + ".ics"
+      var path = base + "/Sunshine calendar " + Qt.formatDateTime(new Date(), "yyyy-MM-dd HHmm") + ".ics"
       files.mkdirs([base], function() {
         if (gen !== ws.generation || files.switching === true) { if (done) done(""); return }
         files.writeFile(path, text, function(ok) {
@@ -761,7 +761,7 @@ Item {
 
   // Pages/chats.json: each page's conversation with your agent (Agent.js
   // cleanChats), so it can be gone back to, after the panel's closed or
-  // Uber Notebook's started again.
+  // Sunshine's started again.
   property var chats: ({})
   property int chatsRevision: 0
   // (Read for this folder: till then, none shown or written.)
@@ -888,7 +888,7 @@ Item {
     if (!contactsLoaded || files.switching === true) { if (done) done(""); return }
     function to(base) {
       if (gen !== ws.generation || files.switching === true) { if (done) done(""); return }
-      var path = base + "/Uber Notebook contacts " + Qt.formatDateTime(new Date(), "yyyy-MM-dd HHmm") + ".vcf"
+      var path = base + "/Sunshine contacts " + Qt.formatDateTime(new Date(), "yyyy-MM-dd HHmm") + ".vcf"
       files.mkdirs([base], function() {
         if (gen !== ws.generation || files.switching === true) { if (done) done(""); return }
         files.writeFile(path, text, function(ok) {
@@ -956,7 +956,7 @@ Item {
   }
 
   // Out of the trash for good: its file (and those of the pages in it) go to
-  // the notebooks folder's .trash, as nothing in Uber Notebook is ever deleted.
+  // the notebooks folder's .trash, as nothing in Sunshine is ever deleted.
   function deleteForever(id) {
     if (!index.pages[id]) return
     var all = Workspace.withDescendants(index, id)
@@ -1091,7 +1091,7 @@ Item {
       }, { timeoutMs: 120000, maxBytes: 4096 })
       return
     }
-    files.exec(["/usr/bin/bash", "-c", ws.importFileScript, "uber-notebook-import-file", path, dir + "/" + asset, String(max)], function(ok, out) {
+    files.exec(["/usr/bin/bash", "-c", ws.importFileScript, "sunshine-import-file", path, dir + "/" + asset, String(max)], function(ok, out) {
       done(ok, ok ? Number(String(out).trim()) || 0 : 0)
     }, { timeoutMs: 120000, maxBytes: 4096 })
   }
@@ -1111,7 +1111,7 @@ Item {
         if (f.kind !== "video") { done(f); return }
         // A video's still: a frame from a second in (or its first).
         var still = asset.replace(/\.[A-Za-z0-9]+$/, "") + "-still.jpg"
-        files.exec(["/usr/bin/bash", "-c", ws.stillScript, "uber-notebook-still", dest, dir + "/" + still], function(ok2) {
+        files.exec(["/usr/bin/bash", "-c", ws.stillScript, "sunshine-still", dest, dir + "/" + still], function(ok2) {
           if (ok2) f.poster = "assets/" + still
           done(f)
         }, { timeoutMs: 30000, maxBytes: 4096 })
@@ -1188,7 +1188,7 @@ Item {
       var tmp = dir + "/.unpack-" + Math.random().toString(36).slice(2, 10) + ".b64"
       files.writeFile(tmp, data, function(ok) {
         if (!ok) { done(""); return }
-        files.exec(["/usr/bin/bash", "-c", ws.unpackScript, "uber-notebook-unpack", tmp, dir + "/" + out], function(ok2) {
+        files.exec(["/usr/bin/bash", "-c", ws.unpackScript, "sunshine-unpack", tmp, dir + "/" + out], function(ok2) {
           done(ok2 ? "assets/" + out : "")
         }, { timeoutMs: 60000, maxBytes: 4096 })
       })
@@ -1225,12 +1225,12 @@ Item {
   // fetchPage reads any; a redirect followed only to one of them; the
   // picture only from one of them. Then as fetchBookmark: done(bookmark
   // data, or null and why).
-  readonly property string fetchAgent: "Mozilla/5.0 (X11; Linux) Uber Notebook"
+  readonly property string fetchAgent: "Mozilla/5.0 (X11; Linux) Sunshine"
   function fetchBookmarkWithin(url, hosts, done) {
     var u = Bookmark.cleanUrl(url)
     var allowed = (hosts || []).map(function(h) { return Permissions.cleanHost(h) }).filter(function(h) { return h !== "" })
     function within(link) { var h = Permissions.hostOf(link); return h !== "" && allowed.indexOf(h) >= 0 }
-    if (!u || !within(u)) { done(null, "Uber Notebook may not contact that site for it"); return }
+    if (!u || !within(u)) { done(null, "Sunshine may not contact that site for it"); return }
     function kept(why) { done({ url: u, title: "", description: "", site: Bookmark.domain(u), image: "" }, why) }
     var at = { gen: generation, dest: Workspace.assetsDir(files.rootPath) }
     fetchPage(u, true, function(link) { return within(link) ? "" : "It goes on to a site you haven't let it contact: the link's kept" }, function(html, from, why) {
@@ -1312,7 +1312,7 @@ Item {
       if (!ips.length || !ips.every(Bookmark.isPublicIp)) { done(""); return }
       var ip = ips.filter(function(a) { return a.indexOf(":") < 0 })[0] || ips[0]
       var at = target.host + ":" + target.port + ":" + (ip.indexOf(":") >= 0 ? "[" + ip + "]" : ip)
-      var tmp = files.runtimeDir + "/uber-notebook-picture-" + Workspace.uuid4()
+      var tmp = files.runtimeDir + "/sunshine-picture-" + Workspace.uuid4()
       files.exec(["/usr/bin/mkdir", "-m", "700", "--", tmp], function(madeTmp) {
         if (!madeTmp) { done(""); return }
         function finish(src) { files.exec(["/usr/bin/rm", "-rf", "--", tmp], null); done(src) }
@@ -1550,7 +1550,7 @@ Item {
     files.pasteInto(Workspace.assetsDir(files.rootPath), done)
   }
 
-  // ---- out of Uber Notebook --------------------------------------------------------------------------
+  // ---- out of Sunshine --------------------------------------------------------------------------
 
   // A page and the pages in it as Markdown files, with their pictures, in
   // "<notebooks>/Exports/<title> <date>/"; the folder opens.
@@ -1670,7 +1670,7 @@ Item {
     }
     files.exec(["/usr/bin/bash", "-c", "/usr/bin/mkdir -p -m 700 -- \"$1\" || exit 1; "
       + "/usr/bin/find \"$1\" -mindepth 1 -maxdepth 1 -type d -name 'import-*' -mmin +1440 -exec /usr/bin/rm -rf -- {} + 2>/dev/null; "
-      + "/usr/bin/mkdir -m 700 -- \"$2\"", "uber-notebook-import-dir", base, tmp], function(ok) {
+      + "/usr/bin/mkdir -m 700 -- \"$2\"", "sunshine-import-dir", base, tmp], function(ok) {
       if (!ok) { ws.importing = false; if (done) done({ pages: 0, first: "", skipped: list }); return }
       if (ws.importMoved()) { ws.importStopped([], finish); return }
       ws.unzipAll(list, tmp, function(roots) {
@@ -1681,7 +1681,7 @@ Item {
   }
 
   // Zips (a Notion export) unpacked into tmp, and the zips in them (Notion
-  // zips its export in parts), by the archive helper (bin/uber-notebook-files):
+  // zips its export in parts), by the archive helper (bin/sunshine-files):
   // nothing in one can land outside its folder, be a link, or take more than
   // UNZIP_MAX_BYTES (UNZIP_MAX_FILES files). Their folders take their place
   // in the list.
@@ -1710,7 +1710,7 @@ Item {
   }
 
   function scanImport(roots, tmp, parent, done) {
-    files.execText(["/usr/bin/bash", "-c", scanScript, "uber-notebook-scan"].concat(roots), function(ok, output) {
+    files.execText(["/usr/bin/bash", "-c", scanScript, "sunshine-scan"].concat(roots), function(ok, output) {
       if (ws.importMoved()) { ws.importStopped([], done); return }
       var groups = []
       String(output || "").split("\u0000").forEach(function(item) {
@@ -1809,7 +1809,7 @@ Item {
     if (list.length === 0) { done(); return }
     // (Which there are, and whether LibreOffice can be given a network of
     // its own with nothing in it: unshare, as for exports.)
-    files.exec(["/usr/bin/bash", "-c", "for t in /usr/bin/pandoc /usr/bin/soffice; do [ -x \"$t\" ] && echo \"$t\"; done; /usr/bin/unshare --user --map-current-user --net -- /usr/bin/true 2>/dev/null && echo unshare; true", "uber-notebook-which"], function(ok, out) {
+    files.exec(["/usr/bin/bash", "-c", "for t in /usr/bin/pandoc /usr/bin/soffice; do [ -x \"$t\" ] && echo \"$t\"; done; /usr/bin/unshare --user --map-current-user --net -- /usr/bin/true 2>/dev/null && echo unshare; true", "sunshine-which"], function(ok, out) {
       var have = String(out || "")
       var pandoc = have.indexOf("/usr/bin/pandoc") >= 0
       var office = have.indexOf("/usr/bin/soffice") >= 0
@@ -1883,7 +1883,7 @@ Item {
           if (/^(https?:|mailto:)/i.test(href)) return href
           var abs = Import.resolvePath(from, href, root)
           var target = byFile[abs] || byFile[abs + ".md"] || byFile[abs.replace(/\.html?$/i, ".md")]
-          return target ? "uber-notebook://page/" + target.id : ""
+          return target ? "sunshine://page/" + target.id : ""
         },
         image: function(src) {
           var abs = Import.resolvePath(from, src, root)
@@ -1921,7 +1921,7 @@ Item {
       var placed = {}
       e.blocks = (e.blocks || []).map(function(b) {
         if (b.type !== "p" || !b.html) return b
-        var only = /^<a href="(?:uber-notebook|omanote):\/\/page\/([0-9a-f-]{36})">[^<]*(?:<[^a][^>]*>[^<]*<\/[^a][^>]*>[^<]*)*<\/a>$/.exec(b.html.trim())
+        var only = /^<a href="(?:sunshine|omanote):\/\/page\/([0-9a-f-]{36})">[^<]*(?:<[^a][^>]*>[^<]*<\/[^a][^>]*>[^<]*)*<\/a>$/.exec(b.html.trim())
         if (only && kids.indexOf(only[1]) >= 0 && !placed[only[1]]) { placed[only[1]] = true; return { type: "page", uid: only[1], indent: b.indent } }
         return b
       })

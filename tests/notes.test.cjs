@@ -18,7 +18,7 @@ check("a footnote is a link that keeps its words", () => {
   assert.equal(Html.plainText(l), "Smith, 2021: page 4 & more", "its words, for search");
   assert.ok(Html.isInternal(plain(Html.links(l))[0].href), "pasting keeps it");
   assert.equal(N.link(""), "");
-  assert.equal(N.textOf("uber-notebook://math/x"), "");
+  assert.equal(N.textOf("sunshine://math/x"), "");
   assert.deepEqual(plain(N.inText("A " + N.link("one") + " b " + N.link("two"))), ["one", "two"]);
   assert.deepEqual(plain(N.order(["a " + N.link("one"), N.link("two") + N.link("one"), "c " + N.link("three")])), ["one", "two", "three"], "numbered down the page, the same words once");
 });

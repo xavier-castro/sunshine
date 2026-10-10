@@ -1,6 +1,6 @@
 import QtQuick
 import QtTest
-import "../.." as UberNotebook
+import "../.." as Sunshine
 import "../../app"
 import "../../Html.js" as Html
 import "../../Notes.js" as Notes
@@ -19,7 +19,7 @@ Item {
   FakeFiles { id: files }
   FakeService { id: service; user: ({ sounds: false }) }
   Theme { id: th }
-  UberNotebook.Workspace { id: ws; files: files }
+  Sunshine.Workspace { id: ws; files: files }
 
   DocView {
     id: view
@@ -115,7 +115,7 @@ Item {
       // Saved, and as Markdown: [^1], their words at the end.
       view.commit()
       var page = ws.readPageNow(view.page.id)
-      verify(page.blocks[b].html.indexOf("uber-notebook://note/") >= 0)
+      verify(page.blocks[b].html.indexOf("sunshine://note/") >= 0)
       var md = Markdown.fromDocPage(page, function() { return null }, {})
       verify(md.indexOf("A later claim[^2] and on") >= 0, md)
       verify(md.indexOf("[^1]: First source\n[^2]: Second source") >= 0, md)

@@ -1,4 +1,4 @@
-// Checks what an agent working in the panel may do through Uber Notebook's
+// Checks what an agent working in the panel may do through Sunshine's
 // commands while it works (Scope.js).
 // Usage (from the plugin directory): node tests/scope.test.cjs
 
@@ -11,7 +11,7 @@ function check(name, fn) { fn(); passed++; }
 
 const A = "11111111-1111-4111-8111-111111111111"; // the page it was asked about
 const Other = "44444444-4444-4444-8444-444444444444"; // any other page
-const dir = "/run/user/1000/uber-notebook-agent";
+const dir = "/run/user/1000/sunshine-agent";
 const scope = () => ({ agent: "Claude Code", dir: dir, frozen: false });
 const ok = (cmd, args, s) => Scope.check(s || scope(), cmd, args) === "";
 
@@ -43,7 +43,7 @@ check("your notes: read and changed, whichever page", () => {
 });
 
 check("files: only from its own folder", () => {
-  assert.match(Scope.check(scope(), "append", [A, "/tmp/x.md"]), /only from its own folder \(\/run\/user\/1000\/uber-notebook-agent\)/);
+  assert.match(Scope.check(scope(), "append", [A, "/tmp/x.md"]), /only from its own folder \(\/run\/user\/1000\/sunshine-agent\)/);
   assert.ok(!ok("append", [A, dir + "/../../../home/me/.ssh/id_rsa"]), "nothing that leaves it");
   assert.ok(!ok("append", [A, dir + "x/a.md"]), "not a folder whose name starts the same");
   assert.ok(!ok("importCalendar", ["/home/me/cal.ics"]));
@@ -54,7 +54,7 @@ check("files: only from its own folder", () => {
 });
 
 check("a picture Grok made: from its own pictures for this conversation, and only a picture", () => {
-  const pics = "/home/me/.grok/sessions/%2Frun%2Fuser%2F1000%2Fuber-notebook-agent%2Fc-1";
+  const pics = "/home/me/.grok/sessions/%2Frun%2Fuser%2F1000%2Fsunshine-agent%2Fc-1";
   const g = () => ({ agent: "Grok", dir: dir, pictures: [pics], frozen: false });
   const img = pics + "/01a1/images/1.jpg";
   assert.ok(ok("attach", [A, img], g()), "attached");
@@ -68,7 +68,7 @@ check("a picture Grok made: from its own pictures for this conversation, and onl
   assert.ok(!ok("attach", [A, pics + "/01a1/x.eml"], g()));
   assert.ok(!ok("append", [A, pics + "/01a1/a.md"], g()), "not Markdown from there");
   assert.ok(!ok("attach", [A, pics + "/../c-2/x/images/1.jpg"], g()), "not another conversation's");
-  assert.ok(!ok("attach", [A, "/home/me/.grok/sessions/%2Frun%2Fuser%2F1000%2Fuber-notebook-agent%2Fc-2/s/images/1.jpg"], g()));
+  assert.ok(!ok("attach", [A, "/home/me/.grok/sessions/%2Frun%2Fuser%2F1000%2Fsunshine-agent%2Fc-2/s/images/1.jpg"], g()));
   assert.ok(!ok("attach", [A, pics + "x/s/images/1.jpg"], g()), "not a folder whose name starts the same");
   assert.ok(!ok("attach", [A, img], scope()), "an agent with no folder of pictures: its own folder only");
   // Refused: what to do instead.
@@ -99,11 +99,11 @@ check("a file from outside its folders: asked about, then taken once you've said
   assert.equal(Scope.check(yes, "append", [A, "/usr/share/pixmaps/a.png"]), "", "any command that takes it");
 });
 
-check("Uber Notebook itself: not while it works", () => {
+check("Sunshine itself: not while it works", () => {
   for (const [cmd, args] of [["set", ["paper", "grid"]], ["mirror", []], ["profile", ["Work"]], ["addProfile", ["Work", ""]],
     ["renameProfile", ["Work", "Job"]], ["profileFolder", ["Work", "/x"]], ["removeProfile", ["Work"]], ["demo", []], ["restartDemo", []],
     ["backup", ["all"]], ["restoreBackup", ["/x.tar.gz", "true"]], ["installUpdate", []], ["someNewCommand", [A]]]) {
-    assert.match(Scope.check(scope(), cmd, args), /^not while Claude Code is working.*not Uber Notebook's settings, profiles or backups/, cmd);
+    assert.match(Scope.check(scope(), cmd, args), /^not while Claude Code is working.*not Sunshine's settings, profiles or backups/, cmd);
   }
 });
 
@@ -111,10 +111,10 @@ check("by who calls: yours as always, the panel's agent's by its rules, and none
   const s = scope();
   assert.equal(Scope.forCaller(false, s, "set", ["paper", "grid"]), "", "yours (a script, a terminal's agent): as always, an agent working or not");
   assert.equal(Scope.forCaller(false, s, "append", [A, "/tmp/x.md"]), "", "files from anywhere");
-  assert.match(Scope.forCaller(true, s, "set", ["paper", "grid"]), /not Uber Notebook's settings/);
+  assert.match(Scope.forCaller(true, s, "set", ["paper", "grid"]), /not Sunshine's settings/);
   assert.equal(Scope.forCaller(true, s, "append", [A, dir + "/a.md"]), "");
-  assert.match(Scope.forCaller(true, null, "read", [A]), /no agent is working in Uber Notebook's panel/, "the panel's name, none working: nothing");
-  assert.ok(!/omarchy-shell uber-notebook\b(?!-)/.test(Scope.forCaller(true, null, "read", [A])), "and it doesn't point an agent at yours");
+  assert.match(Scope.forCaller(true, null, "read", [A]), /no agent is working in Sunshine's panel/, "the panel's name, none working: nothing");
+  assert.ok(!/omarchy-shell sunshine\b(?!-)/.test(Scope.forCaller(true, null, "read", [A])), "and it doesn't point an agent at yours");
 });
 
 check("stopping: nothing changes, reading goes on", () => {

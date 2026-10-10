@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 
-// Pictures shown large, here in Uber Notebook (a picture on a page, a gallery's):
+// Pictures shown large, here in Sunshine (a picture on a page, a gallery's):
 // its caption under it, how many there are, ← and → (or the arrows at its
 // sides) for the others, Esc or a click around it to close; at the corner,
 // Copy (Ctrl+C), Save a copy (Ctrl+S) and Open in its app. A click is the

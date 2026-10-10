@@ -1,6 +1,6 @@
 import QtQuick
 import QtTest
-import "../.." as UberNotebook
+import "../.." as Sunshine
 import "../../app"
 import "../../Html.js" as Html
 import "../../Equations.js" as Equations
@@ -18,7 +18,7 @@ Item {
   FakeFiles { id: files }
   FakeService { id: service; user: ({ sounds: false }) }
   Theme { id: th }
-  UberNotebook.Workspace { id: ws; files: files }
+  Sunshine.Workspace { id: ws; files: files }
 
   DocView {
     id: view
@@ -141,7 +141,7 @@ Item {
       // Saved, and opened again: still one.
       view.commit()
       var id = view.page.id
-      verify(ws.readPageNow(id).blocks[uid].html.indexOf("uber-notebook://math/") >= 0)
+      verify(ws.readPageNow(id).blocks[uid].html.indexOf("sunshine://math/") >= 0)
       view.page = null
       view.open(id)
       tryVerify(function() { return view.page && view.page.id === id && view.editor.items[uid] }, 2000)

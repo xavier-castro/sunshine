@@ -50,8 +50,8 @@ check("a quick note is written once its profile's folder is the one open and rea
   assert.equal(Q.openProfile(state()), "p-work");
   assert.equal(Q.now(state()), "write");
   // The default place: in Documents, or the home folder when there's none.
-  assert.equal(Q.openProfile(state({ folder: "", rootPath: HOME + "/Documents/Uber Notebook" })), "p-work");
-  assert.equal(Q.openProfile(state({ folder: "", rootPath: HOME + "/Uber Notebook" })), "p-work");
+  assert.equal(Q.openProfile(state({ folder: "", rootPath: HOME + "/Documents/Sunshine" })), "p-work");
+  assert.equal(Q.openProfile(state({ folder: "", rootPath: HOME + "/Sunshine" })), "p-work");
   assert.equal(Q.openProfile(state({ folder: "/data/Work", rootPath: "/data/Work" })), "p-work", "a full path");
 });
 
@@ -74,7 +74,7 @@ check("refused only when its folder can't be used, or there's no profile known y
   const blocked = state({ rootPath: "", ready: false, blockedFolder: HOME + "/Notes/Work" });
   assert.equal(Q.blocked(blocked), true);
   assert.equal(Q.now(blocked), "refuse");
-  assert.equal(Q.now(state({ rootPath: "", ready: false, folder: "", blockedFolder: HOME + "/Documents/Uber Notebook" })), "refuse", "the default place");
+  assert.equal(Q.now(state({ rootPath: "", ready: false, folder: "", blockedFolder: HOME + "/Documents/Sunshine" })), "refuse", "the default place");
   // The one left a moment ago was the one that couldn't be used: this one's
   // being opened, so it's kept for it.
   const left = state({ rootPath: "", ready: false, blockedFolder: HOME + "/Notes/Personal" });

@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Effects
 
-// What to turn on: the Uber Notebook skill, and reminder details in
+// What to turn on: the Sunshine skill, and reminder details in
 // notifications. Both off till you turn them on, here or in Settings (AI,
 // and Notifications). Opens by itself once (App.qml: settings.setupShown),
 // and from the strip over Pages; closed, however, it's been shown.
@@ -102,7 +102,7 @@ Popup {
           id: rows
           width: parent.width
           Line {
-            label: "Enable Uber Notebook skill"
+            label: "Enable Sunshine skill"
             note: "For Claude Code, Codex and other agents."
             Toggle { objectName: "setupSkill"; theme: panel.theme; checked: panel.s.agentSkill === true; onToggled: function(on) { panel.set("agentSkill", on) } }
           }

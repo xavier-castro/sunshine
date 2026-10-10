@@ -59,10 +59,10 @@ ShellRoot {
     var why = rec.start("audio", "test", file, function(ok, r) {
       say("stopped: its file finished on SIGINT", ok === true && r.file === file, JSON.stringify(r).slice(0, 200))
       say("its levels read (the line too long left out)", r.peaks && r.peaks.length > 0 && rec._err.length <= 600, "err " + rec._err.length)
-      shell("cat \"$1/one/note.ogg\"; echo; grep -c '' \"$1/one/env.txt\"; grep -E '^(PATH|UBER_NOTEBOOK_TEST_SECRET|BASH_ENV)=' \"$1/one/env.txt\"; sleep 0.5; kill -0 $(cat \"$1/one/child.pid\") 2>/dev/null && echo child-alive || echo child-gone", [root.dir], function(ok2, out) {
+      shell("cat \"$1/one/note.ogg\"; echo; grep -c '' \"$1/one/env.txt\"; grep -E '^(PATH|SUNSHINE_TEST_SECRET|BASH_ENV)=' \"$1/one/env.txt\"; sleep 0.5; kill -0 $(cat \"$1/one/child.pid\") 2>/dev/null && echo child-alive || echo child-gone", [root.dir], function(ok2, out) {
         var lines = out.split("\n")
         say("the file it made", lines[0] === "finished", lines[0])
-        say("a tool's environment only (no secret, no BASH_ENV, PATH /usr/bin)", out.indexOf("UBER_NOTEBOOK_TEST_SECRET") < 0 && out.indexOf("BASH_ENV") < 0 && out.indexOf("PATH=/usr/bin\n") >= 0, out.replace(/\n/g, " | "))
+        say("a tool's environment only (no secret, no BASH_ENV, PATH /usr/bin)", out.indexOf("SUNSHINE_TEST_SECRET") < 0 && out.indexOf("BASH_ENV") < 0 && out.indexOf("PATH=/usr/bin\n") >= 0, out.replace(/\n/g, " | "))
         say("what it started, ended with it", /child-gone/.test(out), out.replace(/\n/g, " | "))
         root.second()
       })
@@ -101,7 +101,7 @@ ShellRoot {
   // others (755) or a link (to a folder of yours): refused, nothing started
   // there, nothing written out there either.
   function fourth() {
-    say("its folder: in the store's runtime folder", rec.tempDir === store.runtimeDir + "/uber-notebook-audio" && rec.tempDir.indexOf("/tmp/") !== 0, rec.tempDir)
+    say("its folder: in the store's runtime folder", rec.tempDir === store.runtimeDir + "/sunshine-audio" && rec.tempDir.indexOf("/tmp/") !== 0, rec.tempDir)
     rec.canTranscribe = true
     shell("/usr/bin/mkdir -m 755 -- \"$1/open\" && /usr/bin/mkdir -m 700 -- \"$1/mine\" && /usr/bin/ln -s -- \"$1/mine\" \"$1/link\"", [root.dir], function(made) {
       if (!made) { say("set up", false); root.finish(); return }

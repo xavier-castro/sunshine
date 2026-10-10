@@ -16,10 +16,10 @@ QtObject {
     for (var k in user) u[k] = user[k]
     return Settings.merge(Defaults.DEFAULTS, u, Defaults.SCHEMA)
   }
-  property string rootPath: "/tmp/uber-notebook-dev"
+  property string rootPath: "/tmp/sunshine-dev"
   property string version: "1.0.0"
-  property string skillDir: "/tmp/uber-notebook-dev-plugin/skills/uber-notebook"
-  property string skillPath: "/tmp/uber-notebook-dev-plugin/skills/uber-notebook/SKILL.md"
+  property string skillDir: "/tmp/sunshine-dev-plugin/skills/sunshine"
+  property string skillPath: "/tmp/sunshine-dev-plugin/skills/sunshine/SKILL.md"
   // (The skill for any AI: copied, saved where you say, shown.)
   property int skillCopied: 0
   property int skillShown: 0

@@ -125,7 +125,7 @@ check("voxtype's daemon found among your processes: run as voxtype (no command, 
       fs.symlinkSync(exe, path.join(d, "exe"));
       fs.utimesSync(d, at, at);
     };
-    const run = () => execFileSync("/usr/bin/bash", ["-c", M.DAEMON_SCRIPT, "uber-notebook-meetings", proc], { encoding: "utf8", env: {} }).trim();
+    const run = () => execFileSync("/usr/bin/bash", ["-c", M.DAEMON_SCRIPT, "sunshine-meetings", proc], { encoding: "utf8", env: {} }).trim();
     assert.equal(run(), "daemon 0", "none running");
     add(100, ["/usr/bin/voxtype", "daemon"], "/usr/lib/voxtype/voxtype-avx512", 1000);
     add(200, ["voxtype", "status", "--follow"], "/usr/lib/voxtype/voxtype-avx512", 3000);

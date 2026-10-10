@@ -56,7 +56,7 @@ check("every command from a terminal is in it", () => {
   const ipc = svc.slice(svc.indexOf("readonly property IpcHandler handler"));
   const own = [...ipc.matchAll(/\n {8}function ([a-z][A-Za-z]*)\(/g)].map((m) => m[1]);
   assert.ok(api.length > 30 && own.length > 10, api.length + " " + own.length);
-  const missing = [...new Set(api.concat(own))].filter((c) => !new RegExp("uber-notebook " + c + "\\b").test(terminal));
+  const missing = [...new Set(api.concat(own))].filter((c) => !new RegExp("sunshine " + c + "\\b").test(terminal));
   assert.deepEqual(missing, [], "commands not in Help");
 });
 
@@ -103,7 +103,7 @@ check("Help's own keys are in it, and New page", () => {
 });
 
 check("the skill and reminder details, where Settings and the panel name them", () => {
-  const where = { "Enable Uber Notebook skill": "Settings → AI → ", "Show reminder details in notifications": "Settings → Notifications → " };
+  const where = { "Enable Sunshine skill": "Settings → AI → ", "Show reminder details in notifications": "Settings → Notifications → " };
   for (const label of Object.keys(where)) {
     assert.ok(rows.some((x) => x.s === "settings" && x.r[0].indexOf(where[label] + label) === 0), label);
     assert.ok(read("app/SettingsPanel.qml").indexOf('label: "' + label + '"') >= 0, "Settings: " + label);

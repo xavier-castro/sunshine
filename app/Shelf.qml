@@ -22,7 +22,7 @@ Item {
   // Into Pages: a page, with a page in it for each of its pages (App.qml).
   signal moveRequested(var notebook)
   signal settingsRequested()
-  // Uber Notebook's name clicked: Settings → About.
+  // Sunshine's name clicked: Settings → About.
   signal aboutRequested()
   // What's new in a newer version (the corner says there's one).
   signal releaseNotesRequested()
@@ -91,7 +91,7 @@ Item {
       anchors.leftMargin: 34
       anchors.verticalCenter: parent.verticalCenter
       spacing: 0
-      // Uber Notebook: its icon and name (a click: Settings → About).
+      // Sunshine: its icon and name (a click: Settings → About).
       AppName {
         theme: shelf.theme
         bottomPadding: 6
@@ -303,7 +303,7 @@ Item {
     }
   }
 
-  // A newer version, if there's one; who makes Uber Notebook, on X.
+  // A newer version, if there's one; who makes Sunshine, on X.
   SideFooter {
     objectName: "shelfFooter"
     x: 22

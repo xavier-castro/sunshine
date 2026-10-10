@@ -111,7 +111,7 @@ check("pasted text keeps what it says, not how it looked", () => {
   const web = '<span style=" font-family:\'Comic Sans\'; font-size:40px; color:#123456; background-color:#000; font-weight:600;">Hi</span>'
     + ' <a href="javascript:evil()">bad</a> <a href="https://ok.org">ok</a><img src="x.png" /> t\u0007x';
   assert.equal(Html.sanitize(web), '<span style="font-weight:700;">Hi</span> bad <a href="https://ok.org">ok</a> tx');
-  assert.match(Html.sanitize(web, true), /color:#123456/, "unless it's Uber Notebook's own");
+  assert.match(Html.sanitize(web, true), /color:#123456/, "unless it's Sunshine's own");
 });
 
 check("the paragraph around a block", () => {
@@ -142,18 +142,18 @@ check("odd html doesn't break it", () => {
   assert.equal(Html.sanitize('<img src="x" onerror="alert(1)" />'), "", "pictures never come in with a paste");
 });
 
-check("links inside Uber Notebook", () => {
-  const page = "uber-notebook://page/6f1c2b9e-0d3a-4f6e-9b1c-2e8a7d5f4c3b";
-  const kept = Html.sanitize('<a href="' + page + '">Plans</a> <a href="uber-notebook://remind/2026-10-01T09:30">Thu 1 Oct 9:30</a> <a href="uber-notebook://page/../../x">bad</a> <a href="uber-notebook://run/rm">no</a>', true);
+check("links inside Sunshine", () => {
+  const page = "sunshine://page/6f1c2b9e-0d3a-4f6e-9b1c-2e8a7d5f4c3b";
+  const kept = Html.sanitize('<a href="' + page + '">Plans</a> <a href="sunshine://remind/2026-10-01T09:30">Thu 1 Oct 9:30</a> <a href="sunshine://page/../../x">bad</a> <a href="sunshine://run/rm">no</a>', true);
   assert.ok(kept.includes('href="' + page + '"'), "a page link is kept");
-  assert.ok(kept.includes('href="uber-notebook://remind/2026-10-01T09:30"'), "and a reminder");
+  assert.ok(kept.includes('href="sunshine://remind/2026-10-01T09:30"'), "and a reminder");
   assert.ok(!kept.includes("../"), "not an odd one");
-  assert.ok(!kept.includes("uber-notebook://run"));
+  assert.ok(!kept.includes("sunshine://run"));
   assert.equal(Html.pageOf(page), "6f1c2b9e-0d3a-4f6e-9b1c-2e8a7d5f4c3b");
-  assert.equal(Html.pageOf("uber-notebook://date/2026-10-01"), "");
-  const decorated = Html.decorateLinks('<a href="uber-notebook://date/2026-10-01">Thu 1 Oct</a> <a href="' + page + '">Plans</a>', "#2456b3");
-  assert.ok(/<a href="uber-notebook:\/\/date[^"]*"><span style="[^"]*text-decoration:none;/.test(decorated), "a date isn't underlined: " + decorated);
-  assert.ok(/<a href="uber-notebook:\/\/page[^"]*"><span style="[^"]*text-decoration:underline;/.test(decorated), "a page link is");
+  assert.equal(Html.pageOf("sunshine://date/2026-10-01"), "");
+  const decorated = Html.decorateLinks('<a href="sunshine://date/2026-10-01">Thu 1 Oct</a> <a href="' + page + '">Plans</a>', "#2456b3");
+  assert.ok(/<a href="sunshine:\/\/date[^"]*"><span style="[^"]*text-decoration:none;/.test(decorated), "a date isn't underlined: " + decorated);
+  assert.ok(/<a href="sunshine:\/\/page[^"]*"><span style="[^"]*text-decoration:underline;/.test(decorated), "a page link is");
   assert.ok(!/text-decoration/.test(Html.normalizeLinks(decorated)), "and neither is kept in what's saved");
   assert.deepEqual(JSON.parse(JSON.stringify(Html.links('a <a href="' + page + '">Pl<b>an</b>s</a> b'))).map((l) => [l.href, l.text]), [[page, "Plans"]], "a link split into runs is one");
   assert.equal(Html.plainText(Html.refreshPageLinks('see <a href="' + page + '">Old <b>name</b></a>!', () => "New name")), "see New name!");
@@ -175,7 +175,7 @@ check("text from a page file can't become anything but text: no pictures, no odd
     html = plain(Blocks.cleanList(Workspace.flatten({ content: [blockId], blocks: { [blockId]: { id: blockId, type: "p", html: html } } }), { nest: true }))[0].html;
   }
   assert.equal(Html.plainText(html), "hello");
-  // Every kept look is one Uber Notebook could have written; anything else goes.
+  // Every kept look is one Sunshine could have written; anything else goes.
   const looks = [
     ['<span style="color: red&quot; onclick=&quot;x">a</span>', ""],
     ['<span style="color:#C00">a</span>', "color:#cc0000;"],
@@ -194,8 +194,8 @@ check("text from a page file can't become anything but text: no pictures, no odd
     assert.equal(out, css ? '<span style="' + css + '">a</span>' : "a", input);
     assert.equal(Html.sanitize(out, true), out, "the same the second time: " + input);
   }
-  // Links: the web, email, Uber Notebook's own; nothing else.
-  for (const [href, kept] of [["https://e.org", true], ["mailto:a@b.org", true], ["uber-notebook://page/" + pageId, true],
+  // Links: the web, email, Sunshine's own; nothing else.
+  for (const [href, kept] of [["https://e.org", true], ["mailto:a@b.org", true], ["sunshine://page/" + pageId, true],
     ["file:///etc/passwd", false], ["javascript:alert(1)", false], ["data:text/html,x", false], ["FILE:///x", false], ["vbscript:x", false]]) {
     const out = Html.sanitize('<a href="' + href + '">a</a>', true);
     assert.equal(out, kept ? '<a href="' + href + '">a</a>' : "a", href);

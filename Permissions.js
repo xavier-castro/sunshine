@@ -1,9 +1,9 @@
-// Permissions.js - what you've let agents working in Uber Notebook's panel
+// Permissions.js - what you've let agents working in Sunshine's panel
 // do without asking: [{ agent, action, target }], kept in settings
 // (agentPermissions), which an agent can't change (Scope.js). An agent:
 // "claude", "grok" or "codex". An action, and its target:
 //   contact  a site, by its exact name (https only): the agent reads it, or
-//            Uber Notebook does for it (a link's title and picture)
+//            Sunshine does for it (a link's title and picture)
 //   search   "web": it searches the web
 //   tool     one of your connectors' tools, by its id ("mcp__figma__...")
 //   trash    "pages": it moves pages to the trash (they can be put back)
@@ -11,7 +11,7 @@
 //            it can read any file you can and reach any site, so no program
 //            is safe to allow by its name: git or make run what their
 //            folder says)
-//   files    a folder, by its full path: Uber Notebook takes a file from it
+//   files    a folder, by its full path: Sunshine takes a file from it
 //            (or a folder in it) that the agent gives a command, as if from
 //            its own folder; never a hidden folder (.ssh, .config...) or one
 //            in one, and never the root (Api offers it for no home folder)
@@ -74,7 +74,7 @@ function allowedFileRoot(list, agent, path) {
 // Whether `agent` may give a command the file at `path` without asking.
 function allowedFile(list, agent, path) { return allowedFileRoot(list, agent, path) !== "" }
 // Whether the file at `path` is anywhere in one of `folders` (full paths):
-// Uber Notebook's own (a profile's notes, the backups), whose files are
+// Sunshine's own (a profile's notes, the backups), whose files are
 // asked about each time, whatever's been said Always to.
 function inAny(folders, path) {
   var p = String(path || "").replace(/\/+/g, "/")
@@ -142,7 +142,7 @@ function agentName(agent) { return agent === "claude" ? "Claude Code" : agent ==
 function describe(r) {
   if (!r) return { label: "", note: "" }
   var who = agentName(r.agent)
-  if (r.action === "contact") return { label: r.target, note: who + " may contact it without asking (or have Uber Notebook do so, for a link)" }
+  if (r.action === "contact") return { label: r.target, note: who + " may contact it without asking (or have Sunshine do so, for a link)" }
   if (r.action === "search") return { label: "Web search", note: who + " may search the web without asking" }
   if (r.action === "trash") return { label: "Trashing pages", note: who + " may move pages to the trash without asking (they can be put back from it)" }
   if (r.action === "shell") return { label: "Any command", note: who + " may run any command without asking: through one, it can read any file you can and reach any site" }

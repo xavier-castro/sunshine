@@ -521,7 +521,7 @@ function splitStatements(line) {
 // What the drawing says it can't do, or what in it it doesn't understand.
 function problem(g) {
   if (!g) return ""
-  if (g.unsupported) return "Uber Notebook draws Mermaid's flowcharts (graph or flowchart); this is a \u201c" + g.kind + "\u201d diagram, kept as it's written."
+  if (g.unsupported) return "Sunshine draws Mermaid's flowcharts (graph or flowchart); this is a \u201c" + g.kind + "\u201d diagram, kept as it's written."
   if (g.errors && g.errors.length) return "Line " + g.errors[0].line + " isn't understood: " + g.errors[0].text.slice(0, 80)
   if (!g.nodes.length) return "Nothing to draw yet."
   return ""

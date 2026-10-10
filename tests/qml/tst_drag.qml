@@ -1,6 +1,6 @@
 import QtQuick
 import QtTest
-import "../.." as UberNotebook
+import "../.." as Sunshine
 import "../../app"
 import "../../Workspace.js" as Workspace
 
@@ -15,7 +15,7 @@ Item {
   FakeFiles { id: files }
   FakeService { id: service; user: ({ sounds: false }) }
   Theme { id: th }
-  UberNotebook.Workspace { id: ws; files: files }
+  Sunshine.Workspace { id: ws; files: files }
 
   property var lastUndo: null
   property string lastToast: ""

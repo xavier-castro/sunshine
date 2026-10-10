@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "id": "marcho78.uber-notebook",
-  "name": "Uber Notebook",
+  "id": "xavier.sunshine",
+  "name": "Sunshine",
   "version": "1.1.2",
-  "author": "marcho78",
+  "author": "Xavier Castro",
   "license": "MIT",
-  "homepage": "https://github.com/marcho78/ubernotebook",
-  "description": "Your notes in the Omarchy shell. Press Super+N (or click the notebook in the top bar) and Pages opens: a workspace of pages made of blocks, the Notion way, with to-dos, toggles, tables, boards, mind maps, sketches, equations, diagrams, pictures and files, and your AI agent (Claude Code, Grok or Codex) working on a page in a panel. Or paper notebooks that move to Pages in a click. Quick notes from anywhere with Super+Alt+N, search across everything, and plain files in ~/Documents/Uber Notebook.",
+  "homepage": "https://github.com/xavier/sunshine",
+  "description": "Your notes in the Omarchy shell. Press Super+N (or click the notebook in the top bar) and Pages opens: a workspace of pages made of blocks, the Notion way, with to-dos, toggles, tables, boards, mind maps, sketches, equations, diagrams, pictures and files, and your AI agent (Claude Code, Grok or Codex) working on a page in a panel. Or paper notebooks that move to Pages in a click. Quick notes from anywhere with Super+Alt+N, search across everything, and plain files in ~/Documents/Sunshine.",
   "kinds": [
     "panel",
     "service",
@@ -19,7 +19,7 @@
     "barWidget": "BarWidget.qml"
   },
   "barWidget": {
-    "displayName": "Uber Notebook",
+    "displayName": "Sunshine",
     "description": "Your notebooks. Click to open, right-click for a quick note.",
     "category": "Productivity",
     "allowMultiple": false,

@@ -1,7 +1,7 @@
 // Html.js - the text inside one block of a page: rich text as Qt writes it,
 // and every change the formatting bar makes to it.
 //
-// Each block of a page is its own Qt rich-text editor. What Uber Notebook stores for
+// Each block of a page is its own Qt rich-text editor. What Sunshine stores for
 // a block is the inside of its paragraph, as Qt writes it out:
 //
 //   Hello <span style=" font-weight:700;">bold</span> <a href="https://…">link</a><br />next line
@@ -70,8 +70,8 @@ function styleText(style) {
 }
 
 // Tags, text and line breaks, in order. Each "<" is looked at only as far
-// as the next one (a tag's quoted values can't hold one; the text Uber
-// Notebook writes escapes it), so it takes time in step with the text,
+// as the next one (a tag's quoted values can't hold one; the text Sunshine
+// writes escapes it), so it takes time in step with the text,
 // whatever's in it: an unclosed tag or comment is read once, not again at
 // every "<" after it. A comment that isn't closed ends what's read.
 var TAG = /^<(\/?)([a-zA-Z][a-zA-Z0-9]*)((?:[^>"']|"[^"]*"|'[^']*')*)>/
@@ -446,7 +446,7 @@ function cleanLook(key, value) {
 // Pasted text keeps what it says (bold, italic, underline, strikethrough,
 // links, line breaks) and drops how the page it came from looked (fonts,
 // sizes, colors, backgrounds), unless keepLook: then only oddities go. Links
-// go only to the web, to an email address, or inside Uber Notebook.
+// go only to the web, to an email address, or inside Sunshine.
 function sanitize(inner, keepLook) {
   var keep = keepLook
     ? ["font-weight", "font-style", "text-decoration", "color", "background-color", "font-family", "font-size", "vertical-align"]
@@ -480,7 +480,7 @@ function sanitize(inner, keepLook) {
 // ---- Qt's paragraph around it --------------------------------------------------
 
 // The inside of the paragraph from Qt's HTML for a range (getFormattedText),
-// without the colors Qt gives every link (Uber Notebook draws links itself).
+// without the colors Qt gives every link (Sunshine draws links itself).
 function extractInner(html) {
   var text = String(html || "")
   var start = text.indexOf("<!--StartFragment-->")
@@ -519,17 +519,17 @@ function normalizeLinks(inner) {
   })
 }
 
-// Links inside Uber Notebook (Pages): to a page, a date, a reminder, a tag.
-//   uber-notebook://page/<uuid>
-//   uber-notebook://date/2026-10-05, uber-notebook://date/2026-10-05T09:30
-//   uber-notebook://remind/2026-10-05T09:30
-//   uber-notebook://tag/idea (its name, encoded: Tags.js)
-//   uber-notebook://math/<LaTeX> (an equation in a line, encoded: Equations.js)
-//   uber-notebook://note/<words> (a footnote, encoded: Notes.js)
-// (Notes written before Uber Notebook was renamed say omanote://: they work the same.)
-var INTERNAL = /^(?:uber-notebook|omanote):\/\/(page\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|(date|remind)\/\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?|tag\/[A-Za-z0-9%_-]{1,400}|contact\/[A-Za-z0-9_-]{1,40}|math\/[A-Za-z0-9%_.!~*'()-]{1,12000}|note\/[A-Za-z0-9%_.!~*'()-]{1,6000})$/
+// Links inside Sunshine (Pages): to a page, a date, a reminder, a tag.
+//   sunshine://page/<uuid>
+//   sunshine://date/2026-10-05, sunshine://date/2026-10-05T09:30
+//   sunshine://remind/2026-10-05T09:30
+//   sunshine://tag/idea (its name, encoded: Tags.js)
+//   sunshine://math/<LaTeX> (an equation in a line, encoded: Equations.js)
+//   sunshine://note/<words> (a footnote, encoded: Notes.js)
+// (Notes written before Sunshine was renamed say omanote://: they work the same.)
+var INTERNAL = /^(?:sunshine|omanote):\/\/(page\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|(date|remind)\/\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?|tag\/[A-Za-z0-9%_-]{1,400}|contact\/[A-Za-z0-9_-]{1,40}|math\/[A-Za-z0-9%_.!~*'()-]{1,12000}|note\/[A-Za-z0-9%_.!~*'()-]{1,6000})$/
 
-function isTag(url) { return /^(?:uber-notebook|omanote):\/\/tag\//.test(String(url || "")) }
+function isTag(url) { return /^(?:sunshine|omanote):\/\/tag\//.test(String(url || "")) }
 
 function isInternal(url) {
   return INTERNAL.test(String(url || ""))
@@ -537,17 +537,17 @@ function isInternal(url) {
 
 // The person a link names (Contacts.js), or "".
 function contactOf(url) {
-  var m = /^(?:uber-notebook|omanote):\/\/contact\/([A-Za-z0-9_-]{1,40})$/.exec(String(url || ""))
+  var m = /^(?:sunshine|omanote):\/\/contact\/([A-Za-z0-9_-]{1,40})$/.exec(String(url || ""))
   return m ? m[1] : ""
 }
 
 // The page a link goes to, or "".
 function pageOf(url) {
-  var m = /^(?:uber-notebook|omanote):\/\/page\/([0-9a-f-]{36})$/.exec(String(url || ""))
+  var m = /^(?:sunshine|omanote):\/\/page\/([0-9a-f-]{36})$/.exec(String(url || ""))
   return m && isInternal(url) ? m[1] : ""
 }
 
-// Links as Uber Notebook draws them: the link color, underlined; a date or a
+// Links as Sunshine draws them: the link color, underlined; a date or a
 // reminder in the link color without the line; a tag in its own colors
 // (`tagStyle(href)` -> { color, background }), without the line.
 function decorateLinks(inner, color, tagStyle) {
@@ -561,7 +561,7 @@ function decorateLinks(inner, color, tagStyle) {
         if (t && normalColor(t.color)) run.style.color = normalColor(t.color)
         if (t && normalColor(t.background)) run.style["background-color"] = normalColor(t.background)
         run.style["text-decoration"] = "none"
-      } else if (/^(?:uber-notebook|omanote):\/\/(date|remind|contact)\//.test(run.href)) run.style["text-decoration"] = "none"
+      } else if (/^(?:sunshine|omanote):\/\/(date|remind|contact)\//.test(run.href)) run.style["text-decoration"] = "none"
       else setDecoration(run.style, "underline", true)
     }
     return run
@@ -610,7 +610,7 @@ function links(inner) {
 // Links to pages written with the pages' names now: lookup(id) -> the text
 // a link to it shows ("" to leave it as it is).
 function refreshPageLinks(inner, lookup) {
-  if (!/(?:uber-notebook|omanote):\/\/page\//.test(inner)) return inner
+  if (!/(?:sunshine|omanote):\/\/page\//.test(inner)) return inner
   var runs = parse(inner)
   var out = []
   for (var i = 0; i < runs.length; i++) {

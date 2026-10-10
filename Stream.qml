@@ -12,7 +12,7 @@ import "Env.js" as Env
 // Like Run.qml, the command leads its own process group (setsid), so stop()
 // (or the deadline) ends it together with anything it started: a gentle
 // stop first, and a hard one if it's still there a few seconds later; and
-// when it's done, or Uber Notebook closes, whatever it left running ends too.
+// when it's done, or Sunshine closes, whatever it left running ends too.
 // What it prints is read in pieces and cut into lines here, within budgets:
 // a line longer than maxLine is left out (and said, in errors), and once it
 // has printed more than maxBytes in all, on its output and its errors

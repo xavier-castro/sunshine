@@ -1,7 +1,7 @@
 import QtQuick
 import "../Agent.js" as Agent
 
-// The model and the effort an agent works with in Uber Notebook (Claude
+// The model and the effort an agent works with in Sunshine (Claude
 // Code, Grok, Codex): two buttons, each a list to pick from. The models are
 // the agent's own (Agent.models); Default is as the agent is set up. The
 // efforts follow the model: a model that doesn't take the effort picked

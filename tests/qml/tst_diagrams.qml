@@ -1,6 +1,6 @@
 import QtQuick
 import QtTest
-import "../.." as UberNotebook
+import "../.." as Sunshine
 import "../../app"
 import "../../Html.js" as Html
 import "../../Diagram.js" as Diagram
@@ -22,7 +22,7 @@ Item {
   FakeFiles { id: files }
   FakeService { id: service; user: ({ sounds: false }) }
   Theme { id: th }
-  UberNotebook.Workspace { id: ws; files: files }
+  Sunshine.Workspace { id: ws; files: files }
   property string lastToast: ""
 
   DocView {
@@ -291,7 +291,7 @@ Item {
       tryVerify(function() { copy = named(item, "drawnTool_copy"); var save = named(item, "drawnTool_save"); return copy !== null && save !== null && save.x > copy.x }, 1000, "on hover")
       mouseClick(copy)
       tryVerify(function() { return files.copiedPicture !== "" }, 3000, "copied")
-      verify(/^\/tmp\/uber-notebook-drawing-\d+\.png$/.test(files.copiedPicture), files.copiedPicture)
+      verify(/^\/tmp\/sunshine-drawing-\d+\.png$/.test(files.copiedPicture), files.copiedPicture)
       compare(root.lastToast, "Copied as a picture: paste it anywhere")
       // A picture made: the diagram at twice its size, with its margin.
       var lay = item.diagram.lay

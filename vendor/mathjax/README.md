@@ -1,9 +1,9 @@
-# MathJax, for Uber Notebook's equations
+# MathJax, for Sunshine's equations
 
 `tex-svg.mjs` (and the parts it imports, `tex-svg-*.mjs`) is
 [MathJax](https://www.mathjax.org/) 3.2.2 (`mathjax-full`), its TeX input and
 SVG output only, bundled as ECMAScript modules that run in Qt's JavaScript
-engine: Uber Notebook draws equations with it, in a worker thread
+engine: Sunshine draws equations with it, in a worker thread
 (`app/MathWorker.mjs`), with nothing else to install.
 
 It's built from `build/` (`npm install`, then `npm run build`), with the TeX

@@ -10,7 +10,7 @@ import "Env.js" as Env
 // deadline, an output overrun or cancel() ends it together with anything it
 // started; and when it's done, anything it started that's still there is
 // ended too (unless `keepChildren`: wl-copy stays on to hand over what was
-// copied), as it is when Uber Notebook closes. It gets only the environment
+// copied), as it is when Sunshine closes. It gets only the environment
 // a tool needs (Env.js). Output is counted as it arrives, stdout and stderr
 // together, and nothing past the budget is kept. (The budget counts
 // characters, as they're kept: a character of UTF-8 may have been up to 4

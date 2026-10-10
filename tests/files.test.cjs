@@ -1,4 +1,4 @@
-// Checks bin/uber-notebook-files, the helper that opens archives (a zip of
+// Checks bin/sunshine-files, the helper that opens archives (a zip of
 // notes to import, a backup to look into and put back), with real files in a
 // folder of its own under the system's temp folder.
 // Usage (from the plugin directory): node tests/files.test.cjs
@@ -9,8 +9,8 @@ const os = require("node:os");
 const path = require("node:path");
 const { execFileSync, spawnSync } = require("node:child_process");
 
-const helper = path.join(__dirname, "..", "bin", "uber-notebook-files");
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "uber-notebook-files-test-"));
+const helper = path.join(__dirname, "..", "bin", "sunshine-files");
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "sunshine-files-test-"));
 let passed = 0;
 function check(name, fn) { fn(); passed++; }
 
@@ -120,7 +120,7 @@ try {
   });
   check("a file of its own: made only where nothing is, taken out only as it was made", () => {
     const d = folder("owned");
-    const text = "[Desktop Entry]\nName=Uber Notebook\n";
+    const text = "[Desktop Entry]\nName=Sunshine\n";
     const at = path.join(d, "entry.desktop");
     assert.equal(helperRun(["create-owned", at, text]).out.trim(), "made");
     assert.equal(fs.readFileSync(at, "utf8"), text);
@@ -137,7 +137,7 @@ try {
     assert.equal(helperRun(["remove-owned", at, text]).out.trim(), "kept");
     fs.writeFileSync(at, text);
     assert.equal(helperRun(["remove-owned", at, text]).out.trim(), "removed");
-    // As Uber Notebook stops, run from its text (kept as it started), its
+    // As Sunshine stops, run from its text (kept as it started), its
     // file gone already: the same.
     assert.equal(helperRun(["create-owned", at, text]).out.trim(), "made");
     const fromText = spawnSync("/usr/bin/python3", ["-I", "-S", "-c", fs.readFileSync(helper, "utf8"), "remove-owned", at, text], { encoding: "utf8" });
@@ -154,26 +154,26 @@ try {
     assert.ok(fs.lstatSync(path.join(d, "link.desktop")).isSymbolicLink());
     assert.equal(helperRun(["remove-owned", path.join(d, "none.desktop"), text]).out.trim(), "kept", "nothing there: nothing done");
     // (What's checked is what was moved aside: nothing's left aside after.)
-    assert.deepEqual(fs.readdirSync(d).filter((n) => n.startsWith(".uber-notebook")), []);
+    assert.deepEqual(fs.readdirSync(d).filter((n) => n.startsWith(".sunshine")), []);
   });
 
   check("its skill's link: taken out only if it's its own", () => {
     const d = folder("skills");
-    fs.symlinkSync("/plugin/skills/uber-notebook", path.join(d, "uber-notebook"));
-    assert.equal(helperRun(["unlink-link", path.join(d, "uber-notebook"), "/elsewhere"]).out.trim(), "kept");
-    assert.equal(helperRun(["unlink-link", path.join(d, "uber-notebook"), "/plugin/skills/uber-notebook"]).out.trim(), "removed");
+    fs.symlinkSync("/plugin/skills/sunshine", path.join(d, "sunshine"));
+    assert.equal(helperRun(["unlink-link", path.join(d, "sunshine"), "/elsewhere"]).out.trim(), "kept");
+    assert.equal(helperRun(["unlink-link", path.join(d, "sunshine"), "/plugin/skills/sunshine"]).out.trim(), "removed");
     fs.mkdirSync(path.join(d, "mine"));
-    assert.equal(helperRun(["unlink-link", path.join(d, "mine"), "/plugin/skills/uber-notebook"]).out.trim(), "kept", "a folder isn't a link");
+    assert.equal(helperRun(["unlink-link", path.join(d, "mine"), "/plugin/skills/sunshine"]).out.trim(), "kept", "a folder isn't a link");
     assert.ok(fs.statSync(path.join(d, "mine")).isDirectory(), "put back as it was");
     fs.writeFileSync(path.join(d, "file"), "x");
-    assert.equal(helperRun(["unlink-link", path.join(d, "file"), "/plugin/skills/uber-notebook"]).out.trim(), "kept", "nor a file");
+    assert.equal(helperRun(["unlink-link", path.join(d, "file"), "/plugin/skills/sunshine"]).out.trim(), "kept", "nor a file");
     assert.equal(fs.readFileSync(path.join(d, "file"), "utf8"), "x");
     // Its skill in another place (an install before): its own too.
-    const here = "/home/x/.config/omarchy/plugins/marcho78.uber-notebook/skills/uber-notebook";
-    fs.symlinkSync("/old/place/marcho78.uber-notebook/skills/uber-notebook", path.join(d, "older"));
-    assert.equal(helperRun(["unlink-link", path.join(d, "older"), "/plugin/skills/uber-notebook"]).out.trim(), "kept", "only for its skill");
+    const here = "/home/x/.config/omarchy/plugins/xavier.sunshine/skills/sunshine";
+    fs.symlinkSync("/old/place/xavier.sunshine/skills/sunshine", path.join(d, "older"));
+    assert.equal(helperRun(["unlink-link", path.join(d, "older"), "/plugin/skills/sunshine"]).out.trim(), "kept", "only for its skill");
     assert.equal(helperRun(["unlink-link", path.join(d, "older"), here]).out.trim(), "removed", "an install before");
-    fs.symlinkSync("/old/place/other-plugin/skills/uber-notebook", path.join(d, "other"));
+    fs.symlinkSync("/old/place/other-plugin/skills/sunshine", path.join(d, "other"));
     assert.equal(helperRun(["unlink-link", path.join(d, "other"), here]).out.trim(), "kept", "anyone else's");
     // Runs: when each started (9 characters that sort), then a random part.
     const lock = path.join(d, "skills.lock");
@@ -207,7 +207,7 @@ try {
     helperRun(["unlink-link", path.join(d, "none"), here, lock, A]);
     assert.ok(!fs.existsSync(mark(C)) && fs.existsSync(mark(B)), "old marks cleared");
     for (const n of fs.readdirSync(d)) if (n.startsWith("skills.lock")) fs.unlinkSync(path.join(d, n));
-    assert.deepEqual(fs.readdirSync(d).filter((n) => n.startsWith(".uber-notebook")), [], "nothing left aside");
+    assert.deepEqual(fs.readdirSync(d).filter((n) => n.startsWith(".sunshine")), [], "nothing left aside");
   });
 
   check("a text file read for an agent: only a plain file, never one that doesn't end", () => {
@@ -280,7 +280,7 @@ try {
     assert.ok(!fs.existsSync(path.join(outside, "new.json")));
     assert.equal(overFolder.ok, false);
     assert.deepEqual([odd.id, odd.ok], [null, false]);
-    assert.deepEqual([unknown.ok, unknown.error], [false, "no such request"], "only what Uber Notebook asks for");
+    assert.deepEqual([unknown.ok, unknown.error], [false, "no such request"], "only what Sunshine asks for");
     assert.ok(fs.existsSync(path.join(root, "Pages", "a.json")));
     assert.deepEqual(fs.readdirSync(path.join(root, "Pages")).filter((n) => n.endsWith(".tmp")), [], "no half-written file left");
     // A page written survives a power cut: the file on disk, then its
@@ -328,9 +328,9 @@ try {
       const out = fs.existsSync(path.join(work, "page.html")) ? fs.readFileSync(path.join(work, "page.html"), "utf8") : null;
       return { r: JSON.parse(r.out.trim().split("\n").pop() || "{}"), out };
     }
-    const img = (name, style) => `<img src="uber-notebook-asset:${name}" alt="x" style="${style || ""}" />`;
+    const img = (name, style) => `<img src="sunshine-asset:${name}" alt="x" style="${style || ""}" />`;
     // Put in, sized to the share of the page asked for, their proportions kept.
-    const ok = run(`<p>${img("wide.png", "width:50%;")}</p><p>${img("tall.png", "width:100%;")}</p><p><img src="uber-notebook-drawing:d1.png" alt="A diagram" style="max-width:100%;" /></p><p>${img("closed.svg", "width:100%;")}</p><p>Text: url(http://x) @import y; &lt;script&gt;</p>`);
+    const ok = run(`<p>${img("wide.png", "width:50%;")}</p><p>${img("tall.png", "width:100%;")}</p><p><img src="sunshine-drawing:d1.png" alt="A diagram" style="max-width:100%;" /></p><p>${img("closed.svg", "width:100%;")}</p><p>Text: url(http://x) @import y; &lt;script&gt;</p>`);
     assert.deepEqual([ok.r.ok, ok.r.pictures, ok.r.missing], [true, 4, 0], JSON.stringify(ok.r));
     assert.match(ok.out, /<img src="data:image\/png;base64,[^"]+" alt="x" width="330" height="165" \/>/, "half the page across");
     assert.match(ok.out, /width="22" height="450"/, "no taller than half a sheet");
@@ -338,7 +338,7 @@ try {
     assert.match(ok.out, /data:image\/svg\+xml;base64,[^"]+" alt="x" width="660" height="330"/);
     assert.ok(ok.out.includes("Text: url(http://x) @import y; &lt;script&gt;"), "words are words");
     // What can't be put in: said in its place.
-    const miss = run(`${img("link.png")}${img("fake.png")}${img("none.png")}${img("open.svg")}<img src="uber-notebook-asset:../export-outside/secret.png" alt="" />`);
+    const miss = run(`${img("link.png")}${img("fake.png")}${img("none.png")}${img("open.svg")}<img src="sunshine-asset:../export-outside/secret.png" alt="" />`);
     assert.deepEqual([miss.r.ok, miss.r.pictures], [false, undefined], "a name that isn't one isn't put in, and the document's refused");
     const miss2 = run(`${img("link.png")}${img("fake.png")}${img("none.png")}${img("open.svg")}`);
     assert.deepEqual([miss2.r.ok, miss2.r.pictures, miss2.r.missing], [true, 0, 4], "a link, not a picture, not there, an SVG naming the web");
@@ -614,7 +614,7 @@ try {
     assert.deepEqual(Object.keys(out.failed).sort(), ["../escape.md", "Other/x.md"]);
     assert.ok(!fs.existsSync(path.join(tmp, "escape.md")));
     assert.ok(!fs.existsSync(plan), "the plan, taken away once read");
-    assert.deepEqual(fs.readdirSync(path.join(m, "Pages")).filter((n) => n.startsWith(".uber-notebook")), [], "nothing left aside");
+    assert.deepEqual(fs.readdirSync(path.join(m, "Pages")).filter((n) => n.startsWith(".sunshine")), [], "nothing left aside");
   });
   check("an agent's lines made ASCII: counted as it prints them, before they're escaped", () => {
     const run = (input, line, total) => spawnSync("/usr/bin/python3", ["-I", "-S", helper, "ascii-lines", String(line), String(total)], { input, encoding: "utf8", timeout: 10000 });
@@ -662,9 +662,9 @@ try {
     const vault = folder("copy-vault");
     const chosen = path.join(tmp, "copy-chosen");
     fs.symlinkSync(vault, chosen);
-    const pc = spawnSync("/usr/bin/python3", ["-I", "-S", helper, "put-copy", chosen, ".uber-notebook-mirror.json"], { input: "{}", encoding: "utf8" });
+    const pc = spawnSync("/usr/bin/python3", ["-I", "-S", helper, "put-copy", chosen, ".sunshine-mirror.json"], { input: "{}", encoding: "utf8" });
     assert.equal(pc.stdout.trim(), "put", pc.stderr);
-    assert.equal(fs.readFileSync(path.join(vault, ".uber-notebook-mirror.json"), "utf8"), "{}");
+    assert.equal(fs.readFileSync(path.join(vault, ".sunshine-mirror.json"), "utf8"), "{}");
     fs.symlinkSync(out, path.join(vault, "inner"));
     assert.notEqual(spawnSync("/usr/bin/python3", ["-I", "-S", helper, "put-copy", chosen, "inner/x"], { input: "x" }).status, 0, "a link below it: not followed");
     assert.ok(!fs.existsSync(path.join(out, "x")));
@@ -695,7 +695,7 @@ try {
     const monitor = require("node:child_process").spawn("/usr/bin/dbus-monitor", ["--address", address], { stdio: ["ignore", log, log] });
     try {
       sleep(400);
-      const note = { summary: "-rf Call the dentist", body: "before Friday ✓", glyph: "\u{f009e}", exec: ["/usr/bin/omarchy-shell", "uber-notebook", "open", "0b6f8f9e-1111-4222-8333-944455556666"] };
+      const note = { summary: "-rf Call the dentist", body: "before Friday ✓", glyph: "\u{f009e}", exec: ["/usr/bin/omarchy-shell", "sunshine", "open", "0b6f8f9e-1111-4222-8333-944455556666"] };
       const r = spawnSync("/usr/bin/python3", ["-I", "-S", helper, "notify"], { input: JSON.stringify(note), encoding: "utf8", env: { DBUS_SESSION_BUS_ADDRESS: address } });
       assert.equal(r.status, 3, r.stderr);
       assert.match(r.stderr, /ServiceUnknown/);
@@ -703,8 +703,8 @@ try {
       const seen = fs.readFileSync(path.join(bus, "monitor.txt"), "utf8");
       const call = seen.slice(seen.indexOf("member=Notify"));
       assert.ok(seen.indexOf("member=Notify") >= 0, seen);
-      for (const want of ['string "Uber Notebook"', 'string "-rf Call the dentist"', 'string "before Friday ✓"', 'string "urgency"', "byte 1",
-        'string "omarchy-glyph"', 'string "omarchy-exec-argv"', 'string "["/usr/bin/omarchy-shell","uber-notebook","open","0b6f8f9e-1111-4222-8333-944455556666"]"', "int32 -1"]) {
+      for (const want of ['string "Sunshine"', 'string "-rf Call the dentist"', 'string "before Friday ✓"', 'string "urgency"', "byte 1",
+        'string "omarchy-glyph"', 'string "omarchy-exec-argv"', 'string "["/usr/bin/omarchy-shell","sunshine","open","0b6f8f9e-1111-4222-8333-944455556666"]"', "int32 -1"]) {
         assert.ok(call.indexOf(want) >= 0, "the call has " + want + ":\n" + call.slice(0, 1500));
       }
       // Only words for the click command, a few of them.
@@ -747,7 +747,7 @@ try {
     r = helperRun(["place", made, path.join(d, "new.pdf"), "keep"]);
     assert.equal(r.code, 0, r.err);
     assert.equal(mode(path.join(d, "new.pdf")), 0o600);
-    assert.ok(!fs.readdirSync(d).some((n) => n.startsWith(".uber-notebook-new")), "nothing half-made left");
+    assert.ok(!fs.readdirSync(d).some((n) => n.startsWith(".sunshine-new")), "nothing half-made left");
     assert.equal(helperRun(["place", d, path.join(d, "x"), "replace"]).code, 3, "only a plain file is copied");
   });
 
@@ -774,19 +774,19 @@ try {
       r = helperOn(drive, ["place", made, path.join(d, "New.png"), "keep"]);
       assert.equal(r.code, 0, drive + ": " + r.err);
       assert.deepEqual(r.out.split("\n"), [path.join(d, "New.png"), "open", ""], drive);
-      assert.ok(!fs.readdirSync(d).some((n) => n.startsWith(".uber-notebook-")), drive + ": nothing half-made left");
+      assert.ok(!fs.readdirSync(d).some((n) => n.startsWith(".sunshine-")), drive + ": nothing half-made left");
       // (The Markdown copy's check: never "keeps" there.)
       // (A drive that refuses the change too: it's said not to keep them,
       // not that the check failed.)
       const p = helperOn(drive, ["probe", d]);
       assert.equal(p.code, 0, drive + ": " + p.err);
       assert.equal(JSON.parse(p.out).keeps, false, drive);
-      assert.ok(!fs.readdirSync(d).some((n) => n.startsWith(".uber-notebook-probe")), drive + ": its probe taken away");
+      assert.ok(!fs.readdirSync(d).some((n) => n.startsWith(".sunshine-probe")), drive + ": its probe taken away");
       // (Nor does making a copy's own files private say they are.)
       const mp = helperOn(drive, ["make-private", d], JSON.stringify(["Picture.png"]));
       assert.equal(mp.code, 0, drive + ": " + mp.err);
       assert.equal(JSON.parse(mp.out).keeps, false, drive);
-      assert.ok(!fs.readdirSync(d).some((n) => n.startsWith(".uber-notebook-probe")), drive + ": its probe taken away");
+      assert.ok(!fs.readdirSync(d).some((n) => n.startsWith(".sunshine-probe")), drive + ": its probe taken away");
     }
   });
 
@@ -808,13 +808,13 @@ try {
     const r = spawnSync("/usr/bin/python3", ["-I", "-S", helper, "make-private", v], { input: JSON.stringify(["Pages", "Notebooks", "sketches", "../x", "/etc"]), encoding: "utf8" });
     assert.equal(r.status, 0, r.stderr);
     assert.deepEqual(JSON.parse(r.stdout), { ok: true, changed: 6, left: 0, keeps: true }, "Pages, A.md, Notebooks, Trip, assets, pic.png; the drive keeps files private");
-    assert.ok(!fs.readdirSync(v).some((n) => n.startsWith(".uber-notebook-probe")), "its probe taken away");
+    assert.ok(!fs.readdirSync(v).some((n) => n.startsWith(".sunshine-probe")), "its probe taken away");
     // The drive looked at alone (every copy): it keeps files private, and which folder it is.
     const pr = helperRun(["probe", v]);
     assert.equal(pr.code, 0, pr.err);
     const st = fs.statSync(v);
     assert.deepEqual(JSON.parse(pr.out), { keeps: true, id: st.dev + ":" + st.ino });
-    assert.ok(!fs.readdirSync(v).some((n) => n.startsWith(".uber-notebook-probe")));
+    assert.ok(!fs.readdirSync(v).some((n) => n.startsWith(".sunshine-probe")));
     assert.equal(helperRun(["probe", "/usr/share"]).code, 3, "a folder that isn't yours");
     assert.equal(mode(path.join(v, "Pages", "A.md")), 0o600);
     assert.equal(mode(path.join(v, "Notebooks", "Trip", "assets", "pic.png")), 0o600, "its pictures too");

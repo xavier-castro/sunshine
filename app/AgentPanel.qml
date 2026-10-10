@@ -40,8 +40,8 @@ Item {
   property string failure: ""
   // What it wasn't allowed to do (tools' names).
   property var denied: []
-  // What its work needs your yes for (DocView.askAgentPermission): Uber
-  // Notebook contacting a site for it, or one of its tools beyond its rules.
+  // What its work needs your yes for (DocView.askAgentPermission): Sunshine
+  // contacting a site for it, or one of its tools beyond its rules.
   // Allow once; Always (kept in Settings → AI, for that agent and what it
   // says), when there's an always to it; No.
   property var asks: []
@@ -612,7 +612,7 @@ Item {
             width: parent.width
             wrapMode: Text.Wrap
             textFormat: Text.PlainText
-            text: "A command runs programs that can read and change any file you can (your notes and Uber Notebook's settings too) and use the network. Allowed for this conversation, no command is asked about again until it ends."
+            text: "A command runs programs that can read and change any file you can (your notes and Sunshine's settings too) and use the network. Allowed for this conversation, no command is asked about again until it ends."
             font.family: panel.theme.uiFont
             font.pixelSize: 11
             color: panel.theme.faint

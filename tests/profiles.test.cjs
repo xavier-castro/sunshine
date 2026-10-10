@@ -16,18 +16,18 @@ const random = () => ((n++ * 0.137) % 1);
 
 check("what the settings keep of them", () => {
   const kept = plain(S.merge(D.DEFAULTS, { profiles: [
-    { id: "p-a", name: "  Personal \n", folder: "~/Documents/Uber Notebook", saved: { inbox: "0f8e", mirror: true, nonsense: 1, lastPage: "NOT AN ID" } },
+    { id: "p-a", name: "  Personal \n", folder: "~/Documents/Sunshine", saved: { inbox: "0f8e", mirror: true, nonsense: 1, lastPage: "NOT AN ID" } },
     { id: "p-a", name: "Twice", folder: "~/x" },
     { id: "BAD ID", name: "x", folder: "~/y" },
     { id: "p-b", name: "", folder: "~/z" },
     { id: "p-c", name: "Work", folder: "relative/path" },
-    { id: "p-d", name: "Demo", folder: "/home/me/.local/share/uber-notebook/demo", demo: true },
+    { id: "p-d", name: "Demo", folder: "/home/me/.local/share/sunshine/demo", demo: true },
     { id: "p-e", name: "New", folder: "~/New", fresh: true },
     { id: "p-f", name: "Odd", folder: "~/Odd", fresh: "yes" }
   ], profile: "p-a" }, D.SCHEMA));
   assert.deepEqual(kept.profiles, [
-    { id: "p-a", name: "Personal", folder: "~/Documents/Uber Notebook", demo: false, saved: { inbox: "0f8e", mirror: true } },
-    { id: "p-d", name: "Demo", folder: "/home/me/.local/share/uber-notebook/demo", demo: true, saved: {} },
+    { id: "p-a", name: "Personal", folder: "~/Documents/Sunshine", demo: false, saved: { inbox: "0f8e", mirror: true } },
+    { id: "p-d", name: "Demo", folder: "/home/me/.local/share/sunshine/demo", demo: true, saved: {} },
     { id: "p-e", name: "New", folder: "~/New", demo: false, saved: {}, fresh: true },
     { id: "p-f", name: "Odd", folder: "~/Odd", demo: false, saved: {} }
   ], "fresh kept only as true (its folder not opened yet)");
@@ -37,7 +37,7 @@ check("what the settings keep of them", () => {
 });
 
 const list = [
-  { id: "p-a", name: "Personal", folder: "~/Documents/Uber Notebook", demo: false, saved: {} },
+  { id: "p-a", name: "Personal", folder: "~/Documents/Sunshine", demo: false, saved: {} },
   { id: "p-b", name: "Business", folder: "/srv/notes/business", demo: false, saved: { inbox: "b1", lastPage: "page-b", mirror: true, mirrorFolder: "~/Vault" } }
 ];
 
@@ -51,15 +51,15 @@ check("finding one, and what can't be", () => {
   assert.equal(P.nameProblem(list, "Side project", ""), "");
   assert.equal(P.folderProblem(list, "", "", "/home/me"), "Choose a folder: a full path, or one under ~/");
   assert.equal(P.folderProblem(list, "notes", "", "/home/me"), "Choose a folder: a full path, or one under ~/");
-  assert.equal(P.folderProblem(list, "/home/me/Documents/Uber Notebook", "", "/home/me"), "“Personal” keeps its notes there");
-  assert.equal(P.folderProblem(list, "~/Documents/Uber Notebook/Work", "", "/home/me"), "“Personal” keeps its notes there", "not inside another's");
+  assert.equal(P.folderProblem(list, "/home/me/Documents/Sunshine", "", "/home/me"), "“Personal” keeps its notes there");
+  assert.equal(P.folderProblem(list, "~/Documents/Sunshine/Work", "", "/home/me"), "“Personal” keeps its notes there", "not inside another's");
   assert.equal(P.folderProblem(list, "/srv", "", "/home/me"), "“Business” keeps its notes there", "nor around one");
-  assert.equal(P.folderProblem(list, "~/Documents/Uber Notebook Work", "", "/home/me"), "");
-  assert.equal(P.folderProblem(list, "~/Documents/Uber Notebook", "p-a", "/home/me"), "", "its own folder");
+  assert.equal(P.folderProblem(list, "~/Documents/Sunshine Work", "", "/home/me"), "");
+  assert.equal(P.folderProblem(list, "~/Documents/Sunshine", "p-a", "/home/me"), "", "its own folder");
 });
 
 check("switching: each keeps its own settings", () => {
-  const settings = { profile: "p-a", folder: "~/Documents/Uber Notebook", inbox: "a1", lastPage: "page-a", lastNotebook: "nb-a", mirror: false, mirrorFolder: "" };
+  const settings = { profile: "p-a", folder: "~/Documents/Sunshine", inbox: "a1", lastPage: "page-a", lastNotebook: "nb-a", mirror: false, mirrorFolder: "" };
   const c = plain(P.switchTo(list, settings, "p-b"));
   assert.equal(c.profile, "p-b");
   assert.equal(c.folder, "/srv/notes/business");
@@ -68,7 +68,7 @@ check("switching: each keeps its own settings", () => {
   assert.deepEqual(c.profiles[0].saved, { inbox: "a1", lastPage: "page-a", lastNotebook: "nb-a", mirror: false, mirrorFolder: "" }, "the one left keeps its");
   // And back.
   const back = plain(P.switchTo(c.profiles, Object.assign({}, settings, c, { inbox: "b2" }), "p-a"));
-  assert.deepEqual([back.folder, back.inbox, back.lastPage, back.lastNotebook], ["~/Documents/Uber Notebook", "a1", "page-a", "nb-a"]);
+  assert.deepEqual([back.folder, back.inbox, back.lastPage, back.lastNotebook], ["~/Documents/Sunshine", "a1", "page-a", "nb-a"]);
   assert.equal(back.profiles[1].saved.inbox, "b2", "Business's, as it was left");
   assert.equal(P.switchTo(list, settings, "nope"), null);
   // The open one's folder, as the settings have it now.
@@ -76,17 +76,17 @@ check("switching: each keeps its own settings", () => {
 });
 
 check("notes from before profiles, a new one, the demo", () => {
-  const before = plain(P.fromBefore("~/Documents/Uber Notebook", random));
+  const before = plain(P.fromBefore("~/Documents/Sunshine", random));
   assert.equal(before.profiles.length, 1);
   assert.equal(before.profiles[0].name, "Personal");
-  assert.equal(before.profiles[0].folder, "~/Documents/Uber Notebook");
+  assert.equal(before.profiles[0].folder, "~/Documents/Sunshine");
   assert.equal(before.profile, before.profiles[0].id);
-  assert.equal(before.folder, "~/Documents/Uber Notebook");
+  assert.equal(before.folder, "~/Documents/Sunshine");
   assert.equal(before.profiles[0].fresh, undefined, "its folder's been opened: never made again");
   const made = plain(P.make(list, "  Studio  ", "~/Studio/", random));
   assert.deepEqual([made.name, made.folder, made.demo, made.fresh], ["Studio", "~/Studio", false, true], "a new one's folder is made when it's opened");
   assert.ok(/^p-[a-z0-9]+$/.test(made.id) && !list.some((p) => p.id === made.id));
-  const demo = plain(P.demo(list, "~/.local/share/uber-notebook/demo", random));
+  const demo = plain(P.demo(list, "~/.local/share/sunshine/demo", random));
   assert.deepEqual([demo.name, demo.demo, demo.fresh], ["Demo", true, true]);
 });
 

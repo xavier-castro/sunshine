@@ -1,8 +1,8 @@
 import QtQuick
 
 // The foot of Pages' sidebar, and the shelf's corner: when there's a newer
-// Uber Notebook, a line that says so (a click: what's new in it, and updating);
-// then who made Uber Notebook, on X (a click opens the profile in your browser).
+// Sunshine, a line that says so (a click: what's new in it, and updating);
+// then who made Sunshine, on X (a click opens the profile in your browser).
 Column {
   id: sf
 

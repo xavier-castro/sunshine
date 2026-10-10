@@ -1,14 +1,14 @@
 import QtQuick
 import "Updates.js" as Updates
 
-// Whether there's a newer Uber Notebook (Updates.js): GitHub's list of the
+// Whether there's a newer Sunshine (Updates.js): GitHub's list of the
 // project's releases (the manifest's homepage), asked a minute after
-// Uber Notebook starts and once a day after that while Settings has it on, and
+// Sunshine starts and once a day after that while Settings has it on, and
 // whenever you ask. It's one plain request for that list: nothing of yours
 // goes with it. A newer one shows in the sidebar, on the shelf and in
 // Settings, with its notes and the command that installs it (`omarchy plugin
 // update`), to run in a terminal: it shows what changes and asks first.
-// Uber Notebook never installs anything itself.
+// Sunshine never installs anything itself.
 Item {
   id: up
 
@@ -33,18 +33,18 @@ Item {
   property var checkedAt: null
   // A git checkout, so `omarchy plugin update` can update it.
   property bool managed: false
-  // (Then the shell restarted: Uber Notebook's service stays loaded through
+  // (Then the shell restarted: Sunshine's service stays loaded through
   // an update, as it was, till the shell starts again.)
   readonly property string updateCommand: "omarchy plugin update " + pluginId + " && omarchy restart shell"
 
-  readonly property string curlScript: "/usr/bin/curl -q -sS -L --proto =https --proto-redir =https --max-time 15 --max-filesize 2000000 -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' -A 'Uber Notebook' -w '\\n%{http_code}' -- \"$1\""
+  readonly property string curlScript: "/usr/bin/curl -q -sS -L --proto =https --proto-redir =https --max-time 15 --max-filesize 2000000 -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' -A 'Sunshine' -w '\\n%{http_code}' -- \"$1\""
 
   function check(done) {
     if (status === "checking") { if (done) done(); return }
     if (!repo || !files) { status = "failed"; problem = "There's no GitHub page to ask (the manifest's homepage)."; if (done) done(); return }
     status = "checking"
     problem = ""
-    files.exec(["/usr/bin/bash", "-c", curlScript, "uber-notebook-update", Updates.releasesUrl(repo)], function(ok, out) {
+    files.exec(["/usr/bin/bash", "-c", curlScript, "sunshine-update", Updates.releasesUrl(repo)], function(ok, out) {
       up.checkedAt = new Date()
       if (!ok) {
         up.status = "failed"

@@ -58,7 +58,7 @@ Item {
 
   function refresh(done) {
     if (!files || !folder) { if (done) done(); return }
-    files.exec(["/usr/bin/bash", "-c", Backups.LIST_SCRIPT, "uber-notebook-backups", folder], function(ok, out) {
+    files.exec(["/usr/bin/bash", "-c", Backups.LIST_SCRIPT, "sunshine-backups", folder], function(ok, out) {
       bk.list = ok ? Backups.listed(out, bk.folder) : []
       bk.notPrivate = ok && /^open$/m.test(String(out || ""))
       if (bk.notPrivate && bk.every !== "off") bk.sayStopped()
@@ -108,7 +108,7 @@ Item {
     note = ""
     if (service && typeof service.saveOpen === "function") service.saveOpen()
     var paths = picked.map(function(p) { return bk.profiles.pathOf(p.folder) })
-    files.exec(["/usr/bin/bash", "-c", Backups.EXISTS_SCRIPT, "uber-notebook-backup-has"].concat(paths), function(ok, out) {
+    files.exec(["/usr/bin/bash", "-c", Backups.EXISTS_SCRIPT, "sunshine-backup-has"].concat(paths), function(ok, out) {
       var there = String(out || "").split("\n")
       var take = []
       picked.forEach(function(p, i) { if (there[i] === "1") take.push({ profile: p, path: paths[i] }) })
@@ -119,7 +119,7 @@ Item {
       var m = Backups.manifest(take.map(function(t) { return t.profile }), bk.version, now)
       var args = [bk.folder, name.stem, name.suffix]
       take.forEach(function(t, i) { args.push(t.path, "p" + (i + 1), Backups.inside(bk.folder, t.path)) })
-      bk.files.exec(["/usr/bin/bash", "-c", Backups.BACKUP_SCRIPT, "uber-notebook-backup"].concat(args), function(made, said) {
+      bk.files.exec(["/usr/bin/bash", "-c", Backups.BACKUP_SCRIPT, "sunshine-backup"].concat(args), function(made, said) {
         var lines = String(said || "").trim().split("\n")
         var path = made ? lines[lines.length - 1] : ""
         // (Its folder can't keep it private: said in Settings, and, for an
@@ -150,7 +150,7 @@ Item {
   }
 
   // A backup put back: each profile in it a new profile, in a new folder
-  // beside the others (~/Documents/Uber Notebook <name> (restored)), opened if
+  // beside the others (~/Documents/Sunshine <name> (restored)), opened if
   // `open` (the first). done({ ok, restored: [{ id, name, folder }], error }).
   function restore(path, open, done) {
     if (working) { done({ ok: false, error: "A backup is being " + (working === "backup" ? "made" : "put back") + " already." }); return }

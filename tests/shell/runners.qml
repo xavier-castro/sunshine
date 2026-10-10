@@ -43,7 +43,7 @@ ShellRoot {
       say("run env: PATH is the system's", /^PATH=\/usr\/bin$/m.test(out), "")
       say("run env: no BASH_ENV/LD_PRELOAD/TAR_OPTIONS", !/^(BASH_ENV|LD_PRELOAD|TAR_OPTIONS)=/m.test(out), "")
       say("run env: HOME and XDG_RUNTIME_DIR kept", /^HOME=/m.test(out) && /^XDG_RUNTIME_DIR=/m.test(out), "")
-      say("run env: nothing else (e.g. UBER_NOTEBOOK_TEST_SECRET)", !/^UBER_NOTEBOOK_TEST_SECRET=/m.test(out), "")
+      say("run env: nothing else (e.g. SUNSHINE_TEST_SECRET)", !/^SUNSHINE_TEST_SECRET=/m.test(out), "")
     })
     run(["/usr/bin/wc", "-c"], { input: "hello wörld" }, function(ok, out) { say("run stdin", ok && String(out).trim() === "12", out) })
     run(["/usr/bin/bash", "-c", "/usr/bin/sleep 30 & echo $!"], {}, function(ok, out) {
@@ -95,7 +95,7 @@ ShellRoot {
     Qt.callLater(function() { talk.send("second\n") })
     stream(["/usr/bin/env"], {}, function(code, errors, lines) {
       var t = lines.join("\n")
-      say("stream env: the agent's own (HOME, UBER_NOTEBOOK_TEST_SECRET kept), but no BASH_ENV/LD_PRELOAD", /^HOME=/m.test(t) && /^UBER_NOTEBOOK_TEST_SECRET=/m.test(t) && !/^(BASH_ENV|LD_PRELOAD)=/m.test(t), "")
+      say("stream env: the agent's own (HOME, SUNSHINE_TEST_SECRET kept), but no BASH_ENV/LD_PRELOAD", /^HOME=/m.test(t) && /^SUNSHINE_TEST_SECRET=/m.test(t) && !/^(BASH_ENV|LD_PRELOAD)=/m.test(t), "")
     })
   }
   Timer { id: delay; interval: 600; property var then: null; onTriggered: then() }

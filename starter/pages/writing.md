@@ -1,5 +1,5 @@
 ---
-title: Writing in Uber Notebook
+title: Writing in Sunshine
 icon: ✍️
 parent: welcome
 order: 1

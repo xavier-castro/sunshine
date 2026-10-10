@@ -1,6 +1,6 @@
 import QtQuick
 import QtTest
-import "../.." as UberNotebook
+import "../.." as Sunshine
 import "../../app"
 import "../../Settings.js" as Settings
 
@@ -17,8 +17,8 @@ Item {
   FakeStore { id: store }
   FakeService { id: service; store: files; user: ({ sounds: false }); profiles: profiles; asked: ({}) }
   FakeFiles { id: files; rootPath: profiles.current !== null ? Settings.resolveFolder(service.settings.folder, "/tmp", true) : "" }
-  UberNotebook.Profiles { id: profiles; service: service; files: files; dataFolder: "/tmp/uber-notebook-data" }
-  UberNotebook.Workspace {
+  Sunshine.Profiles { id: profiles; service: service; files: files; dataFolder: "/tmp/sunshine-data" }
+  Sunshine.Workspace {
     id: ws
     files: files
     starter: "templates"
@@ -88,7 +88,7 @@ Item {
       wait(900)
       verify(!app.setupPopup.opened, "not over the first run")
       verify(!strip().visible)
-      verify(profiles.add("Home", "~/Documents/Uber Notebook", true) === "")
+      verify(profiles.add("Home", "~/Documents/Sunshine", true) === "")
       tryVerify(function() { return !profiles.firstRun }, 1000)
       tryVerify(function() { return app.setupPopup.opened }, 2000, "the first profile made: the panel")
       app.setupPopup.close()
@@ -144,7 +144,7 @@ Item {
     function test_3_turn_on() {
       fresh({ setupShown: true })
       tryVerify(function() { return strip().visible }, 1000)
-      compare(stripText(), "Use the Uber Notebook skill in Claude Code and Codex, and see reminder details in notifications.")
+      compare(stripText(), "Use the Sunshine skill in Claude Code and Codex, and see reminder details in notifications.")
       // (Pages starts under it: nothing of the page is under the strip.)
       compare(app.docView.anchors.topMargin, strip().height)
       var before = ws.index ? JSON.stringify(ws.index) : ""
@@ -156,7 +156,7 @@ Item {
       tryVerify(function() { return service.settings.reminderWords === true }, 1000)
       click(named(win(), "setupDone"))
       tryVerify(function() { return !app.setupPopup.visible }, 1000)
-      compare(stripText(), "Use the Uber Notebook skill in Claude Code and Codex.")
+      compare(stripText(), "Use the Sunshine skill in Claude Code and Codex.")
       click(named(win(), "setupStripTurnOn"))
       tryVerify(function() { return service.settings.agentSkill === true }, 1000, "one: turned on")
       verify(!app.setupPopup.opened, "no panel for one")

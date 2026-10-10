@@ -1,7 +1,7 @@
-// Defaults.js - Uber Notebook's settings: their defaults, and what each may be.
+// Defaults.js - Sunshine's settings: their defaults, and what each may be.
 //
-// Code rather than a JSON file, so Uber Notebook reads no settings file of its own.
-// Settings are stored on Uber Notebook's entry in shell.json (by the Omarchy shell),
+// Code rather than a JSON file, so Sunshine reads no settings file of its own.
+// Settings are stored on Sunshine's entry in shell.json (by the Omarchy shell),
 // holding only what differs from DEFAULTS; Settings.merge() validates them
 // against SCHEMA before anything uses them.
 
@@ -10,7 +10,7 @@ var DEFAULTS = {
   // Opens and closes the notebook, and jots a quick note from anywhere.
   shortcut: "SUPER + N",
   quickShortcut: "SUPER + ALT + N",
-  // Where the notebooks live: "" is ~/Documents/Uber Notebook (or ~/Uber Notebook when
+  // Where the notebooks live: "" is ~/Documents/Sunshine (or ~/Sunshine when
   // there is no Documents folder). The open profile's folder.
   folder: "",
   // Profiles: notes kept apart (personal, business, the demo...), each a
@@ -44,7 +44,7 @@ var DEFAULTS = {
   // Where the last session left off, so the notebook opens there again.
   lastNotebook: "",
   zoom: 100,
-  // Pages or Notebooks: which one Uber Notebook opens in (the one you were in;
+  // Pages or Notebooks: which one Sunshine opens in (the one you were in;
   // Pages, the first time), and the page you were on in Pages.
   space: "pages",
   lastPage: "",
@@ -75,11 +75,11 @@ var DEFAULTS = {
   // keep each one's words for a moment on a command line, where every
   // account on the computer can read them.
   reminderWords: false,
-  // The Uber Notebook skill (skills/uber-notebook) linked into the folders
+  // The Sunshine skill (skills/sunshine) linked into the folders
   // agents read skills from (~/.claude/skills, ~/.codex/skills...) while
-  // Uber Notebook runs, so Claude Code, Codex and other agents anywhere know
+  // Sunshine runs, so Claude Code, Codex and other agents anywhere know
   // its commands: off till you turn it on. (The agent panel, and agents
-  // started from Uber Notebook, are given it either way.)
+  // started from Sunshine, are given it either way.)
   agentSkill: false,
   // The panel that asks about the skill and reminder details: opened once by
   // itself (app/SetupPanel.qml). What the strip over Pages no longer asks about
@@ -104,17 +104,17 @@ var DEFAULTS = {
   audioInput: "",
   // A voice evened out and made loud enough (a quiet laptop microphone).
   audioBoost: true,
-  // Backups (Backups.js): the folder they go in ("" is ~/Documents/Uber Notebook
+  // Backups (Backups.js): the folder they go in ("" is ~/Documents/Sunshine
   // Backups); automatic ones of every profile ("off", "daily", "weekly"),
   // and how many of those are kept (the oldest go to the trash).
   backupFolder: "",
   backupEvery: "off",
   backupKeep: 10,
-  // Whether Uber Notebook asks GitHub, once a day, if there's a newer version
+  // Whether Sunshine asks GitHub, once a day, if there's a newer version
   // (Updates.qml); off, only when you ask.
   checkUpdates: true,
   // The model and effort Claude Code, Grok and Codex work with when they
-  // work in Uber Notebook (Agent.js): "" for as each is set up.
+  // work in Sunshine (Agent.js): "" for as each is set up.
   claudeModel: "",
   claudeEffort: "",
   grokModel: "",

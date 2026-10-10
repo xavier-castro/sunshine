@@ -5,9 +5,9 @@
 // Everything in it is written here: what's on a page goes in as text,
 // escaped, never as markup; links only to the web and email (a page's link to
 // another page in it goes there, in the document). Pictures are named, not
-// linked: src="uber-notebook-asset:<name>" (in Pages/assets) and
-// "uber-notebook-drawing:<name>" (a diagram drawn for it), which the files
-// helper puts in (bin/uber-notebook-files export-html) before anything reads
+// linked: src="sunshine-asset:<name>" (in Pages/assets) and
+// "sunshine-drawing:<name>" (a diagram drawn for it), which the files
+// helper puts in (bin/sunshine-files export-html) before anything reads
 // it, refusing a document that would load anything from anywhere else.
 // Equations and sketches go in drawn (SVG, as data: addresses). Its colors
 // are a light page's, on white paper, as printed.
@@ -42,13 +42,13 @@ var FAINT = "#787774"
 var LINE = "#e3e2de"
 // A sheet's width for what's on it, in CSS pixels (A4 or Letter, less margins).
 var PAGE_WIDTH = 660
-var ASSET = "uber-notebook-asset:"
+var ASSET = "sunshine-asset:"
 // Styles on the elements themselves, as well as in the sheet: LibreOffice
 // (the Word file) reads those, not a class's.
 var TABLE = "border-collapse:collapse;width:100%;"
 var CELL = "border:1px solid " + LINE + ";padding:4px 8px;vertical-align:top;text-align:left;"
 var HEAD = CELL + "background:#f7f6f3;font-weight:600;"
-var DRAWING = "uber-notebook-drawing:"
+var DRAWING = "sunshine-drawing:"
 // Synced blocks inside synced blocks: this deep at most; and in a whole
 // document, this many expanded, this much of them (then each says it's one).
 var MAX_SYNCED = 3
@@ -156,7 +156,7 @@ function inline(inner, ctx) {
     lastHref = run.href || ""
     if (run.br) { out += "<br />"; lastHref = ""; return }
     if (run.img) return
-    var href = String(run.href || "").replace(/^omanote:\/\//, "uber-notebook://")
+    var href = String(run.href || "").replace(/^omanote:\/\//, "sunshine://")
     // A footnote: its number (its words at the page's end).
     if (Notes.isLink(href)) {
       if (seen === run.href) return
@@ -191,7 +191,7 @@ function inline(inner, ctx) {
     var mark = colorOf(s["background-color"], true)
     if (mark) text = "<mark style=\"background:" + mark + ";\">" + text + "</mark>"
     var web = safeHref(href)
-    var page = /^uber-notebook:\/\/page\/([0-9a-f-]{36})/.exec(href)
+    var page = /^sunshine:\/\/page\/([0-9a-f-]{36})/.exec(href)
     var anchor = page && typeof ctx.here === "function" ? ctx.here(page[1]) : ""
     if (web) text = "<a href=\"" + esc(web) + "\">" + text + "</a>"
     else if (anchor) text = "<a href=\"#" + anchor + "\">" + text + "</a>"

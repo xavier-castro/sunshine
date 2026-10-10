@@ -13,7 +13,7 @@ import "Meeting.js" as Meeting
 //
 // Meeting mode is off until voxtype's settings turn it on: enable() does
 // (`voxtype config set meeting.enabled true`), when you ask it to. It takes
-// effect when voxtype starts again, which Uber Notebook leaves to you (it
+// effect when voxtype starts again, which Sunshine leaves to you (it
 // never manages a service): until it has, `waiting`, and it says so.
 Item {
   id: mt
@@ -51,7 +51,7 @@ Item {
     // (And, while waiting, when voxtype's daemon started: Meeting.DAEMON_SCRIPT.)
     var script = "[ -x /usr/bin/voxtype ] || exit 0; echo voxtype; /usr/bin/voxtype config get meeting.enabled 2>/dev/null; "
       + (mt.waiting ? Meeting.DAEMON_SCRIPT + "; " : "") + "exit 0"
-    files.exec(["/usr/bin/bash", "-c", script, "uber-notebook-meetings"], function(ok, out) {
+    files.exec(["/usr/bin/bash", "-c", script, "sunshine-meetings"], function(ok, out) {
       var o = String(out || "")
       mt.available = /^voxtype$/m.test(o)
       mt.enabled = mt.available && /\btrue\b/.test(o)
@@ -97,7 +97,7 @@ Item {
   }
 
   function run(argv, done, options) {
-    if (!files) { done(false, "Uber Notebook runs without the shell"); return }
+    if (!files) { done(false, "Sunshine runs without the shell"); return }
     files.exec(argv, function(ok, out) {
       var problem = ok ? "" : String(out || "").replace(/^Error:\s*/m, "").split("\n").filter(function(l) { return l.trim() !== "" })[0] || "voxtype couldn't do it"
       done(ok, ok ? out : problem)
@@ -144,7 +144,7 @@ Item {
   function fetch(id, done) {
     var clean = Meeting.cleanId(id)
     if (!clean) { done(false, "That isn't a meeting"); return }
-    if (!files) { done(false, "Uber Notebook runs without the shell"); return }
+    if (!files) { done(false, "Sunshine runs without the shell"); return }
     // (Its words in any language: back as ASCII, through Store.execText.)
     files.execText(["/usr/bin/voxtype", "meeting", "export", clean, "--format", "json"], function(ok, out) {
       done(ok, ok ? out : String(out || "").replace(/^Error:\s*/m, "").split("\n").filter(function(l) { return l.trim() !== "" })[0] || "voxtype couldn't do it")

@@ -1,4 +1,4 @@
-// Runs the files helper (bin/uber-notebook-files) as on a drive that can't
+// Runs the files helper (bin/sunshine-files) as on a drive that can't
 // keep files private, in a folder of the test's own:
 //   "exfat"   every file it makes reads 644, every folder 755, and a chmod
 //             changes nothing (an exFAT or FAT partition mounted umask=022)
@@ -12,7 +12,7 @@
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
-const helper = path.join(__dirname, "..", "bin", "uber-notebook-files");
+const helper = path.join(__dirname, "..", "bin", "sunshine-files");
 
 const PRELUDE = [
   "import errno, os, runpy, stat, sys",

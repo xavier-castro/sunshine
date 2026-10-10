@@ -1,9 +1,9 @@
--- Uber Notebook (marcho78.uber-notebook): the Hyprland half.
+-- Sunshine (xavier.sunshine): the Hyprland half.
 --
 -- The service runs this inside Hyprland with `hyprctl eval` when the shell
 -- starts, after every Hyprland config reload, and when the settings change:
 --
---   return dofile("<plugin>/hypr/uber-notebook.lua")({ binds = { ... }, window = { ... } })
+--   return dofile("<plugin>/hypr/sunshine.lua")({ binds = { ... }, window = { ... } })
 --
 -- It registers the keyboard shortcuts, which send a message to the service
 -- over Hyprland's event socket (hl.dsp.event), and the window rules for the
@@ -17,12 +17,12 @@
 -- only "ok" for a returned value, but prints an error and fails, so the
 -- settings can say what went wrong.
 
-local PREFIX = "marcho78.uber-notebook|"
+local PREFIX = "xavier.sunshine|"
 local EVENTS = { toggle = true, quick = true }
-local STATE = "__marcho78_uber_notebook"
+local STATE = "__xavier_sunshine"
 local CLASS = "^org\\.quickshell$"
-local MAIN_TITLE = "^Uber Notebook$"
-local QUICK_TITLE = "^Uber Notebook Quick Note$"
+local MAIN_TITLE = "^Sunshine$"
+local QUICK_TITLE = "^Sunshine Quick Note$"
 local PICKER_TITLE = "^(Choose a picture|Import notes|Import a folder of notes|Export to)$"
 
 return function(options)
@@ -106,7 +106,7 @@ return function(options)
       problem("skipped " .. keys .. ": unknown action")
     else
       if type(description) ~= "string" or #description > 80 or not description:match("^[%w%p ]*$") then
-        description = "Uber Notebook"
+        description = "Sunshine"
       end
       local done, handle = pcall(hl.bind, keys, hl.dsp.event(PREFIX .. event), { description = description })
       if done and handle then

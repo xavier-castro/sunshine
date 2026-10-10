@@ -1,6 +1,6 @@
 import QtQuick
 import QtTest
-import "../.." as UberNotebook
+import "../.." as Sunshine
 import "../../app"
 import "../../Workspace.js" as Workspace
 import "../../Board.js" as Board
@@ -21,7 +21,7 @@ Item {
   FakeFiles { id: files }
   FakeService { id: service; user: ({ sounds: false }) }
   Theme { id: th }
-  UberNotebook.Workspace { id: ws; files: files }
+  Sunshine.Workspace { id: ws; files: files }
   property string lastToast: ""
 
   DocView {
@@ -188,9 +188,9 @@ Item {
         view.addFileTo(view.page.id, uid, "/home/me/Private video.mp4")
         tryVerify(function() { return files.heldReads.length > 0 }, 1000, "copying")
         files.rootPath = other
-        tryVerify(function() { files.answerReads(); return files.ran.some(function(a) { return a[3] === "uber-notebook-still" }) }, 2000, "its still made")
-        var still = files.ran.filter(function(a) { return a[3] === "uber-notebook-still" })[0]
-        var copied = files.ran.filter(function(a) { return a[3] === "uber-notebook-import-file" })[0]
+        tryVerify(function() { files.answerReads(); return files.ran.some(function(a) { return a[3] === "sunshine-still" }) }, 2000, "its still made")
+        var still = files.ran.filter(function(a) { return a[3] === "sunshine-still" })[0]
+        var copied = files.ran.filter(function(a) { return a[3] === "sunshine-import-file" })[0]
         verify(copied[5].indexOf(root0 + "/Pages/assets/") === 0, copied[5])
         verify(still[5].indexOf(root0 + "/Pages/assets/") === 0, "beside the video: " + still[5])
         verify(/private-video-still\.jpg$/.test(still[5]), still[5])
@@ -631,7 +631,7 @@ Item {
       verify(md.indexOf("X.pdf](assets/file-20261002-120000-abc-x.pdf) (2 KB)") > 0, md)
       verify(md.indexOf("**To do**\n- Ship it") > 0)
       verify(md.indexOf("From the synced block") > 0, "the synced block's blocks")
-      // Just after Uber Notebook starts (the synced page not read yet): read
+      // Just after Sunshine starts (the synced page not read yet): read
       // first, then copied whole.
       files.copied = ""
       ws.written = ({})

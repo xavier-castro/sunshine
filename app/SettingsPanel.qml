@@ -9,9 +9,9 @@ import "../Colors.js" as Colors
 import "../Dates.js" as Dates
 import "../Sidebar.js" as Sidebar
 
-// Uber Notebook's settings, in sections (the list at the left): General,
+// Sunshine's settings, in sections (the list at the left): General,
 // Appearance, Writing, AI, Audio, Profiles, Backups, Notifications and About.
-// They apply as you change them and are kept on Uber Notebook's entry in
+// They apply as you change them and are kept on Sunshine's entry in
 // ~/.config/omarchy/shell.json.
 Popup {
   id: panel
@@ -30,7 +30,7 @@ Popup {
   // Profiles (Profiles.qml): notes kept apart, each in a folder of its own.
   readonly property var profiles: service && service.profiles ? service.profiles : null
   property bool addingProfile: false
-  // Whether there's a newer Uber Notebook (Updates.qml), and backups (Backups.qml).
+  // Whether there's a newer Sunshine (Updates.qml), and backups (Backups.qml).
   readonly property var updates: service && service.updates ? service.updates : null
   readonly property var backups: service && service.backups ? service.backups : null
 
@@ -49,7 +49,7 @@ Popup {
     { id: "profiles", label: "Profiles", icon: icons.people || "", note: "Notes kept apart, each profile in a folder of its own." },
     { id: "backups", label: "Backups", icon: icons.archive || "", note: "Your profiles in one file each, to keep safe or move, and put back." },
     { id: "notifications", label: "Notifications", icon: icons.bell || "", note: "What reminders' and events' notifications show." },
-    { id: "about", label: "About", icon: icons.info || "", note: "The version you have, updates, and who makes Uber Notebook." }
+    { id: "about", label: "About", icon: icons.info || "", note: "The version you have, updates, and who makes Sunshine." }
   ]
   readonly property var current: sections.filter(function(x) { return x.id === panel.section })[0] || sections[0]
 
@@ -255,7 +255,7 @@ Popup {
     if (u.status === "current") return "You have the newest version" + when
     if (u.status === "none") return "No releases published yet" + when
     if (u.status === "failed") return u.problem + when
-    return u.automatic ? "Checked a minute after Uber Notebook starts, then once a day." : "Not checked yet."
+    return u.automatic ? "Checked a minute after Sunshine starts, then once a day." : "Not checked yet."
   }
 
   background: Item {
@@ -471,7 +471,7 @@ Popup {
         elide: Text.ElideMiddle
         textFormat: Text.PlainText
         leftPadding: 2
-        text: prow.modelData.folder || "~/Documents/Uber Notebook"
+        text: prow.modelData.folder || "~/Documents/Sunshine"
         font.family: panel.theme.uiFont
         font.pixelSize: 12
         color: panel.theme.muted
@@ -628,7 +628,7 @@ Popup {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 18
         textFormat: Text.PlainText
-        text: "Uber Notebook " + (panel.service ? panel.service.version : "")
+        text: "Sunshine " + (panel.service ? panel.service.version : "")
         font.family: panel.theme.uiFont
         font.pixelSize: 11
         color: panel.theme.faint
@@ -693,7 +693,7 @@ Popup {
           visible: panel.section === "general"
           title: "Shortcuts"
           Line {
-            label: "Open and close Uber Notebook"
+            label: "Open and close Sunshine"
             note: panel.service ? panel.service.shortcutNote("toggle") : ""
             Field {
               id: toggleField
@@ -753,8 +753,8 @@ Popup {
             }
           }
           Line {
-            label: "Show Uber Notebook in the top bar"
-            note: "Off, the notebook icon takes no space; Uber Notebook stays on."
+            label: "Show Sunshine in the top bar"
+            note: "Off, the notebook icon takes no space; Sunshine stays on."
             Toggle { theme: panel.theme; checked: panel.s.barIcon !== false; onToggled: function(on) { panel.set("barIcon", on) } }
           }
         }
@@ -994,7 +994,7 @@ Popup {
         Group {
           visible: panel.section === "ai"
           Line {
-            label: "Enable Uber Notebook skill"
+            label: "Enable Sunshine skill"
             note: "For Claude Code, Codex and other agents."
             Toggle { objectName: "agentSkillToggle"; theme: panel.theme; checked: panel.s.agentSkill === true; onToggled: function(on) { panel.set("agentSkill", on) } }
           }
@@ -1080,11 +1080,11 @@ Popup {
         }
 
         // What you've let agents have done for them without asking
-        // (Permissions.js): sites Uber Notebook may contact for each.
+        // (Permissions.js): sites Sunshine may contact for each.
         Group {
           visible: panel.section === "ai"
           title: "Commands"
-          note: "When an agent in the panel wants to run a command, you're asked: for that command, or for the rest of the conversation. Here you can let it run any command without asking. A command runs programs that can read and change any file you can (your notes and Uber Notebook's settings too) and use the network, so this is off unless you turn it on."
+          note: "When an agent in the panel wants to run a command, you're asked: for that command, or for the rest of the conversation. Here you can let it run any command without asking. A command runs programs that can read and change any file you can (your notes and Sunshine's settings too) and use the network, so this is off unless you turn it on."
           Repeater {
             model: [{ id: "claude", name: "Claude Code" }, { id: "grok", name: "Grok" }]
             delegate: Line {
@@ -1110,7 +1110,7 @@ Popup {
           id: skillGroup
           visible: panel.section === "ai"
           title: "Use with any AI"
-          note: "Uber Notebook's skill tells an AI how to find, read and change your notes with omarchy-shell uber-notebook commands. With Enable Uber Notebook skill on (at the top), Claude Code, Codex, pi and Hermes find it by themselves; give it to any other AI that can run commands on this computer (omarchy-shell uber-notebook skill prints it too)."
+          note: "Sunshine's skill tells an AI how to find, read and change your notes with omarchy-shell sunshine commands. With Enable Sunshine skill on (at the top), Claude Code, Codex, pi and Hermes find it by themselves; give it to any other AI that can run commands on this computer (omarchy-shell sunshine skill prints it too)."
           property string said: ""
           Line {
             objectName: "aiSkill"
@@ -1392,7 +1392,7 @@ Popup {
         Group {
           visible: panel.section === "backups" && panel.backups !== null
           title: "Automatic backups"
-          note: panel.s.backupEvery === "daily" || panel.s.backupEvery === "weekly" ? "Every profile, while Uber Notebook runs. The oldest automatic ones go to the trash; the ones you make are never cleared out." : ""
+          note: panel.s.backupEvery === "daily" || panel.s.backupEvery === "weekly" ? "Every profile, while Sunshine runs. The oldest automatic ones go to the trash; the ones you make are never cleared out." : ""
           Line {
             label: "Back up automatically"
             Choice {
@@ -1533,7 +1533,7 @@ Popup {
           title: "Updates"
           Line {
             objectName: "updateStatus"
-            label: "Uber Notebook " + (panel.service ? panel.service.version : "")
+            label: "Sunshine " + (panel.service ? panel.service.version : "")
             note: panel.updateNote
             noteColor: panel.updates && panel.updates.status === "failed" ? panel.theme.urgent : panel.theme.muted
             Row {
@@ -1556,7 +1556,7 @@ Popup {
           }
           Line {
             label: "Check for updates automatically"
-            note: "Once a day, Uber Notebook asks GitHub for its newest version. Nothing of yours goes with it."
+            note: "Once a day, Sunshine asks GitHub for its newest version. Nothing of yours goes with it."
             Toggle { objectName: "updateAuto"; theme: panel.theme; checked: panel.s.checkUpdates !== false; onToggled: function(on) { panel.set("checkUpdates", on) } }
           }
           Line {
@@ -1603,7 +1603,7 @@ Popup {
           title: "Your notes"
           Line {
             label: "On your computer"
-            note: "Your notes are plain files on your computer, yours alone: each page and notebook a JSON file, pictures copied in beside them. Uber Notebook goes online only to ask GitHub for a newer version and to read a link's page for a bookmark; an agent you ask works through its own account and is given what it needs of the page."
+            note: "Your notes are plain files on your computer, yours alone: each page and notebook a JSON file, pictures copied in beside them. Sunshine goes online only to ask GitHub for a newer version and to read a link's page for a bookmark; an agent you ask works through its own account and is given what it needs of the page."
           }
         }
       }

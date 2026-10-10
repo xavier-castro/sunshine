@@ -1,5 +1,5 @@
 #!/usr/bin/python3 -IS
-# uber-notebook-files - the archives Uber Notebook opens: a zip of notes to
+# sunshine-files - the archives Sunshine opens: a zip of notes to
 # import (a Notion or Obsidian export), and a backup to look into and put
 # back. Run as /usr/bin/python3 -I -S <this file> <command> ... (isolated:
 # no user site, no environment), by Workspace.qml and Backups.qml.
@@ -12,14 +12,14 @@
 # given (bytes and files, counted as they're written).
 #
 #   unzip <zip> <folder> <max bytes> <max files>
-#       The zip into <folder> (an empty folder of Uber Notebook's own), and
+#       The zip into <folder> (an empty folder of Sunshine's own), and
 #       the zips that were in it (Notion exports in parts) into the same
 #       folder, all within one budget. Prints JSON: { ok, files, bytes,
 #       skipped } or { ok: false, error }.
 #   inspect-backup <backup.tar.gz>
 #       What's in a backup: "readable:1", "types:<-d...>", "outside:<n>",
 #       "dots:<n>", "hash:<sha256 of the file>", "---", its
-#       uber-notebook-backup.json (at most 200 KB). "readable:0" when it
+#       sunshine-backup.json (at most 200 KB). "readable:0" when it
 #       isn't one.
 #   read <max bytes> <file> [<within>]
 #       A text file (a regular file, not a link to one, at most <max bytes>),
@@ -34,18 +34,18 @@
 #       folder may be a link (a vault kept elsewhere), as long as where it
 #       leads is a folder of yours; nothing below it is followed.
 #   create-owned <file> <text>
-#       A small file of Uber Notebook's own (its entry in the app launcher):
+#       A small file of Sunshine's own (its entry in the app launcher):
 #       made only where nothing is ("made"); one that's there already is left
 #       as it is ("same" when it's exactly that text, else "taken").
 #   remove-owned <file> <text>
 #       That file taken away only if it's still exactly that text, a plain
 #       file ("removed"); anything else there is left ("kept").
 #   unlink-link <link> <target> [<lock> [<run>]]
-#       A link of Uber Notebook's own (its skill, in an agent's folder) taken
+#       A link of Sunshine's own (its skill, in an agent's folder) taken
 #       away only if it's a link to <target>, or to its skill in another
 #       place when <target> is its skill (an install before), ("removed",
 #       else "kept"). With <lock>: once the lock linking takes is free, so a
-#       link being made as Uber Notebook stops is taken away after it's made;
+#       link being made as Sunshine stops is taken away after it's made;
 #       with <run> (its run, stopping: when it started, 9 characters that
 #       sort, then a random part), that run marked stopped beside the lock
 #       (<lock>.stopped-<run>), under it, so a link that run asked for and
@@ -53,7 +53,7 @@
 #       that hasn't stopped has linked or unlinked since (<lock>.active):
 #       those links are its. (Marks over a week old are cleared away.)
 #   serve <notes folder>
-#       Your notes, read and written for Uber Notebook as long as it runs:
+#       Your notes, read and written for Sunshine as long as it runs:
 #       a request a line on its input (JSON: { id, op, ... }), an answer a
 #       line on its output ({ id, ok, ... } or { id, ok: false, error }).
 #       The folder's opened once (yours, a folder); every path in a request
@@ -124,9 +124,9 @@
 #       fingerprint }, removed: [path], kept: [path], failed: { path: why } }.
 #   export-html <assets folder> <work folder> <max bytes>
 #       A page made a document (Export.js wrote <work folder>/page.src.html,
-#       a folder of Uber Notebook's own) with its pictures put in, as
-#       <work folder>/page.html: each src="uber-notebook-asset:<name>" (in
-#       <assets folder>) and "uber-notebook-drawing:<name>" (in <work
+#       a folder of Sunshine's own) with its pictures put in, as
+#       <work folder>/page.html: each src="sunshine-asset:<name>" (in
+#       <assets folder>) and "sunshine-drawing:<name>" (in <work
 #       folder>/drawings), read without following a link, a plain file that's
 #       a PNG, JPEG, GIF, WebP, BMP or SVG (one that names nothing outside
 #       it), within <max bytes> in all; one that can't be is said in its
@@ -203,7 +203,7 @@ import tarfile
 import zipfile
 import zlib
 
-MANIFEST = "uber-notebook-backup.json"
+MANIFEST = "sunshine-backup.json"
 CHUNK = 1024 * 1024
 
 
@@ -319,7 +319,7 @@ def write_new(dir_fd, name, source, budget):
     os.close(fd)
 
 
-# ---- your notes, as long as Uber Notebook runs -----------------------------------------------------
+# ---- your notes, as long as Sunshine runs -----------------------------------------------------
 
 def walk(root_fd, parts):
     """The folder at `parts` below root_fd (none made), every step opened
@@ -528,7 +528,7 @@ EXPORT_ATTRS = {"id", "class", "style", "href", "src", "alt", "width", "height",
 EXPORT_CSP = "default-src 'none'; img-src data:; style-src 'unsafe-inline'"
 # What would load something, in a style.
 STYLE_LOADS = re.compile(r"url\s*\(|@import|image-set\s*\(|expression\s*\(|\\|behavior\s*:|-moz-binding", re.I)
-PICTURE_PLACE = re.compile(r'<img src="uber-notebook-(asset|drawing):([A-Za-z0-9][A-Za-z0-9._-]{0,120})"[^<>]*/>')
+PICTURE_PLACE = re.compile(r'<img src="sunshine-(asset|drawing):([A-Za-z0-9][A-Za-z0-9._-]{0,120})"[^<>]*/>')
 DATA_PICTURE = re.compile(r"^data:image/(png|jpeg|gif|webp|bmp|svg\+xml);base64,[A-Za-z0-9+/]*={0,2}$")
 
 
@@ -763,7 +763,7 @@ def cmd_export_html(assets, work, max_bytes):
         check.feed(out)
         check.close()
         if check.problem:
-            raise Refused("not a document Uber Notebook wrote: " + check.problem)
+            raise Refused("not a document Sunshine wrote: " + check.problem)
         data = out.encode("utf-8")
         fd = os.open("page.html", os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600, dir_fd=work_fd)
         with os.fdopen(fd, "wb") as f:
@@ -988,7 +988,7 @@ def mirror_op(root_fd, op):
     try:
         tmp = None
         if kind == "write":
-            tmp = ".uber-notebook-new-%s" % tag
+            tmp = ".sunshine-new-%s" % tag
             fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600, dir_fd=dfd)
             try:
                 view = memoryview(data)
@@ -997,7 +997,7 @@ def mirror_op(root_fd, op):
             finally:
                 os.close(fd)
         try:
-            aside = ".uber-notebook-aside-%s" % tag
+            aside = ".sunshine-aside-%s" % tag
             try:
                 os.rename(name, aside, src_dir_fd=dfd, dst_dir_fd=dfd)
             except FileNotFoundError:
@@ -1265,7 +1265,7 @@ def cmd_read(max_bytes, path, within=None):
 
 
 def cmd_put(folder, path, follow_top=False):
-    """A file of Uber Notebook's own in a folder of its own (an agent's
+    """A file of Sunshine's own in a folder of its own (an agent's
     sandbox profile), what's on its input: every folder below opened without
     following a link (made as needed), the file written new beside it, then
     put in its place, over whatever's there (a link included: the link is
@@ -1284,7 +1284,7 @@ def cmd_put(folder, path, follow_top=False):
     finally:
         os.close(root)
     try:
-        tmp = ".uber-notebook-new-%s" % os.urandom(6).hex()
+        tmp = ".sunshine-new-%s" % os.urandom(6).hex()
         fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600, dir_fd=dfd)
         try:
             view = memoryview(data)
@@ -1305,7 +1305,7 @@ def cmd_put(folder, path, follow_top=False):
     print("put")
 
 
-# ---- files of Uber Notebook's own ---------------------------------------------------------------
+# ---- files of Sunshine's own ---------------------------------------------------------------
 
 def parent_of(path):
     """(the folder's fd, the name in it) for an absolute path."""
@@ -1354,7 +1354,7 @@ def take_aside(dfd, name):
     """`name` in dfd moved aside, one rename (what was there then is what's
     checked, not what's there by the time it's taken away): its new name,
     or None (nothing there)."""
-    aside = ".uber-notebook-aside-%s" % os.urandom(6).hex()
+    aside = ".sunshine-aside-%s" % os.urandom(6).hex()
     try:
         os.rename(name, aside, src_dir_fd=dfd, dst_dir_fd=dfd)
     except FileNotFoundError:
@@ -1378,7 +1378,7 @@ def cmd_remove_owned(path, text):
         os.close(dfd)
 
 
-SKILL_END = "/marcho78.uber-notebook/skills/uber-notebook"
+SKILL_END = "/xavier.sunshine/skills/sunshine"
 
 
 def skill_lock(path):
@@ -1680,7 +1680,7 @@ def cmd_inspect(path):
             manifest = b""
             for tf, m in tar_members(src, INSPECT_BYTES, INSPECT_MEMBERS):
                 # (A sparse file: its holes would be written out whole, far
-                # more than the backup's size. Uber Notebook's never have one.)
+                # more than the backup's size. Sunshine's never have one.)
                 types.add("S" if m.issparse() else TYPES.get(m.type, "?"))
                 raw = m.name
                 if parts_of(raw) is None:
@@ -1972,7 +1972,7 @@ def _save_private(dest, write, replace=True):
         raise Refused("not a file name")
     dfd = os.open(folder or "/", os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
     try:
-        tmp = ".uber-notebook-new-%s" % os.urandom(6).hex()
+        tmp = ".sunshine-new-%s" % os.urandom(6).hex()
         fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600, dir_fd=dfd)
         refused = False
         try:
@@ -2053,7 +2053,7 @@ def _keeps_private(root_fd):
     # (A drive that refuses the change (a phone, through gvfs) doesn't keep
     # files private either: neither the Markdown copy nor a profile put back
     # is kept there, and that's what's said.)
-    probe = ".uber-notebook-probe-%s" % os.urandom(6).hex()
+    probe = ".sunshine-probe-%s" % os.urandom(6).hex()
     pfd = os.open(probe, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600, dir_fd=root_fd)
     try:
         try:
@@ -2200,7 +2200,7 @@ def cmd_notify():
     argv = [_bus_text(a, 200) for a in argv]
 
     b = _Wire()
-    b.string("Uber Notebook")  # app_name
+    b.string("Sunshine")  # app_name
     b.u32(0)  # replaces_id
     b.string("")  # app_icon
     b.string(summary)
@@ -2309,7 +2309,7 @@ def main(argv):
         elif len(argv) == 8 and argv[1] == "restore-backup":
             cmd_restore(argv[2], argv[3], argv[4], argv[5], argv[6], argv[7])
         else:
-            sys.stderr.write("usage: uber-notebook-files unzip|inspect-backup|restore-backup ...\n")
+            sys.stderr.write("usage: sunshine-files unzip|inspect-backup|restore-backup ...\n")
             return 2
     except (Refused, OSError, zipfile.BadZipFile, tarfile.TarError, EOFError, ValueError, zlib.error, MemoryError) as e:
         if argv[1:2] in (["unzip"], ["export-html"], ["copy-picture"], ["copy-file"], ["read-files"], ["read-glob"]):

@@ -22,7 +22,7 @@ import "../Email.js" as Email
 import "../Library.js" as Library
 import "../Overlays.js" as Overlays
 
-// Pages: the other way to write in Uber Notebook, the way Notion does it. The
+// Pages: the other way to write in Sunshine, the way Notion does it. The
 // sidebar has every page as a tree; the page you're on has its cover, icon
 // and title, then its blocks (Editor.qml in its "doc" layout), with the "/"
 // menu, a toolbar over selected words, and a menu on each block's handle.
@@ -38,7 +38,7 @@ FocusScope {
   signal notebooksRequested()
   signal settingsRequested()
   signal helpRequested()
-  // Uber Notebook's name clicked: Settings → About.
+  // Sunshine's name clicked: Settings → About.
   signal aboutRequested()
   // Settings, at what's in the sidebar.
   signal sidebarChoicesRequested()
@@ -78,7 +78,7 @@ FocusScope {
   property bool libraryShown: false
   // People (contacts), in place of a page.
   property bool peopleShown: false
-  // Templates (yours and Uber Notebook's), in place of a page.
+  // Templates (yours and Sunshine's), in place of a page.
   property bool templatesShown: false
   // An event just made from "More" with nothing in it yet (it goes if it's left empty).
   property string justMade: ""
@@ -132,7 +132,7 @@ FocusScope {
 
   Connections {
     target: view.workspace
-    // Another notes folder (Settings, or `omarchy-shell uber-notebook set folder`).
+    // Another notes folder (Settings, or `omarchy-shell sunshine set folder`).
     function onFolderChanged() { view.leaveFolder() }
     function onRevisionChanged() {
       if (view.pendingActivate && view.workspace.ready && view.visible) {
@@ -389,7 +389,7 @@ FocusScope {
     showPictures(at >= 0 ? list : [{ src: src, caption: "" }], Math.max(0, at))
   }
 
-  // ---- a picture, out of Uber Notebook ----
+  // ---- a picture, out of Sunshine ----
 
   // Onto the clipboard, to paste anywhere.
   function copyPicture(src) {
@@ -792,7 +792,7 @@ FocusScope {
 
   function exportCalendar() {
     if (!workspace) return
-    workspace.exportCalendar(function(path) { if (path) view.toast("The calendar is in " + path.replace(/^.*\/Uber Notebook\//, "Uber Notebook/")) })
+    workspace.exportCalendar(function(path) { if (path) view.toast("The calendar is in " + path.replace(/^.*\/Sunshine\//, "Sunshine/")) })
   }
 
   // ---- people -------------------------------------------------------------------------------
@@ -840,7 +840,7 @@ FocusScope {
     })
   }
   function exportContacts() {
-    workspace.exportContacts(function(path) { view.toast(path ? "Everyone's in " + path.replace(/^.*\/Uber Notebook\//, "Uber Notebook/") : "They couldn't be exported") })
+    workspace.exportContacts(function(path) { view.toast(path ? "Everyone's in " + path.replace(/^.*\/Sunshine\//, "Sunshine/") : "They couldn't be exported") })
   }
 
   // People for the "@" menu: [{ id, name, sub, initials, tint }].
@@ -1667,7 +1667,7 @@ FocusScope {
   // turn of this one; `o.fresh`: in a new session, told what was said (one
   // that never said its session, or lost it).
   // The panel's agent works in a folder of its own (where the Markdown it
-  // hands Uber Notebook's commands goes).
+  // hands Sunshine's commands goes).
   //
   // A folder of its own for each conversation ("c-" and 12 hex, kept with
   // the conversation): what an agent leaves there (settings, instructions,
@@ -1682,7 +1682,7 @@ FocusScope {
     return agentFolder
   }
   function agentBase() {
-    return workspace && workspace.files && workspace.files.runtimeDir ? workspace.files.runtimeDir + "/uber-notebook-agent" : ""
+    return workspace && workspace.files && workspace.files.runtimeDir ? workspace.files.runtimeDir + "/sunshine-agent" : ""
   }
   function agentDir() {
     var base = agentBase()
@@ -1691,12 +1691,12 @@ FocusScope {
     return base + "/" + agentFolder
   }
 
-  // What an agent's work needs your yes for, asked in the panel: Uber
-  // Notebook contacting a site for it (Api.agentLink), or one of its own
+  // What an agent's work needs your yes for, asked in the panel: Sunshine
+  // contacting a site for it (Api.agentLink), or one of its own
   // tools beyond its rules (Claude Code's: agentAsked). [{ key, agent,
   // action, target, text, always, runs, nos, owner }]: `text` what it wants
   // to do, `always` what Always says ("": once only); one question for each
-  // key however often it comes (Uber Notebook's own: agent, action and site),
+  // key however often it comes (Sunshine's own: agent, action and site),
   // each waiting run going when you answer (by its key, as the panel gives
   // back a copy). Always keeps your yes in settings (Permissions.js), where
   // an agent can't change it; `owner`: the run it's for, whose questions go
@@ -1716,7 +1716,7 @@ FocusScope {
     } else {
       list.push({ key: key, agent: req.agent, action: String(req.action || ""), target: String(req.target || ""),
         // (Its words too, every character shown, on one line.)
-        text: Agent.visible(req.text ? String(req.text) : "have Uber Notebook contact " + req.target + (req.why ? ", " + req.why : "")).replace(/\n/g, " "),
+        text: Agent.visible(req.text ? String(req.text) : "have Sunshine contact " + req.target + (req.why ? ", " + req.why : "")).replace(/\n/g, " "),
         detail: Agent.visible(req.detail || ""), lines: req.detail ? Agent.lineCount(req.detail) : 0,
         always: req.always !== undefined ? String(req.always) : "Always for " + req.target,
         // (For this conversation: `grant`, said `conversation`; "" for none.)
@@ -1732,7 +1732,7 @@ FocusScope {
     var ask = agentAsks.filter(function(a) { return a.key === key })[0]
     if (!ask) return
     agentAsks = agentAsks.filter(function(a) { return a.key !== key })
-    function each(fns, arg) { fns.forEach(function(f) { try { f(arg) } catch (e) { console.warn("Uber Notebook: after you answered: " + e) } }) }
+    function each(fns, arg) { fns.forEach(function(f) { try { f(arg) } catch (e) { console.warn("Sunshine: after you answered: " + e) } }) }
     if (how !== "once" && !(how === "always" && ask.always) && !(how === "conversation" && ask.grant)) { each(ask.nos); return }
     // For this conversation: kept with the one that asked (its grants,
     // which its runs' scope shares), and what else it has waiting on the
@@ -1763,8 +1763,8 @@ FocusScope {
   function agentAsked(agent, ev, run) {
     var a = Agent.askOf(ev.tool, ev.input, ev.title, ev.name)
     function reply(allow) { if (run && typeof run.send === "function") run.send(Agent.answerFor(agent, ev, allow)) }
-    // (One of Uber Notebook's own commands, alone: not asked, as Claude
-    // Code's aren't; Uber Notebook says what it may do.)
+    // (One of Sunshine's own commands, alone: not asked, as Claude
+    // Code's aren't; Sunshine says what it may do.)
     if (a.action === "shell" && ev.input && Agent.ownCommand(ev.input.command)) { reply(true); return }
     // (A file of its own, in its conversation's folder: not asked either.)
     var ownDir = agentTalk && Agent.isConversationFolder(agentTalk.folder) ? agentBase() + "/" + agentTalk.folder : ""
@@ -1788,11 +1788,11 @@ FocusScope {
     var gone = agentAsks.filter(function(a) { return a.talk !== "" && a.talk !== now })
     if (!gone.length) return
     agentAsks = agentAsks.filter(function(a) { return gone.indexOf(a) < 0 })
-    gone.forEach(function(a) { a.nos.forEach(function(f) { try { f() } catch (e) { console.warn("Uber Notebook: " + e) } }) })
+    gone.forEach(function(a) { a.nos.forEach(function(f) { try { f() } catch (e) { console.warn("Sunshine: " + e) } }) })
   }
 
-  // While it works, Uber Notebook's commands read and change your notes, not
-  // Uber Notebook's settings, profiles or backups, and read files only from
+  // While it works, Sunshine's commands read and change your notes, not
+  // Sunshine's settings, profiles or backups, and read files only from
   // its folder (Scope.js, Service.qml).
   function agentScope(agent, dir) {
     // (The conversation's grants go with it: a removal you've allowed for
@@ -1914,7 +1914,7 @@ FocusScope {
       files.agentPath(agent, function(exe) {
         if (!current()) return
         if (!exe) {
-          finish(127, Agent.name(agent) + " isn't installed where Uber Notebook can find it (on your PATH, owned by you or root, and not changeable by anyone else)")
+          finish(127, Agent.name(agent) + " isn't installed where Sunshine can find it (on your PATH, owned by you or root, and not changeable by anyone else)")
           return
         }
         where = { exe: exe, dir: dir, skill: service && typeof service.skillDir === "string" ? service.skillDir : "", helper: files.filesHelper || "" }
@@ -2167,7 +2167,7 @@ FocusScope {
   }
 
   // A new page from a template (Templates): one of yours by its id, or one
-  // of Uber Notebook's ("daily"...), put on it once it's open.
+  // of Sunshine's ("daily"...), put on it once it's open.
   property var startWith: null
   function newPageWith(template) {
     if (!workspace) return
@@ -2382,7 +2382,7 @@ FocusScope {
   // are on the page, recording at once; again, it stops.
   readonly property bool recordingNote: recorder !== null && recorder.busy && recorder.kind === "audio"
   function newAudioNote() {
-    if (!recorder) { toast("Recording isn't here: Uber Notebook runs without the shell"); return }
+    if (!recorder) { toast("Recording isn't here: Sunshine runs without the shell"); return }
     if (recordingNote) { if (recorder.phase === "recording") recorder.stop(); return }
     if (recorder.busy) { toast("Already recording: stop that one first"); return }
     if (!page || locked || tagShown !== "") { toast(locked ? "This page is locked: unlock it to record on it" : "Open a page to record on it"); return }
@@ -2396,7 +2396,7 @@ FocusScope {
   // the microphone at the top, or "/dictate"; again, or Done, to finish).
   readonly property bool dictating: recorder !== null && recorder.busy && recorder.kind === "dictation" && recorder.owner === "page"
   function dictate() {
-    if (!recorder) { toast("Dictation isn't here: Uber Notebook runs without the shell"); return }
+    if (!recorder) { toast("Dictation isn't here: Sunshine runs without the shell"); return }
     if (dictating) { if (recorder.phase === "recording") recorder.stop(); return }
     if (!page || locked || tagShown !== "") { toast(locked ? "This page is locked: unlock it to dictate into it" : "Open a page to dictate into it"); return }
     if (switching) { toast(switchingText); return }
@@ -2449,7 +2449,7 @@ FocusScope {
   }
 
   function meetingProblem() {
-    if (!meetings) return "Meetings aren't here: Uber Notebook runs without the shell"
+    if (!meetings) return "Meetings aren't here: Sunshine runs without the shell"
     if (!meetings.available) return "Meetings need voxtype, Omarchy's dictation (omarchy voxtype install)"
     if (!meetings.enabled) return "voxtype's meeting mode is off: turn it on in the meeting"
     if (meetings.waiting) return meetings.waitingText
@@ -2858,7 +2858,7 @@ FocusScope {
     quickFind.start()
   }
   function openTrash() { trashPop.x = 12; trashPop.y = view.height - trashPop.height - 60; trashPop.open() }
-  // Templates (yours, then Uber Notebook's), in place of a page.
+  // Templates (yours, then Sunshine's), in place of a page.
   function openTemplates(fromHistory) {
     if (!workspace) return
     commit()
@@ -4561,7 +4561,7 @@ FocusScope {
           onClicked: buttonSetup.set({ template: "tpl:" + modelData.id })
         }
       }
-      Text { textFormat: Text.PlainText; leftPadding: 4; text: "Uber Notebook's"; font.family: view.theme.uiFont; font.pixelSize: 11; color: view.theme.muted }
+      Text { textFormat: Text.PlainText; leftPadding: 4; text: "Sunshine's"; font.family: view.theme.uiFont; font.pixelSize: 11; color: view.theme.muted }
       Flow {
         objectName: "buttonBuiltins"
         width: parent.width

@@ -1,6 +1,6 @@
 import QtQuick
 import QtTest
-import "../.." as UberNotebook
+import "../.." as Sunshine
 import "../../app"
 import "../../Workspace.js" as Workspace
 import "../../Calendar.js" as Calendar
@@ -20,7 +20,7 @@ Item {
   FakeFiles { id: files }
   FakeService { id: service; user: ({ sounds: false }) }
   Theme { id: th; clockSetting: service.settings.clock || "12" }
-  UberNotebook.Workspace { id: ws; files: files }
+  Sunshine.Workspace { id: ws; files: files }
   property string lastToast: ""
   property var lastUndo: null
 
@@ -38,7 +38,7 @@ Item {
     id: ui
     function saveNow() { view.commit() }
   }
-  UberNotebook.Api {
+  Sunshine.Api {
     id: api
     workspace: ws
     files: files
@@ -140,7 +140,7 @@ Item {
       fresh()
       var e = add({ title: "Dentist", start: iso(today(), 15), end: iso(today(), 15, 45), color: "blue" })
       tryVerify(function() { var d = onDisk(); return d && d.events.length === 1 && d.events[0].title === "Dentist" }, 1000, "in Pages/calendar.json")
-      // Read again, as when Uber Notebook starts.
+      // Read again, as when Sunshine starts.
       ws.calendar = Calendar.make()
       ws.loadCalendar()
       tryVerify(function() { return ws.calendar.events.length === 1 }, 1000)

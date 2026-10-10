@@ -200,7 +200,7 @@ FocusScope {
     if (doc && out.indexOf(Equations.PREFIX) >= 0) out = mathImages(out, em || Docs.typeStyle("p", smallText).size)
     if (doc && out.indexOf(Notes.PREFIX) >= 0) out = Notes.toImages(out, noteNumber, em || Docs.typeStyle("p", smallText).size, String(accent))
     // Links to pages say what the pages are called now.
-    if (doc && /(?:uber-notebook|omanote):\/\/page\//.test(out)) out = Html.refreshPageLinks(out, function(id) {
+    if (doc && /(?:sunshine|omanote):\/\/page\//.test(out)) out = Html.refreshPageLinks(out, function(id) {
       var info = root.pageInfo(id)
       return info ? root.pageLinkText(info) : ""
     })
@@ -2469,12 +2469,12 @@ FocusScope {
       // A person: "@Sam Rivera", a link to them (a new one's made first).
       var pid = entry.kind === "personnew" ? (typeof makePerson === "function" ? makePerson(entry.name) : "") : entry.id
       if (!pid) return
-      href = "uber-notebook://contact/" + pid
+      href = "sunshine://contact/" + pid
       text = "@" + (entry.kind === "personnew" ? entry.name : entry.label)
     } else {
       var id = entry.kind === "create" ? makePage(entry.title) : entry.id
       if (!id) return
-      href = "uber-notebook://page/" + id
+      href = "sunshine://page/" + id
       text = pageLinkText(pageInfo(id) || { title: entry.title || entry.label, icon: entry.icon || "" })
     }
     closeBurst()
@@ -3941,7 +3941,7 @@ FocusScope {
 
   // ---- the clipboard -------------------------------------------------------------------------
 
-  // What Uber Notebook itself last copied, so pasting it back keeps everything.
+  // What Sunshine itself last copied, so pasting it back keeps everything.
   property string lastCopied: ""
   property var copiedBlocks: null
 
@@ -3975,7 +3975,7 @@ FocusScope {
   function withClipboard(fn, primary) {
     function go() {
       clipReady = true
-      try { fn() } catch (e) { console.warn("Uber Notebook: pasting: " + e) } finally { clipReady = false; clipPlain = null }
+      try { fn() } catch (e) { console.warn("Sunshine: pasting: " + e) } finally { clipReady = false; clipPlain = null }
     }
     if (typeof readClipboard !== "function") {
       if (primary === true) return

@@ -1,6 +1,6 @@
 import QtQuick
 import QtTest
-import "../.." as UberNotebook
+import "../.." as Sunshine
 import "../../app"
 import "../../Workspace.js" as Workspace
 import "../../Docs.js" as Docs
@@ -18,7 +18,7 @@ Item {
   FakeFiles { id: files }
   FakeService { id: service; user: ({ sounds: false }) }
   Theme { id: th }
-  UberNotebook.Workspace { id: ws; files: files }
+  Sunshine.Workspace { id: ws; files: files }
   property string lastToast: ""
 
   DocView {
@@ -263,8 +263,8 @@ Item {
       click(on)
       tryVerify(function() { return mt.enabled }, 1000)
       compare(mt.enables, 1)
-      // On in voxtype's settings, not in effect till voxtype restarts (Uber
-      // Notebook doesn't restart it): said, in the meeting and as a toast;
+      // On in voxtype's settings, not in effect till voxtype restarts (Sunshine
+      // doesn't restart it): said, in the meeting and as a toast;
       // no Start, and the button at the top doesn't start one either.
       tryVerify(function() { var n = named(m.view, "meetingNote"); return n !== null && n.text === mt.waitingText }, 1000)
       tryCompare(root, "lastToast", mt.waitingText, 1000)

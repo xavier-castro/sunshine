@@ -1,5 +1,5 @@
 {
-  "name": "uber-notebook-mathjax",
+  "name": "sunshine-mathjax",
   "private": true,
   "description": "Builds ../tex-svg.mjs: MathJax's TeX input and SVG output, for Qt's JavaScript engine",
   "type": "module",

@@ -1,5 +1,5 @@
 // Notes.js - footnotes in Pages. A footnote is kept in the line it belongs
-// to as a link that holds its words, uber-notebook://note/<words>, so search
+// to as a link that holds its words, sunshine://note/<words>, so search
 // and agents read it there (and the Markdown copy has it as [^1], its words
 // at the end of the page). The editor shows it as its number, small and
 // raised: an image (one character to the cursor, so what's typed after it
@@ -11,8 +11,8 @@
 .pragma library
 .import "Html.js" as Html
 
-var PREFIX = "uber-notebook://note/"
-var MARK = "uber-notebook-note"
+var PREFIX = "sunshine://note/"
+var MARK = "sunshine-note"
 var MAX_NOTE = 2000
 
 function clean(text) {
@@ -68,7 +68,7 @@ function imageUrl(svg, text) {
 
 // The words an image's address says it's the footnote of, or "".
 function textOfImage(src) {
-  var m = /^data:image\/svg\+xml;uber-notebook-note=([^,;"]*)[,;]/.exec(String(src || ""))
+  var m = /^data:image\/svg\+xml;sunshine-note=([^,;"]*)[,;]/.exec(String(src || ""))
   if (!m) return ""
   try { return clean(decodeURIComponent(m[1])) } catch (e) { return "" }
 }
@@ -78,7 +78,7 @@ function textOfImage(src) {
 function toImages(inner, numberOf, em, color) {
   var text = String(inner || "")
   if (text.indexOf(PREFIX) < 0) return text
-  return text.replace(/<a\b[^>]*?\bhref="(uber-notebook:\/\/note\/[^"]*)"[^>]*>[\s\S]*?<\/a>/g, function(all, url) {
+  return text.replace(/<a\b[^>]*?\bhref="(sunshine:\/\/note\/[^"]*)"[^>]*>[\s\S]*?<\/a>/g, function(all, url) {
     var t = textOf(Html.decodeEntities(url))
     if (!t) return all
     var n = typeof numberOf === "function" ? numberOf(t) : 1
@@ -92,7 +92,7 @@ function toImages(inner, numberOf, em, color) {
 function toLinks(inner) {
   var text = String(inner || "")
   if (text.indexOf(MARK) < 0) return text
-  return text.replace(/<img\b[^>]*?\bsrc="(data:image\/svg\+xml;uber-notebook-note=[^"]*)"[^>]*>/g, function(all, src) {
+  return text.replace(/<img\b[^>]*?\bsrc="(data:image\/svg\+xml;sunshine-note=[^"]*)"[^>]*>/g, function(all, src) {
     var t = textOfImage(Html.decodeEntities(src))
     return t ? link(t) : ""
   })
@@ -110,7 +110,7 @@ function positionIn(inner, words, nth) {
     var r = runs[i]
     if (r.br) { at++; lastHref = ""; continue }
     if (r.img) { at++; lastHref = ""; continue }
-    var token = r.href && (isLink(r.href) || String(r.href).indexOf("uber-notebook://math/") === 0)
+    var token = r.href && (isLink(r.href) || String(r.href).indexOf("sunshine://math/") === 0)
     if (token) {
       if (r.href === lastHref) continue
       lastHref = r.href

@@ -177,7 +177,7 @@ check("synced blocks in Markdown: never the page itself, only so many", () => {
   const out = many.map((p) => Markdown.fromDocPage(p, () => null, { syncedPage: (id) => (id === B ? b : null), syncedBudget: budget }));
   const total = out.reduce((n, t) => n + t.length, 0);
   assert.ok(total < 1000000 + 100000 + 20000, "all of them within it: " + total);
-  assert.ok(out[19].includes("*(A synced block: open the page in Uber Notebook)*"), "past it: said");
+  assert.ok(out[19].includes("*(A synced block: open the page in Sunshine)*"), "past it: said");
   // For an agent: words that would read as a column's marker, escaped in
   // a synced block too (and read back as the words).
   const Import = load("Import.js");

@@ -16,7 +16,7 @@ function check(name, fn) { fn(); passed++; }
 check("an equation in a line is a link that keeps its LaTeX", () => {
   const tex = "\\frac{a}{b} + x^2 & y < z";
   const l = E.link(tex);
-  assert.match(l, /^<a href="uber-notebook:\/\/math\/[^"]+">/);
+  assert.match(l, /^<a href="sunshine:\/\/math\/[^"]+">/);
   assert.ok(l.includes("&amp;") && l.includes("&lt;"), "its text escaped");
   const links = plain(Html.links(l));
   assert.equal(links.length, 1);
@@ -24,7 +24,7 @@ check("an equation in a line is a link that keeps its LaTeX", () => {
   assert.equal(Html.plainText(l), tex, "its text is its LaTeX (search, agents)");
   assert.equal(E.link("  "), "", "nothing: no link");
   assert.equal(E.texOf("https://example.com"), "");
-  assert.equal(E.texOf("uber-notebook://math/%E0%A4%A"), "", "a broken address: nothing");
+  assert.equal(E.texOf("sunshine://math/%E0%A4%A"), "", "a broken address: nothing");
   assert.deepEqual(plain(E.inText("a " + E.link("x^2") + " b " + E.link("y") + " <a href=\"https://x.org\">x</a>")), ["x^2", "y"]);
   assert.equal(E.clean("x".repeat(5000)).length, E.MAX_TEX);
 });
@@ -65,7 +65,7 @@ check("in the editor, an image that says which equation it is; kept as its link"
   assert.ok(!shown.includes("<a "), "no links left");
   assert.match(imgs[0], /width="99" height="40"/, "the drawing's size");
   assert.equal(E.texOfImage(/src="([^"]+)"/.exec(imgs[0])[1]), "E = mc^2");
-  assert.ok(decodeURIComponent(/src="data:image\/svg\+xml;uber-notebook-math=[^,]*,([^"]+)"/.exec(imgs[1])[1]).includes("\\frac{1}{2}"), "one being drawn: its LaTeX, faint");
+  assert.ok(decodeURIComponent(/src="data:image\/svg\+xml;sunshine-math=[^,]*,([^"]+)"/.exec(imgs[1])[1]).includes("\\frac{1}{2}"), "one being drawn: its LaTeX, faint");
   assert.equal(E.toLinks(shown), inner, "and back, as it was");
   // As Qt writes it back (attributes its way, a self-closing tag).
   const asQt = shown.replace(/<img src="([^"]+)" width="(\d+)" height="(\d+)" style="vertical-align: middle;" \/>/g, "<img src=\"$1\" width=\"$2\" height=\"$3\" style=\"vertical-align: middle;\" />");

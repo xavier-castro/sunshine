@@ -5,7 +5,7 @@ import qs.Commons
 import "app"
 
 // The notebook window, and the quick-note card. The Omarchy shell summons
-// this (`omarchy-shell shell toggle marcho78.uber-notebook`, the shortcut, the bar
+// this (`omarchy-shell shell toggle xavier.sunshine`, the shortcut, the bar
 // icon) and keeps it loaded, so the notebook opens instantly and stays where
 // you left it; what's in the window is made the first time it opens.
 Item {
@@ -17,7 +17,7 @@ Item {
   property var service: null
   property var manifest: null
 
-  readonly property string pluginId: "marcho78.uber-notebook"
+  readonly property string pluginId: "xavier.sunshine"
   readonly property bool opened: window.visible
   property bool closingFromHost: false
   property var pendingPayload: ({})
@@ -43,7 +43,7 @@ Item {
   }
   onShellChanged: resolveService()
   Component.onCompleted: if (!resolveService()) serviceLookup.start()
-  // Going away (the shell stopping, Uber Notebook turned off): the page you're on
+  // Going away (the shell stopping, Sunshine turned off): the page you're on
   // is written first, and the write finishes before anything else goes.
   Component.onDestruction: {
     if (!service) return
@@ -147,7 +147,7 @@ Item {
 
   FloatingWindow {
     id: window
-    title: "Uber Notebook"
+    title: "Sunshine"
     visible: false
     color: Color.background
     implicitWidth: root.service ? root.service.settings.width : 1320
@@ -320,7 +320,7 @@ Item {
 
   FloatingWindow {
     id: quickWindow
-    title: "Uber Notebook Quick Note"
+    title: "Sunshine Quick Note"
     visible: false
     color: "transparent"
     implicitWidth: 520

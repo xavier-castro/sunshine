@@ -10,19 +10,19 @@ import "Agent.js" as Agent
 import "QuickQueue.js" as QuickQueue
 import "Dates.js" as Dates
 
-// Uber Notebook: notebooks that look and feel like paper, and pages made of
+// Sunshine: notebooks that look and feel like paper, and pages made of
 // blocks (Pages), on Omarchy.
 //
 // This service is the part that's always running. It keeps the shortcuts and
-// window rules registered with Hyprland (hypr/uber-notebook.lua, run with `hyprctl
+// window rules registered with Hyprland (hypr/sunshine.lua, run with `hyprctl
 // eval`), holds the settings, the notebooks on disk (Store.qml) and Pages
 // (Workspace.qml), and answers IPC. Notebook.qml is the window and the
 // quick-note card; BarWidget.qml is the icon in the top bar.
 //
-//   omarchy-shell uber-notebook toggle
-//   omarchy-shell uber-notebook quick "Call the dentist"
-//   omarchy-shell uber-notebook search "tram 28"
-//   omarchy-shell uber-notebook pages
+//   omarchy-shell sunshine toggle
+//   omarchy-shell sunshine quick "Call the dentist"
+//   omarchy-shell sunshine search "tram 28"
+//   omarchy-shell sunshine pages
 Item {
   id: root
 
@@ -35,15 +35,15 @@ Item {
   // entry off.
   property bool hyprIntegration: true
   property bool launcherEntry: true
-  // The uber-notebook skill (skills/uber-notebook), linked into agents' skill folders
-  // while Uber Notebook runs, once you turn it on (Settings → AI: the
+  // The sunshine skill (skills/sunshine), linked into agents' skill folders
+  // while Sunshine runs, once you turn it on (Settings → AI: the
   // agentSkill setting), so whichever agent you use knows its commands. (The
   // development harness never links it, nor takes a link out.)
   property bool skillLinks: true
-  readonly property string skillDir: pluginDir + "/skills/uber-notebook"
+  readonly property string skillDir: pluginDir + "/skills/sunshine"
   readonly property string skillPath: skillDir + "/SKILL.md"
   // The skill, for any AI that can run commands on this computer: its text
-  // (omarchy-shell uber-notebook skill), onto the clipboard, saved where you
+  // (omarchy-shell sunshine skill), onto the clipboard, saved where you
   // say, or its folder shown (Settings → AI).
   function skillText() { return storeItem.readNow(skillPath, 1024 * 1024) || "" }
   function copySkill() {
@@ -52,15 +52,15 @@ Item {
     return t !== ""
   }
   function saveSkillCopy(done) {
-    pickSavePath("uber-notebook-skill.md", function(to) {
+    pickSavePath("sunshine-skill.md", function(to) {
       if (!to) { done("", ""); return }
       storeItem.copyFileTo(skillPath, to, function(ok, why) { done(ok ? to : "", ok ? "" : why || "it couldn't be saved there") })
     }, "document")
   }
   function showSkill() { Quickshell.execDetached(["/usr/bin/uwsm-app", "--", "/usr/bin/xdg-open", skillDir]) }
-  // Its links as the setting says: made while it's on; Uber Notebook's own
+  // Its links as the setting says: made while it's on; Sunshine's own
   // taken out when it's off (one left by a run that didn't stop as it
-  // should, too). A moment after it changes, or Uber Notebook starts, so
+  // should, too). A moment after it changes, or Sunshine starts, so
   // what shell.json says is in first.
   readonly property bool skillOn: settings.agentSkill === true
   onSkillOnChanged: if (skillLinks) skillTimer.restart()
@@ -83,7 +83,7 @@ Item {
   // The panel's been shown: it doesn't open by itself again.
   function setupSeen() { if (settings.setupShown !== true) setSetting("setupShown", true) }
 
-  readonly property string pluginId: "marcho78.uber-notebook"
+  readonly property string pluginId: "xavier.sunshine"
   readonly property string pluginDir: decodeURIComponent(Qt.resolvedUrl(".").toString().replace(/^file:\/\//, "").replace(/\/$/, ""))
   readonly property string home: Quickshell.env("HOME")
   // The manifest, as the shell hands it over (or, if it doesn't, as
@@ -94,7 +94,7 @@ Item {
 
   // ---- settings ----------------------------------------------------------------------
   //
-  // Kept inline on Uber Notebook's own shell.json entry (only what differs from
+  // Kept inline on Sunshine's own shell.json entry (only what differs from
   // Defaults.js): the shell writes the entry (updateEntryInline) and hands
   // plugins a copy of the bar configuration it lives in (barConfig).
 
@@ -108,7 +108,7 @@ Item {
 
   // While the shell saves an entry it hands plugins a copy of its
   // configuration from just before the save; a copy that still shows the
-  // entry as it was must not undo Uber Notebook's own save.
+  // entry as it was must not undo Sunshine's own save.
   property bool saving: false
   property string entryBeforeSave: ""
 
@@ -136,7 +136,7 @@ Item {
     id: profilesItem
     service: root
     files: storeItem
-    dataFolder: { var d = Quickshell.env("XDG_DATA_HOME"); return d && d.indexOf("/") === 0 ? d.replace(/\/+$/, "") + "/uber-notebook" : "~/.local/share/uber-notebook" }
+    dataFolder: { var d = Quickshell.env("XDG_DATA_HOME"); return d && d.indexOf("/") === 0 ? d.replace(/\/+$/, "") + "/sunshine" : "~/.local/share/sunshine" }
   }
   property alias profiles: profilesItem
 
@@ -146,7 +146,7 @@ Item {
   // can't be, said where you'll see it (it goes on trying).
   function windowClosed() {
     storeItem.retryUnsaved(function(left) {
-      if (left > 0) storeItem.notify("Not saved yet", (left === 1 ? "A change" : left + " changes") + " to your notes couldn't be saved (is the disk full?). Uber Notebook keeps trying.", "", "")
+      if (left > 0) storeItem.notify("Not saved yet", (left === 1 ? "A change" : left + " changes") + " to your notes couldn't be saved (is the disk full?). Sunshine keeps trying.", "", "")
     })
   }
 
@@ -292,7 +292,7 @@ Item {
     })
   }
 
-  // Whether there's a newer Uber Notebook, and what's in it (Updates.qml).
+  // Whether there's a newer Sunshine, and what's in it (Updates.qml).
   Updates {
     id: updatesItem
     files: storeItem
@@ -394,7 +394,7 @@ Item {
       var checked = Settings.checkBinds(Settings.wantedBinds(root.settings), existing)
       root.takenBinds = checked.taken
       registerRun.start(["/usr/bin/hyprctl", "eval",
-        Settings.hyprRegistration(root.pluginDir + "/hypr/uber-notebook.lua", Settings.hyprOptions(checked.free, root.settings))])
+        Settings.hyprRegistration(root.pluginDir + "/hypr/sunshine.lua", Settings.hyprOptions(checked.free, root.settings))])
     }
   }
 
@@ -403,10 +403,10 @@ Item {
     maxBytes: 16 * 1024
     timeoutMs: 4000
     onFinished: function(ok, output) {
-      // hypr/uber-notebook.lua raises what didn't register; hyprctl prints it as "error: …".
+      // hypr/sunshine.lua raises what didn't register; hyprctl prints it as "error: …".
       var text = String(output || "").trim().replace(/^error:\s*/i, "")
       root.hyprStatus = ok && (text === "" || text === "ok") ? "ok" : (text.slice(0, 600) || "Hyprland didn't answer")
-      if (root.hyprStatus !== "ok") console.warn("Uber Notebook: registering with Hyprland:", root.hyprStatus)
+      if (root.hyprStatus !== "ok") console.warn("Sunshine: registering with Hyprland:", root.hyprStatus)
       root.registering = false
       if (root.registerAgain) {
         root.registerAgain = false
@@ -429,7 +429,7 @@ Item {
     return Settings.shortcutLabel(key)
   }
 
-  // Take the shortcuts and rules back out of Hyprland when Uber Notebook is
+  // Take the shortcuts and rules back out of Hyprland when Sunshine is
   // disabled or reloaded; write everything waiting to be written.
   Component.onDestruction: {
     // (Only the entry as it was written: one changed or put there since is left.)
@@ -447,7 +447,7 @@ Item {
     storeItem.flush()
     if (hyprIntegration)
       Quickshell.execDetached(["/usr/bin/hyprctl", "eval",
-        hyprText ? Settings.hyprRegistrationText(hyprText, { remove: true }) : Settings.hyprRegistration(pluginDir + "/hypr/uber-notebook.lua", { remove: true })])
+        hyprText ? Settings.hyprRegistrationText(hyprText, { remove: true }) : Settings.hyprRegistration(pluginDir + "/hypr/sunshine.lua", { remove: true })])
   }
 
   Connections {
@@ -469,7 +469,7 @@ Item {
   // ---- the window ------------------------------------------------------------------------
   //
   // Opening and closing go through the Omarchy shell (summon/hide/toggle), so
-  // `omarchy-shell shell toggle marcho78.uber-notebook` and the shortcut agree.
+  // `omarchy-shell shell toggle xavier.sunshine` and the shortcut agree.
 
   property var ui: null
   readonly property bool windowOpen: !!ui && ui.opened === true
@@ -519,7 +519,7 @@ Item {
   function keepQuick(text) {
     var value = String(text || "").trim()
     // (No profile yet: the window, to make one; a note isn't kept.)
-    if (profilesItem.firstRun) { show({}); return { ok: value === "", said: (value ? "Not saved: " : "") + "Uber Notebook has no profile yet. Make one in its window" } }
+    if (profilesItem.firstRun) { show({}); return { ok: value === "", said: (value ? "Not saved: " : "") + "Sunshine has no profile yet. Make one in its window" } }
     if (!value) {
       if (ui && typeof ui.openQuick === "function") ui.openQuick()
       return { ok: true, said: "" }
@@ -546,7 +546,7 @@ Item {
   // (`quiet`: one waiting, tried again: not said when it can't be yet.)
   function quickToNotebook(value, quiet) {
     if (storeItem.quickNote(value)) return quickSaid(true, "Saved to Quick notes")
-    return quickSaid(false, quickRefusal() || "Not saved: Uber Notebook's notes aren't open yet", quiet)
+    return quickSaid(false, quickRefusal() || "Not saved: Sunshine's notes aren't open yet", quiet)
   }
 
   // Into the Pages Inbox, once Pages has loaded (a note made before then
@@ -663,14 +663,14 @@ Item {
 
   // ---- in the app launcher ----------------------------------------------------------------------
   //
-  // An entry in ~/.local/share/applications, so Uber Notebook is in the Omarchy
+  // An entry in ~/.local/share/applications, so Sunshine is in the Omarchy
   // launcher (and any other) with its icon, like an app. It's made when
-  // Uber Notebook starts and taken out when it stops, so turning Uber Notebook off (or
+  // Sunshine starts and taken out when it stops, so turning Sunshine off (or
   // removing it) leaves nothing behind. Only ever its own: it's made only where
   // there's nothing of that name, and taken out only if it's exactly what was
   // made (the archive helper's create-owned and remove-owned).
 
-  readonly property string desktopFile: home + "/.local/share/applications/marcho78-uber-notebook.desktop"
+  readonly property string desktopFile: home + "/.local/share/applications/xavier-sunshine.desktop"
   // What was made (or found there, the same), to take out when it stops.
   property string launcherText: ""
 
@@ -686,7 +686,7 @@ Item {
         storeItem.helper(["create-owned", root.desktopFile, entry], function(made, out) {
           var r = String(out || "").trim()
           if (made && (r === "made" || r === "same")) { root.launcherText = entry; return }
-          // (One Uber Notebook left from another place, the same but for its
+          // (One Sunshine left from another place, the same but for its
           // icon's, which is gone: taken out, if it's still that, and made
           // again. One you changed is left.)
           var there = storeItem.readNow(root.desktopFile, 8192) || ""
@@ -707,7 +707,7 @@ Item {
 
   // ---- IPC --------------------------------------------------------------------------------------
 
-  // While an agent works in Uber Notebook's panel (DocView), what it may do
+  // While an agent works in Sunshine's panel (DocView), what it may do
   // through the commands below: Scope.js. null the rest of the time.
   property var agentScope: null
   // (`agent`: its name, `id`: which it is, claude, grok or codex: Permissions.js.)
@@ -719,9 +719,9 @@ Item {
     agentScope = { agent: String(agent || "An agent"), id: String(id || ""), dir: String(dir || ""), pictures: pictures, frozen: false, grants: grants && typeof grants === "object" ? grants : {}, talk: String(talk || "") }
   }
   function endAgentScope() { agentScope = null }
-  // A command, from you (`forAgent` false: uber-notebook, a script's or a
+  // A command, from you (`forAgent` false: sunshine, a script's or a
   // terminal's agent's too: as always) or from the panel's agent
-  // (uber-notebook-agent: as Scope.js says while it works, none otherwise),
+  // (sunshine-agent: as Scope.js says while it works, none otherwise),
   // the Api told which while it runs.
   // (A file from outside its folders, and nothing else in the way: you're
   // asked in the panel, and it's done when you say yes: Api.askForFiles.)
@@ -738,11 +738,11 @@ Item {
     try { return run() } finally { apiItem.caller = null }
   }
 
-  // The commands, under two names: uber-notebook (yours, a script's, a
-  // terminal's agent's: as always) and uber-notebook-agent (the panel's
+  // The commands, under two names: sunshine (yours, a script's, a
+  // terminal's agent's: as always) and sunshine-agent (the panel's
   // agent's: Scope.js), each made from this one handler.
   Instantiator {
-    model: [{ name: "uber-notebook", agent: false }, { name: "uber-notebook-agent", agent: true }]
+    model: [{ name: "sunshine", agent: false }, { name: "sunshine-agent", agent: true }]
     // (Which one it is kept beside the handler, not on it: what's on an
     // IpcHandler goes out over IPC, and these can't.)
     delegate: QtObject {
@@ -755,8 +755,8 @@ Item {
         function toggle(): void { root.toggle({}) }
         function show(): void { if (!root.windowOpen) root.show({}) }
         function hide(): void { root.hide() }
-        // uber-notebook quick            opens the quick-note card
-        // uber-notebook quick "Buy milk"  saves it straight away
+        // sunshine quick            opens the quick-note card
+        // sunshine quick "Buy milk"  saves it straight away
         // ({ ok, note }, waiting: true if its profile's notes are still
         // opening; or { ok: false, error }: not kept, said why.)
         function quick(text: string): string {
@@ -767,11 +767,11 @@ Item {
         }
         function search(text: string): void { root.show({ search: String(text || "").slice(0, 200) }) }
         function shelf(): void { root.show({ shelf: true }) }
-        // uber-notebook pages: straight to Pages.
+        // sunshine pages: straight to Pages.
         function pages(): void { root.show({ pages: true }) }
         // The calendar, on a day ("" is today).
         function calendar(day: string): void { root.show({ calendar: /^\d{4}-\d{2}-\d{2}$/.test(String(day || "")) ? String(day) : "today" }) }
-        // uber-notebook importNotes ~/notes: files or a folder (a Notion or Obsidian export) into Pages.
+        // sunshine importNotes ~/notes: files or a folder (a Notion or Obsidian export) into Pages.
         // (Right after a profile switch, its notes still opening: not
         // imported, said; never into the profile before.)
         function importNotes(path: string): string {
@@ -789,12 +789,12 @@ Item {
           if (said) return JSON.stringify(said.indexOf("Imported") === 0 ? { ok: true, note: said } : { ok: false, error: said })
           return JSON.stringify({ ok: true, note: "importing: the OSD says how it went" })
         }
-        // uber-notebook open <page id>: a page in Pages (a reminder's notification does this).
+        // sunshine open <page id>: a page in Pages (a reminder's notification does this).
         function open(id: string): void { if (/^[0-9a-f-]{36}$/.test(String(id || ""))) root.show({ page: String(id) }) }
         function settings(): void { root.show({ settings: true }) }
-        // omarchy-shell uber-notebook set paper grid   (values are checked like the settings panel's)
+        // omarchy-shell sunshine set paper grid   (values are checked like the settings panel's)
         function set(key: string, value: string): string {
-          if (commands.agent) return "not for the panel's agent: Uber Notebook's settings are yours"
+          if (commands.agent) return "not for the panel's agent: Sunshine's settings are yours"
           if (!root.defaults || !Object.prototype.hasOwnProperty.call(root.defaults, key)) return "unknown setting"
           // (The open profile's folder, or another profile opened: as
           // Settings does them, Profiles.qml.)
@@ -807,16 +807,16 @@ Item {
           return JSON.stringify(root.settings[key])
         }
         function reset(): void { if (!commands.agent) root.resetSettings() }
-        // omarchy-shell uber-notebook mirror: the Markdown copy made up to date now, and how it is.
+        // omarchy-shell sunshine mirror: the Markdown copy made up to date now, and how it is.
         function mirror(): string {
           if (commands.agent) return JSON.stringify({ ok: false, error: "not for the panel's agent: the Markdown copy is yours to make" })
-          if (!mirrorItem.on) return JSON.stringify({ ok: false, error: "the Markdown copy is off: omarchy-shell uber-notebook set mirror true" })
+          if (!mirrorItem.on) return JSON.stringify({ ok: false, error: "the Markdown copy is off: omarchy-shell sunshine set mirror true" })
           mirrorItem.sync()
           return JSON.stringify({ ok: !mirrorItem.problem, folder: root.mirrorPath, status: mirrorItem.status, files: mirrorItem.files })
         }
 
         // For AI agents and scripts: pages in and out, answered in JSON
-        // (omarchy-shell uber-notebook help lists them; Api.qml does them).
+        // (omarchy-shell sunshine help lists them; Api.qml does them).
         function help(): string { return root.scoped(commands.agent, "help", [], function() { return apiItem.help() }) }
         function list(): string { return root.scoped(commands.agent, "list", [], function() { return apiItem.list() }) }
         function find(words: string): string { return root.scoped(commands.agent, "find", [words], function() { return apiItem.find(words) }) }
@@ -881,9 +881,9 @@ Item {
         function notebook(id: string): string { return root.scoped(commands.agent, "notebook", [id], function() { return apiItem.notebook(id) }) }
         function readNotebook(id: string, page: string): string { return root.scoped(commands.agent, "readNotebook", [id, page], function() { return apiItem.readNotebook(id, page) }) }
         function addToNotebook(id: string, file: string): string { return root.scoped(commands.agent, "addToNotebook", [id, file], function() { return apiItem.addToNotebook(id, file) }) }
-        // omarchy-shell uber-notebook profiles: [{ id, name, folder, open, demo }].
+        // omarchy-shell sunshine profiles: [{ id, name, folder, open, demo }].
         function profiles(): string { return root.scoped(commands.agent, "profiles", [], function() { return apiItem.profileList() }) }
-        // omarchy-shell uber-notebook profile Business: another profile open (its name or id).
+        // omarchy-shell sunshine profile Business: another profile open (its name or id).
         function profile(which: string): string { return root.scoped(commands.agent, "profile", [which], function() { return apiItem.openProfile(which) }) }
         function addProfile(name: string, folder: string, open: string): string { return root.scoped(commands.agent, "addProfile", [name, folder, open], function() { return apiItem.addProfile(name, folder, open) }) }
         function renameProfile(which: string, name: string): string { return root.scoped(commands.agent, "renameProfile", [which, name], function() { return apiItem.renameProfile(which, name) }) }
@@ -895,7 +895,7 @@ Item {
         function backups(): string { return root.scoped(commands.agent, "backups", [], function() { return apiItem.backupList() }) }
         function restoreBackup(file: string, open: string): string { return root.scoped(commands.agent, "restoreBackup", [file, open], function() { return apiItem.restoreBackup(file, open) }) }
         function appVersion(): string { return root.scoped(commands.agent, "appVersion", [], function() { return apiItem.appVersion() }) }
-        // omarchy-shell uber-notebook skill: Uber Notebook's skill, for any AI.
+        // omarchy-shell sunshine skill: Sunshine's skill, for any AI.
         function skill(): string { return root.scoped(commands.agent, "skill", [], function() { return root.skillText() || JSON.stringify({ ok: false, error: "the skill couldn't be read" }) }) }
         function checkUpdate(): string { return root.scoped(commands.agent, "checkUpdate", [], function() { return apiItem.checkUpdate() }) }
         function releaseNotes(): string { return root.scoped(commands.agent, "releaseNotes", [], function() { return apiItem.releaseNotes() }) }
@@ -932,7 +932,7 @@ Item {
     Dates.setTwelveHour(twelveHour)
     try { ownManifest = JSON.parse(storeItem.readNow(pluginDir + "/manifest.json", 64 * 1024) || "null") } catch (e) { ownManifest = null }
     helperText = storeItem.readNow(storeItem.filesHelper, 512 * 1024) || ""
-    hyprText = storeItem.readNow(pluginDir + "/hypr/uber-notebook.lua", 256 * 1024) || ""
+    hyprText = storeItem.readNow(pluginDir + "/hypr/sunshine.lua", 256 * 1024) || ""
     scheduleRegister()
     if (launcherEntry) launcherTimer.start()
     if (skillLinks) skillTimer.restart()

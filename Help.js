@@ -20,7 +20,7 @@ var SECTIONS = [
     "rows": [
      [
       "Super+N",
-      "Open or close Uber Notebook, from anywhere (or click the notebook in the top bar).",
+      "Open or close Sunshine, from anywhere (or click the notebook in the top bar).",
       ""
      ],
      [
@@ -70,12 +70,12 @@ var SECTIONS = [
      ],
      [
       "Ctrl+/ or F1",
-      "This Help, from anywhere in Uber Notebook.",
+      "This Help, from anywhere in Sunshine.",
       "Ctrl+? where / needs Shift."
      ],
      [
       "Choose what to turn on",
-      "Opens once, the first time: the Uber Notebook skill for Claude Code, Codex and other agents, and reminder details in notifications. Both are off till you turn them on.",
+      "Opens once, the first time: the Sunshine skill for Claude Code, Codex and other agents, and reminder details in notifications. Both are off till you turn them on.",
       "While one's off, a strip over Pages has Turn on and Dismiss. The skill is in Settings → AI too, and reminder details in Settings → Notifications."
      ]
     ]
@@ -93,7 +93,7 @@ var SECTIONS = [
     "rows": [
      [
       "Super+N",
-      "Open or close Uber Notebook from anywhere on the desktop",
+      "Open or close Sunshine from anywhere on the desktop",
       "You can change it, or clear it to turn it off, in Settings → General → Shortcuts. It is not registered when another Hyprland binding already uses those keys, and Settings names that binding. When Hyprland's bindings can't be read, neither shortcut is registered. A shortcut needs a modifier unless the key is F1-F24 or an XF86 media key."
      ],
      [
@@ -444,7 +444,7 @@ var SECTIONS = [
      [
       "Enter",
       "Write in the first picked block. If it's a picture, show it large",
-      "In Pages, the picture opens in Uber Notebook's own viewer. In a notebook, it opens in its own app."
+      "In Pages, the picture opens in Sunshine's own viewer. In a notebook, it opens in its own app."
      ]
     ]
    },
@@ -898,7 +898,7 @@ var SECTIONS = [
      ],
      [
       "Esc",
-      "Put Uber Notebook away (hide the window)",
+      "Put Sunshine away (hide the window)",
       "Only on the shelf. Esc does not hide the window in Pages or in an open notebook."
      ]
     ]
@@ -977,12 +977,12 @@ var SECTIONS = [
      [
       "#",
       "Opens the tag menu. With nothing typed it shows your 8 most-used tags, otherwise the matching ones, plus 'New tag #name'. A tag in the line opens, on a click, every block that has it.",
-      "Pages only, not in code blocks. It opens at the start of a block or after a space or ( [ { \" ' “ ‘, so 'C#' doesn't open it. '# ' at the start of a line makes a heading instead. With no tags yet it says 'Type a tag: #idea, #project/uber-notebook'."
+      "Pages only, not in code blocks. It opens at the start of a block or after a space or ( [ { \" ' “ ‘, so 'C#' doesn't open it. '# ' at the start of a line makes a heading instead. With no tags yet it says 'Type a tag: #idea, #project/sunshine'."
      ],
      [
       "#name then a space or . , ; : ! ? ) ] } or a quote",
       "Makes it a tag without picking from the menu. The character you typed after the name stays. #Idea and #idea are the same tag.",
-      "A tag name uses letters, digits, _ - and /, as in #project/uber-notebook. It can't be only digits (#1 isn't a tag) and can't start with / or -. Typed, a name of up to 39 characters becomes a tag this way (up to 40 picking 'New tag' in the menu); past 40 the menu closes and the text stays plain. In pasted or imported text a tag can be up to 60 characters. Esc closes the menu and leaves plain text."
+      "A tag name uses letters, digits, _ - and /, as in #project/sunshine. It can't be only digits (#1 isn't a tag) and can't start with / or -. Typed, a name of up to 39 characters becomes a tag this way (up to 40 picking 'New tag' in the menu); past 40 the menu closes and the text stays plain. In pasted or imported text a tag can be up to 60 characters. Esc closes the menu and leaves plain text."
      ],
      [
       ": then 2 or more letters of an emoji name (e.g. :roc)",
@@ -1684,7 +1684,7 @@ var SECTIONS = [
      ],
      [
       "/image",
-      "Adds a picture from Uber Notebook's picture picker (Pictures, Downloads, Desktop, Home) or 'The file dialog…'",
+      "Adds a picture from Sunshine's picture picker (Pictures, Downloads, Desktop, Home) or 'The file dialog…'",
       ""
      ],
      [
@@ -2095,7 +2095,7 @@ var SECTIONS = [
     "rows": [
      [
       "Templates at the sidebar's foot",
-      "Shows every template as a card, yours first, then Uber Notebook's. Click one to make a new page from it",
+      "Shows every template as a card, yours first, then Sunshine's. Click one to make a new page from it",
       ""
      ],
      [
@@ -2203,8 +2203,8 @@ var SECTIONS = [
     "rows": [
      [
       "Click the notebook icon in the Omarchy top bar (or Super+N)",
-      "Opens or closes Uber Notebook",
-      "Super+N is the default; change it in Settings → General → Shortcuts. The icon's tooltip shows the shortcut and says 'right-click for a quick note'. Settings → General → Window → Show Uber Notebook in the top bar hides the icon."
+      "Opens or closes Sunshine",
+      "Super+N is the default; change it in Settings → General → Shortcuts. The icon's tooltip shows the shortcut and says 'right-click for a quick note'. Settings → General → Window → Show Sunshine in the top bar hides the icon."
      ],
      [
       "Right-click the notebook icon in the top bar",
@@ -2217,7 +2217,7 @@ var SECTIONS = [
     "title": "Sidebar",
     "rows": [
      [
-      "Click 'Uber Notebook' (the app name) at the top of the sidebar or the shelf",
+      "Click 'Sunshine' (the app name) at the top of the sidebar or the shelf",
       "Opens Settings at About",
       ""
      ],
@@ -2573,8 +2573,8 @@ var SECTIONS = [
       "'Always' permissions are listed in Settings → AI → What agents may do without asking, where they can be removed."
      ],
      [
-      "omarchy-shell uber-notebook-agent <command> ...",
-      "The same commands under a second name, used only by the agent working in Uber Notebook's panel (Claude Code, Grok or Codex). It can read and change your notes but not Uber Notebook's settings, profiles or backups. When no agent is working in the panel, the commands that are checked refuse.",
+      "omarchy-shell sunshine-agent <command> ...",
+      "The same commands under a second name, used only by the agent working in Sunshine's panel (Claude Code, Grok or Codex). It can read and change your notes but not Sunshine's settings, profiles or backups. When no agent is working in the panel, the commands that are checked refuse.",
       "toggle, show, hide, search, shelf, pages, calendar, open, settings and status skip the scope check, so they work under this name at any time. While the agent is being stopped, it can't change anything."
      ],
      [
@@ -2594,13 +2594,13 @@ var SECTIONS = [
      ],
      [
       "A panel-agent link (bookmark, setLink)",
-      "The card keeps just the link. Uber Notebook reads the site's page for a title and picture only if you allowed that site, and otherwise asks in the panel: Allow once, Always for <site>, or No.",
+      "The card keeps just the link. Sunshine reads the site's page for a title and picture only if you allowed that site, and otherwise asks in the panel: Allow once, Always for <site>, or No.",
       "Only https links are read for the agent. Other links stay link-only until you refresh the card."
      ],
      [
-      "Settings → AI → Enable Uber Notebook skill",
-      "On, while Uber Notebook runs, its skill is linked as uber-notebook into ~/.agents/skills, ~/.claude/skills, ~/.codex/skills, ~/.hermes/skills and ~/.pi/agent/skills, so Claude Code, Codex and other agents know the commands, wherever you use them. Off (the default), its own links are removed. They're removed when it stops, too.",
-      "A link is only made where the folder exists and nothing called uber-notebook is already there. Only its own links are removed. The panel agent, and agents started from Uber Notebook, are given the skill either way."
+      "Settings → AI → Enable Sunshine skill",
+      "On, while Sunshine runs, its skill is linked as sunshine into ~/.agents/skills, ~/.claude/skills, ~/.codex/skills, ~/.hermes/skills and ~/.pi/agent/skills, so Claude Code, Codex and other agents know the commands, wherever you use them. Off (the default), its own links are removed. They're removed when it stops, too.",
+      "A link is only made where the folder exists and nothing called sunshine is already there. Only its own links are removed. The panel agent, and agents started from Sunshine, are given the skill either way."
      ]
     ]
    }
@@ -2647,7 +2647,7 @@ var SECTIONS = [
      ],
      [
       "People icon at a page's top right, or /meeting",
-      "A meeting block: voxtype's meeting mode records your microphone and the computer's sound. With meeting mode on, the icon and /meeting start recording at once. While a meeting records, the icon goes to the page it was started on (if started in Uber Notebook since it last started); otherwise it puts that meeting on this page.",
+      "A meeting block: voxtype's meeting mode records your microphone and the computer's sound. With meeting mode on, the icon and /meeting start recording at once. While a meeting records, the icon goes to the page it was started on (if started in Sunshine since it last started); otherwise it puts that meeting on this page.",
       "The icon shows only when voxtype is installed."
      ],
      [
@@ -2748,7 +2748,7 @@ var SECTIONS = [
      ],
      [
       "Esc on the shelf",
-      "Hides Uber Notebook",
+      "Hides Sunshine",
       ""
      ],
      [
@@ -2881,12 +2881,12 @@ var SECTIONS = [
      ],
      [
       "Settings → Backups → Back up automatically (Off, Daily, Weekly) and Keep (3, 5, 10, 20, 50)",
-      "Backs up every profile but the demo, while Uber Notebook runs. The oldest automatic backups go to the trash; backups you make yourself are never cleared.",
+      "Backs up every profile but the demo, while Sunshine runs. The oldest automatic backups go to the trash; backups you make yourself are never cleared.",
       ""
      ],
      [
       "Settings → Backups → Folder: Change… / Default / open",
-      "Sets where backups go (default ~/Documents/Uber Notebook Backups)",
+      "Sets where backups go (default ~/Documents/Sunshine Backups)",
       ""
      ],
      [
@@ -2907,7 +2907,7 @@ var SECTIONS = [
      [
       "Markdown copy → Copy to (folder field) and the folder button",
       "Sets the folder (default: Markdown/ in your notes folder). The folder button opens the copy",
-      "Refuses your home folder, the root folder, the notes folder (or a folder containing it), and Uber Notebook's own folders. Only shown while the copy is on."
+      "Refuses your home folder, the root folder, the notes folder (or a folder containing it), and Sunshine's own folders. Only shown while the copy is on."
      ]
     ]
    },
@@ -2954,12 +2954,12 @@ var SECTIONS = [
     "rows": [
      [
       "Settings → General → Shortcuts",
-      "Change the keys that open/close Uber Notebook and jot a quick note, and choose where quick notes go (Pages Inbox or Quick notes)",
+      "Change the keys that open/close Sunshine and jot a quick note, and choose where quick notes go (Pages Inbox or Quick notes)",
       ""
      ],
      [
       "Settings → General → Window",
-      "Float in the middle of the screen (off: tiles like other windows), Size (Small, Medium, Large; applies when floating), Show Uber Notebook in the top bar",
+      "Float in the middle of the screen (off: tiles like other windows), Size (Small, Medium, Large; applies when floating), Show Sunshine in the top bar",
       ""
      ],
      [
@@ -2998,8 +2998,8 @@ var SECTIONS = [
       ""
      ],
      [
-      "Settings → AI → Enable Uber Notebook skill",
-      "Links the skill into Claude Code's, Codex's and other agents' skill folders while Uber Notebook runs, so they know its commands",
+      "Settings → AI → Enable Sunshine skill",
+      "Links the skill into Claude Code's, Codex's and other agents' skill folders while Sunshine runs, so they know its commands",
       "Off by default"
      ],
      [
@@ -3019,7 +3019,7 @@ var SECTIONS = [
      ],
      [
       "Settings → AI → Use with any AI",
-      "The uber-notebook skill: Copy, Save a copy..., or Show (opens its folder).",
+      "The sunshine skill: Copy, Save a copy..., or Show (opens its folder).",
       ""
      ],
      [
@@ -3053,13 +3053,13 @@ var SECTIONS = [
       ""
      ],
      [
-      "Ctrl+, or the cog on the shelf / in the sidebar, or omarchy-shell uber-notebook settings",
+      "Ctrl+, or the cog on the shelf / in the sidebar, or omarchy-shell sunshine settings",
       "Opens Settings. Sections: General, Appearance, Writing, AI, Audio, Profiles, Backups, Notifications, About. Changes apply right away.",
       ""
      ],
      [
-      "Settings → General → Shortcuts → Open and close Uber Notebook (or: set shortcut \"SUPER + N\")",
-      "shortcut (default SUPER + N): the global shortcut that opens and closes Uber Notebook. Leave it empty for none.",
+      "Settings → General → Shortcuts → Open and close Sunshine (or: set shortcut \"SUPER + N\")",
+      "shortcut (default SUPER + N): the global shortcut that opens and closes Sunshine. Leave it empty for none.",
       "It needs a modifier (SUPER, CTRL, ALT or SHIFT) unless it's F1-F24 or an XF86 media key. If another binding already uses it, the shortcut is left alone and Settings says which binding has it."
      ],
      [
@@ -3083,8 +3083,8 @@ var SECTIONS = [
       "Values are kept within 640-5000 (width) and 480-4000 (height)."
      ],
      [
-      "Settings → General → Window → Show Uber Notebook in the top bar (or: set barIcon true|false)",
-      "barIcon (default true): shows the notebook icon in the top bar. When off, the icon takes no space and Uber Notebook keeps running.",
+      "Settings → General → Window → Show Sunshine in the top bar (or: set barIcon true|false)",
+      "barIcon (default true): shows the notebook icon in the top bar. When off, the icon takes no space and Sunshine keeps running.",
       ""
      ],
      [
@@ -3135,16 +3135,16 @@ var SECTIONS = [
      [
       "Settings → Writing → Markdown copy → Keep a Markdown copy (or: set mirror true|false)",
       "mirror (default false): keeps a Markdown file of every page (Pages and notebooks) up to date in a folder, for Obsidian, git or any editor.",
-      "Each profile has its own setting. `omarchy-shell uber-notebook mirror` brings the copy up to date now."
+      "Each profile has its own setting. `omarchy-shell sunshine mirror` brings the copy up to date now."
      ],
      [
       "Settings → Writing → Markdown copy → Copy to (or: set mirrorFolder ~/Vault)",
       "mirrorFolder (default \"\"): where the Markdown copy goes. \"\" means Markdown/ in the notes folder. The folder button opens it.",
-      "Each profile has its own. It must be an absolute or ~/ path with no ... Copying refuses your home folder, the notes folder itself, and Uber Notebook's own folders inside it."
+      "Each profile has its own. It must be an absolute or ~/ path with no ... Copying refuses your home folder, the notes folder itself, and Sunshine's own folders inside it."
      ],
      [
-      "Settings → AI → Enable Uber Notebook skill (or: set agentSkill true|false)",
-      "agentSkill (default false): Uber Notebook's skill linked into agents' skill folders while it runs. Off, its own links are removed.",
+      "Settings → AI → Enable Sunshine skill (or: set agentSkill true|false)",
+      "agentSkill (default false): Sunshine's skill linked into agents' skill folders while it runs. Off, its own links are removed.",
       ""
      ],
      [
@@ -3154,13 +3154,13 @@ var SECTIONS = [
      ],
      [
       "Settings → AI → Model and effort (or: set claudeModel <model>, set claudeEffort <effort>; same for grok and codex)",
-      "claudeModel, claudeEffort, grokModel, grokEffort, codexModel, codexEffort (default \"\"): the model and effort Claude Code, Grok and Codex use in Uber Notebook. \"\" uses each agent's own setup.",
+      "claudeModel, claudeEffort, grokModel, grokEffort, codexModel, codexEffort (default \"\"): the model and effort Claude Code, Grok and Codex use in Sunshine. \"\" uses each agent's own setup.",
       "The ask box's model and effort buttons set these too. The values are cleaned before they're passed to the agent."
      ],
      [
       "Settings → AI → Commands → <Claude Code|Grok> may run any command",
       "Lets Claude Code or Grok run any command in the panel without asking. Off by default. It's stored in agentPermissions as a shell/any entry.",
-      "There's no toggle for Codex. Commands it runs can read and change any file you can, including your notes and Uber Notebook's settings, and can use the network."
+      "There's no toggle for Codex. Commands it runs can read and change any file you can, including your notes and Sunshine's settings, and can use the network."
      ],
      [
       "Settings → AI → What agents may do without asking → Remove",
@@ -3169,7 +3169,7 @@ var SECTIONS = [
      ],
      [
       "Settings → AI → Use with any AI → Copy / Save a copy… / Show",
-      "Copies the skill (SKILL.md) to the clipboard, saves a copy where you choose, or shows its folder. `omarchy-shell uber-notebook skill` prints it.",
+      "Copies the skill (SKILL.md) to the clipboard, saves a copy where you choose, or shows its folder. `omarchy-shell sunshine skill` prints it.",
       ""
      ],
      [
@@ -3204,7 +3204,7 @@ var SECTIONS = [
      ],
      [
       "set folder <path> / set profile <name or id> / profiles (internal)",
-      "folder (default \"\" = ~/Documents/Uber Notebook) is the open profile's notes folder. profile is the open profile's id. profiles is the list of profiles.",
+      "folder (default \"\" = ~/Documents/Sunshine) is the open profile's notes folder. profile is the open profile's id. profiles is the list of profiles.",
       "These internal keys are hidden from preferences. Use Settings → Profiles or the profile commands instead. `set profiles` is refused."
      ],
      [
@@ -3214,7 +3214,7 @@ var SECTIONS = [
      ],
      [
       "Settings → Backups → Automatic backups → Back up automatically (or: set backupEvery off|daily|weekly)",
-      "backupEvery (default off): backs up every profile except the demo, in one file, daily or weekly, while Uber Notebook runs.",
+      "backupEvery (default off): backs up every profile except the demo, in one file, daily or weekly, while Sunshine runs.",
       "It checks 3 minutes after starting and then every 30 minutes. Automatic backups stop, with a notification, if the backup folder can't be kept private."
      ],
      [
@@ -3224,7 +3224,7 @@ var SECTIONS = [
      ],
      [
       "Settings → Backups → Automatic backups → Folder → Change… / Default (or: set backupFolder ~/Backups)",
-      "backupFolder (default \"\" = ~/Documents/Uber Notebook Backups): where backups go. The folder icon opens it.",
+      "backupFolder (default \"\" = ~/Documents/Sunshine Backups): where backups go. The folder icon opens it.",
       ""
      ],
      [
@@ -3259,7 +3259,7 @@ var SECTIONS = [
      ],
      [
       "Settings → About → Your notes",
-      "Where your notes live: plain files on your computer, yours alone (each page and notebook a JSON file, pictures copied in beside them). Uber Notebook goes online only to ask GitHub for a newer version and to read a link's page for a bookmark; an agent you ask works through its own account and is given what it needs of the page.",
+      "Where your notes live: plain files on your computer, yours alone (each page and notebook a JSON file, pictures copied in beside them). Sunshine goes online only to ask GitHub for a newer version and to read a link's page for a bookmark; an agent you ask works through its own account and is given what it needs of the page.",
       ""
      ],
      [
@@ -3294,12 +3294,12 @@ var SECTIONS = [
      ],
      [
       "Switching between Pages and Notebooks (internal: space)",
-      "space (default pages): whether Uber Notebook opens in Pages or Notebooks. It remembers the one you were in last.",
+      "space (default pages): whether Sunshine opens in Pages or Notebooks. It remembers the one you were in last.",
       "Internal key, hidden from preferences."
      ],
      [
       "(automatic) lastNotebook, lastPage",
-      "Remember the notebook and the Pages page you were on, so Uber Notebook reopens there.",
+      "Remember the notebook and the Pages page you were on, so Sunshine reopens there.",
       "Internal keys, kept per profile and through reset."
      ],
      [
@@ -3320,488 +3320,488 @@ var SECTIONS = [
   "id": "terminal",
   "label": "From a terminal",
   "icon": "terminal",
-  "note": "Commands for you, scripts and agents: omarchy-shell uber-notebook …",
+  "note": "Commands for you, scripts and agents: omarchy-shell sunshine …",
   "groups": [
    {
     "title": "From a terminal",
     "rows": [
      [
-      "omarchy-shell uber-notebook <command> [arguments]",
-      "Runs one of Uber Notebook's commands in the running app, over the Omarchy shell's IPC. Arguments go by position; use \"\" to leave one empty. Most commands answer in JSON ({ ok: false, error } when they can't). read, version, readNotebook, releaseNotes and skill answer in Markdown.",
-      "Content goes in as a Markdown file, by its full path (/... or ~/...): a relative path (note.md, ./new.md) is refused. It must be a plain file, not a link, of at most 2 MB (importContacts up to 32 MB, importCalendar up to 16 MB). The first time a file is named, the answer can be \"run the same command again in a moment\". toggle, show, hide, search, shelf, pages, calendar, open, settings and reset answer nothing; set answers in plain text when it refuses. Until a profile exists, most commands answer \"Uber Notebook has no profile yet: make one with addProfile\"."
+      "omarchy-shell sunshine <command> [arguments]",
+      "Runs one of Sunshine's commands in the running app, over the Omarchy shell's IPC. Arguments go by position; use \"\" to leave one empty. Most commands answer in JSON ({ ok: false, error } when they can't). read, version, readNotebook, releaseNotes and skill answer in Markdown.",
+      "Content goes in as a Markdown file, by its full path (/... or ~/...): a relative path (note.md, ./new.md) is refused. It must be a plain file, not a link, of at most 2 MB (importContacts up to 32 MB, importCalendar up to 16 MB). The first time a file is named, the answer can be \"run the same command again in a moment\". toggle, show, hide, search, shelf, pages, calendar, open, settings and reset answer nothing; set answers in plain text when it refuses. Until a profile exists, most commands answer \"Sunshine has no profile yet: make one with addProfile\"."
      ],
      [
-      "omarchy-shell uber-notebook help",
+      "omarchy-shell sunshine help",
       "Lists every scripting command with its usage and what it does, plus the fenced-block, columns and Markdown formats, as JSON.",
       "These commands aren't in the list: toggle, show, hide, quick, search, shelf, pages, calendar, importNotes, settings, set, reset, mirror, status and help itself. unarchive appears inside archive's entry, and restartDemo inside demo's."
      ],
      [
-      "omarchy-shell uber-notebook toggle",
-      "Opens or closes the Uber Notebook window.",
+      "omarchy-shell sunshine toggle",
+      "Opens or closes the Sunshine window.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook show",
+      "omarchy-shell sunshine show",
       "Opens the window where you left off. Does nothing if it's already open.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook hide",
+      "omarchy-shell sunshine hide",
       "Closes the window.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook quick",
+      "omarchy-shell sunshine quick",
       "Opens the quick-note card when no text is given.",
       "With no profile yet, it opens the main window instead. The panel agent can't use it (\"quick notes are yours\")."
      ],
      [
-      "omarchy-shell uber-notebook quick \"Buy milk\"",
+      "omarchy-shell sunshine quick \"Buy milk\"",
       "Saves a quick note right away. By default it becomes a page in the Pages Inbox (the first line is the title, the rest is Markdown). With quickTo set to notebook, it goes to the Quick notes notebook instead. Answers { ok, note }, with waiting: true if the profile's notes are still opening.",
       "If the Pages page can't be made, the note goes to Quick notes instead. Text is capped at 20000 characters. With no profile yet, the note isn't saved and the window opens. The panel agent can't use it."
      ],
      [
-      "omarchy-shell uber-notebook search \"tram 28\"",
+      "omarchy-shell sunshine search \"tram 28\"",
       "Opens the window on the Notebooks shelf with the text in its search box.",
       "This searches the notebooks shelf, not Pages. Text is capped at 200 characters. Empty text just opens the window where you left off."
      ],
      [
-      "omarchy-shell uber-notebook shelf",
+      "omarchy-shell sunshine shelf",
       "Opens the window on the Notebooks shelf, closing any open notebook.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook pages",
+      "omarchy-shell sunshine pages",
       "Opens the window straight into Pages.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook calendar \"\" (or calendar 2026-10-12)",
+      "omarchy-shell sunshine calendar \"\" (or calendar 2026-10-12)",
       "Opens the calendar in Pages, on today or on the date given (YYYY-MM-DD).",
       "Anything other than a YYYY-MM-DD date opens on today."
      ],
      [
-      "omarchy-shell uber-notebook importNotes ~/notes",
+      "omarchy-shell sunshine importNotes ~/notes",
       "Imports files or a folder (for example a Notion or Obsidian export) into Pages. The OSD says how it went.",
       "~/ is expanded. It's refused while the profile's notes are still opening, if the profile's notes folder can't be used, or if another profile opens during the import. The panel agent can't use it (\"importing is yours\")."
      ],
      [
-      "omarchy-shell uber-notebook open <page id>",
+      "omarchy-shell sunshine open <page id>",
       "Opens that page in Pages.",
       "Does nothing unless the id is 36 characters of hex digits and dashes (a page id)."
      ],
      [
-      "omarchy-shell uber-notebook settings",
+      "omarchy-shell sunshine settings",
       "Opens the window with Settings open.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook set <key> <value>",
+      "omarchy-shell sunshine set <key> <value>",
       "Changes one setting and answers with its new value as JSON. The value is read as that setting takes it: true or false for an on/off one, a number for a number, words for the rest (set clock 24, set paper grid). folder and profile go through Profiles, as Settings does them; profiles can't be set whole.",
-      "Not for the panel's agent. A value the setting doesn't take isn't refused: the setting goes back to its default, and the answer shows it (set sounds no turns sounds on: use true or false). omarchy-shell uber-notebook reset puts every setting back, but your profiles and what's each one's own."
+      "Not for the panel's agent. A value the setting doesn't take isn't refused: the setting goes back to its default, and the answer shows it (set sounds no turns sounds on: use true or false). omarchy-shell sunshine reset puts every setting back, but your profiles and what's each one's own."
      ],
      [
-      "omarchy-shell uber-notebook reset",
+      "omarchy-shell sunshine reset",
       "Puts settings back to their defaults. It keeps the profiles, the open profile, its folder, and each profile's own inbox, lastPage, lastNotebook, mirror and mirrorFolder.",
       "Reset also clears agentPermissions (everything you allowed agents with Always) and puts both shortcuts back to their defaults. When the panel agent calls it, nothing happens and nothing is said."
      ],
      [
-      "omarchy-shell uber-notebook mirror",
+      "omarchy-shell sunshine mirror",
       "Starts bringing the Markdown copy up to date now and answers { ok, folder, status, files }.",
       "Answers an error if the Markdown copy is off (`set mirror true` turns it on). The status can still say Copying… because the copy runs in the background. The panel agent can't use it."
      ],
      [
-      "omarchy-shell uber-notebook status",
+      "omarchy-shell sunshine status",
       "Reports the app's state as JSON: whether the window is open, Hyprland registration, shortcuts already taken by other bindings, notes folder, open profile's name, version, whether an update is available, notebook and page counts, ready, and connected.",
-      "Not listed by help. It skips the panel agent's scope check, so it also works under uber-notebook-agent."
+      "Not listed by help. It skips the panel agent's scope check, so it also works under sunshine-agent."
      ],
      [
-      "omarchy-shell uber-notebook list",
+      "omarchy-shell sunshine list",
       "Lists every page: id, title, icon and path (the pages it sits inside).",
       ""
      ],
      [
-      "omarchy-shell uber-notebook find <words>",
+      "omarchy-shell sunshine find <words>",
       "Finds pages with all of the words in their title or text, best match first, with a snippet. Pages in the trash and templates are skipped. At most 50 results.",
       "Empty words are refused (\"find needs words to look for\")."
      ],
      [
-      "omarchy-shell uber-notebook read <id>",
-      "Returns the page as Markdown. Links to other pages come out as uber-notebook://page/<id>, and boards, contacts, events and similar blocks come out as fenced blocks.",
+      "omarchy-shell sunshine read <id>",
+      "Returns the page as Markdown. Links to other pages come out as sunshine://page/<id>, and boards, contacts, events and similar blocks come out as fenced blocks.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook add <title> <file.md>",
+      "omarchy-shell sunshine add <title> <file.md>",
       "Creates a new page in the Inbox from a Markdown file. An empty title takes the file's first # heading. The Inbox page is created the first time it's needed, and again if it's gone or in the trash.",
       "The panel agent can use it, but only with a file from its own folder or one you approve."
      ],
      [
-      "omarchy-shell uber-notebook addTo <page id> <title> <file.md>",
+      "omarchy-shell sunshine addTo <page id> <title> <file.md>",
       "Creates a new page inside that page. Use \"\" or top for the top of Pages.",
       "The panel agent can use it with a file from its own folder, or with your approval."
      ],
      [
-      "omarchy-shell uber-notebook append <id> <file.md>",
+      "omarchy-shell sunshine append <id> <file.md>",
       "Adds the Markdown to the end of a page. The page as it was is saved in its history first.",
       "Refused for a locked page. The panel agent can use it with a file from its own folder, or with your approval."
      ],
      [
-      "omarchy-shell uber-notebook blocks <id>",
+      "omarchy-shell sunshine blocks <id>",
       "Lists the page's blocks in order: id, type, depth and text (as Markdown).",
       ""
      ],
      [
-      "omarchy-shell uber-notebook replace <page id> <block id> <file.md>",
+      "omarchy-shell sunshine replace <page id> <block id> <file.md>",
       "Replaces that block, and the blocks inside it, with the Markdown.",
       "Refused for a locked page, for a block that holds columns, and for a block with a page inside it. The panel agent can use it with a file from its own folder, or with your approval."
      ],
      [
-      "omarchy-shell uber-notebook insertAfter <page id> <block id> <file.md>",
+      "omarchy-shell sunshine insertAfter <page id> <block id> <file.md>",
       "Inserts the Markdown after that block (and the blocks inside it), at the same depth.",
       "The panel agent can use it with a file from its own folder, or with your approval."
      ],
      [
-      "omarchy-shell uber-notebook trash <id>",
+      "omarchy-shell sunshine trash <id>",
       "Moves the page, and the pages inside it, to the trash, where it can be restored.",
       "For the panel agent, you're asked in the panel first unless you chose Always."
      ],
      [
-      "omarchy-shell uber-notebook tags",
+      "omarchy-shell sunshine tags",
       "Lists every tag with how many pages and blocks have it, and its color.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook library <kind> <words>",
+      "omarchy-shell sunshine library <kind> <words>",
       "Lists what has been put on pages (the Library), newest first. kind is link, file, video, picture, audio, meeting, sketch, person or email, or \"\" (or all) for everything. words narrows the list by title, link or page.",
       "Plurals such as files, pictures and people work, but \"sketches\" doesn't: only a trailing s is dropped, which leaves \"sketche\". At most 500 results."
      ],
      [
-      "omarchy-shell uber-notebook contacts <words>",
+      "omarchy-shell sunshine contacts <words>",
       "Lists your People: id, name, company, title, phones, emails and birthday. Use \"\" for everyone.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook contact <id or name>",
+      "omarchy-shell sunshine contact <id or name>",
       "Shows one person with everything kept about them (address, website, notes), plus the pages they're named on. It finds the person by id, or else by the best match for a name, email or number.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook addContact <name> <phone> <email>",
+      "omarchy-shell sunshine addContact <name> <phone> <email>",
       "Adds someone to People (use \"\" for what you don't know). If someone with that email or number is already there, their details are filled in instead.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook importContacts <file>",
+      "omarchy-shell sunshine importContacts <file>",
       "Imports a .vcf (vCard) or .csv file into People. People already there are filled in, not added twice. Answers { read, added, filledIn }.",
       "A .csv needs a header row. The panel agent can use it with a file from its own folder, or with your approval."
      ],
      [
-      "omarchy-shell uber-notebook tagged <tag>",
+      "omarchy-shell sunshine tagged <tag>",
       "Lists every block with the tag: page id, page title, block id, type, text, and whether it's checked.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook tagColor <tag> <color>",
+      "omarchy-shell sunshine tagColor <tag> <color>",
       "Sets a tag's color: gray, brown, orange, yellow, green, blue, purple, pink, red, a hex like #ff8800, or \"\" for none.",
       "A tag with no color takes the color of the tag it's inside (#work/acme takes #work's)."
      ],
      [
-      "omarchy-shell uber-notebook projects",
+      "omarchy-shell sunshine projects",
       "Lists every project not in the archive: id, title, status, due date, progress, whether it's overdue, and its path.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook project <id> <status> <due>",
+      "omarchy-shell sunshine project <id> <status> <due>",
       "Makes the page a project or changes one. status is planning, active, paused or done (\"\" keeps it; none turns it back into a page). due is a date like 2026-10-12, \"\" for none, or - to keep it.",
       "Refused for a locked page."
      ],
      [
-      "omarchy-shell uber-notebook archive <id>",
+      "omarchy-shell sunshine archive <id>",
       "Puts the page, and the pages inside it, in the archive (unarchive brings it back).",
       ""
      ],
      [
-      "omarchy-shell uber-notebook unarchive <id>",
+      "omarchy-shell sunshine unarchive <id>",
       "Brings an archived page (and the pages in it) back from the archive.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook events <from> <to>",
+      "omarchy-shell sunshine events <from> <to>",
       "Lists calendar events from one date to another (2026-10-05). \"\" \"\" means today and the following week. It also lists the dates in your notes (reminders and projects' due dates).",
       "At most about 400 days at a time."
      ],
      [
-      "omarchy-shell uber-notebook addEvent <what and when> <repeat>",
+      "omarchy-shell sunshine addEvent <what and when> <repeat>",
       "Puts an event on the calendar, for example \"Dentist oct 12 3pm\" or \"Standup mon 9:30-9:45\". repeat is daily, weekdays, weekly, monthly, yearly or \"\".",
       "A timed event gets a 10-minute alert; an all-day event gets none."
      ],
      [
-      "omarchy-shell uber-notebook editEvent <id> <field> <value>",
+      "omarchy-shell sunshine editEvent <id> <field> <value>",
       "Changes an event. Fields: title, when (\"fri 3pm\"), start, end, allDay, place, notes, repeat, alert (0, 5, 10, 15, 30, 60, 120 or 1440 minutes before, or none) and color.",
       "For the panel agent, emptying the place or notes asks you first."
      ],
      [
-      "omarchy-shell uber-notebook removeEvent <id>",
+      "omarchy-shell sunshine removeEvent <id>",
       "Removes an event from the calendar, including every repeat.",
       "For the panel agent, you're asked first."
      ],
      [
-      "omarchy-shell uber-notebook importCalendar <file.ics>",
+      "omarchy-shell sunshine importCalendar <file.ics>",
       "Adds an .ics file's events to the calendar. Events already there are skipped. Answers { added, skipped }.",
       "The panel agent can use it with a file from its own folder, or with your approval."
      ],
      [
-      "omarchy-shell uber-notebook templates",
+      "omarchy-shell sunshine templates",
       "Lists your templates: id, title, icon, description and page count.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook addTemplate <title> <file.md> <description>",
+      "omarchy-shell sunshine addTemplate <title> <file.md> <description>",
       "Creates a template from Markdown. {{date}}, {{weekday}}, {{time}}, {{month}}, {{year}} and {{week}} are filled in when it's used. An empty title takes the file's first # heading.",
       "The panel agent can use it with a file from its own folder, or with your approval."
      ],
      [
-      "omarchy-shell uber-notebook describeTemplate <template> <text>",
+      "omarchy-shell sunshine describeTemplate <template> <text>",
       "Sets a one-line description of what a template is for, shown on its card in Templates.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook fromTemplate <template> <title> <parent>",
+      "omarchy-shell sunshine fromTemplate <template> <title> <parent>",
       "Creates a new page from a template (by name or id). A title of \"\" uses the template's title. A parent of \"\" puts the page in the Inbox and top puts it at the top of Pages; you can also give a page id.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook makeTemplate <id>",
+      "omarchy-shell sunshine makeTemplate <id>",
       "Saves a copy of the page, and the pages inside it, as one of your templates.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook preferences",
+      "omarchy-shell sunshine preferences",
       "Lists every user setting with its key, value, kind, choices and range. Change one with set <key> <value>.",
       "Leaves out the internal keys profiles, profile, folder, lastNotebook, lastPage, inbox, recentColors and space. set takes all of them but profiles, which is refused (use the profile commands)."
      ],
      [
-      "omarchy-shell uber-notebook rename <id> <title>",
+      "omarchy-shell sunshine rename <id> <title>",
       "Changes the page's title.",
       "Refused for a locked page."
      ],
      [
-      "omarchy-shell uber-notebook move <id> <parent> <position>",
+      "omarchy-shell sunshine move <id> <parent> <position>",
       "Moves the page inside another page (top or \"\" for the top of Pages), at a position among the pages there. 0 is first and \"\" is the end.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook icon <id> <emoji>",
+      "omarchy-shell sunshine icon <id> <emoji>",
       "Sets the page's icon to one emoji, or \"\" for none.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook cover <id> <cover>",
+      "omarchy-shell sunshine cover <id> <cover>",
       "Sets the page's cover to gradient:0 through gradient:11, or \"\" for none.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook lock <id> <true|false>",
+      "omarchy-shell sunshine lock <id> <true|false>",
       "Locks the page (it can be read but not changed) or unlocks it.",
       "lock is on the panel agent's list of allowed changes, so the panel agent can also unlock a page. false, no, off and 0 count as false; anything else counts as true."
      ],
      [
-      "omarchy-shell uber-notebook favorite <id> <true|false>",
+      "omarchy-shell sunshine favorite <id> <true|false>",
       "Adds the page to Favorites or takes it out.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook trashed",
+      "omarchy-shell sunshine trashed",
       "Lists what's in the trash: id, title, the page it was in, and when it was trashed.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook restore <id>",
+      "omarchy-shell sunshine restore <id>",
       "Takes a page out of the trash and puts it back where it was.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook duplicate <id>",
+      "omarchy-shell sunshine duplicate <id>",
       "Copies the page, and the pages inside it, right after the original.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook history <id>",
+      "omarchy-shell sunshine history <id>",
       "Lists the page's saved versions, newest first: name and when it was saved.",
       "The first time, it can answer \"reading its history: ask again in a moment\"."
      ],
      [
-      "omarchy-shell uber-notebook version <id> <name>",
+      "omarchy-shell sunshine version <id> <name>",
       "Returns one saved version of the page as Markdown.",
       "This isn't the app's version; for that, use appVersion."
      ],
      [
-      "omarchy-shell uber-notebook restoreVersion <id> <name>",
+      "omarchy-shell sunshine restoreVersion <id> <name>",
       "Restores the page to that version. The current page is saved in its history first.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook check <page id> <block id> <true|false>",
+      "omarchy-shell sunshine check <page id> <block id> <true|false>",
       "Checks or unchecks a to-do.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook color <page id> <block id> <color>",
+      "omarchy-shell sunshine color <page id> <block id> <color>",
       "Sets a block's color: gray, brown, orange, yellow, green, blue, purple, pink, red, or a hex such as #ff8800. Add _background for the background, or use \"\" for none.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook removeBlock <page id> <block id>",
+      "omarchy-shell sunshine removeBlock <page id> <block id>",
       "Removes the block, and the blocks inside it, from the page. The page as it was is saved in its history.",
       "Refused for a block that holds columns, and for a block with a page inside it."
      ],
      [
-      "omarchy-shell uber-notebook board <page id> <block id> <action> <a> <b>",
+      "omarchy-shell sunshine board <page id> <block id> <action> <a> <b>",
       "Changes a board. Actions: add <text> <column>, move <card> <column>, edit <card> <text>, remove <card>, addColumn <name>, renameColumn <column> <name>, removeColumn <column>, height <px>, columnWidth <column> <px>, cardColor <card> <color>, columnColor <column> <color>. A card or column can be given by its id or its text.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook picture <page id> <block id> <width> <align>",
+      "omarchy-shell sunshine picture <page id> <block id> <width> <align>",
       "Sets a picture's width (15 to 100 percent of the page) and alignment (left, center or right). \"\" keeps either one.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook addGallery <page id> <pictures> <columns>",
+      "omarchy-shell sunshine addGallery <page id> <pictures> <columns>",
       "Adds a gallery at the end of the page. pictures is a list of full paths (one per line or separated by |) or a folder. columns is 2, 3 or 4; anything else gives 3.",
       "At most 200 pictures. The panel agent can use pictures from its own folder, its own generated pictures, or ones you approve. It can't use a folder from outside its own."
      ],
      [
-      "omarchy-shell uber-notebook gallery <page id> <block id> <action> <a> <b>",
+      "omarchy-shell sunshine gallery <page id> <block id> <action> <a> <b>",
       "Changes a gallery. Actions: add <pictures or folder>, remove <n>, move <n> <to>, caption <n> <text>, columns <2|3|4>, height <px>. A picture can be given by its place (1 is first) or its src.",
       "For the panel agent, the pictures for add follow the same file rules as addGallery."
      ],
      [
-      "omarchy-shell uber-notebook setLink <page id> <block id> <link>",
+      "omarchy-shell sunshine setLink <page id> <block id> <link>",
       "Changes a bookmark's link (and reads its page again), or points a page link at another page by id or title.",
       "For the panel agent, the bookmark keeps only the link; its page is read only from a site you allowed, or after you're asked."
      ],
      [
-      "omarchy-shell uber-notebook attach <page id> <file>",
+      "omarchy-shell sunshine attach <page id> <file>",
       "Copies a file into Pages and puts it at the end of the page: a picture, a video, an .eml email, a PDF or any other file.",
       "Refused for a locked page. The panel agent can use a file from its own folder (or its own generated pictures), or one you approve."
      ],
      [
-      "omarchy-shell uber-notebook bookmark <page id> <url>",
+      "omarchy-shell sunshine bookmark <page id> <url>",
       "Adds a link at the end of the page as a card with its title, a line of text and its picture.",
       "A bare address like example.com/guide gets https:// added. For the panel agent, the site is contacted only if you allowed it, or after you're asked."
      ],
      [
-      "omarchy-shell uber-notebook editContact <id or name> <field> <value>",
+      "omarchy-shell sunshine editContact <id or name> <field> <value>",
       "Changes someone in People. Fields: name, company, title, birthday, address, website, notes. phone and email add one (\"mobile: +1 555 123 4567\"); removePhone and removeEmail take one off.",
       "For the panel agent, emptying a field or removing a phone or email asks you first."
      ],
      [
-      "omarchy-shell uber-notebook removeContact <id>",
+      "omarchy-shell sunshine removeContact <id>",
       "Removes someone from People. It needs their id.",
-      "Undo in People can bring them back while Uber Notebook is running. For the panel agent, you're asked first."
+      "Undo in People can bring them back while Sunshine is running. For the panel agent, you're asked first."
      ],
      [
-      "omarchy-shell uber-notebook renameTag <tag> <new name>",
+      "omarchy-shell sunshine renameTag <tag> <new name>",
       "Renames a tag on every page that has it. Each page keeps its previous version.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook removeTag <tag>",
+      "omarchy-shell sunshine removeTag <tag>",
       "Takes a tag off every page and removes the #tag from the text.",
       "For the panel agent, you're asked first."
      ],
      [
-      "omarchy-shell uber-notebook notebooks",
+      "omarchy-shell sunshine notebooks",
       "Lists the notebooks on the shelf: id, title, page count and when each was last modified.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook notebook <id>",
+      "omarchy-shell sunshine notebook <id>",
       "Lists a notebook's pages in order: id, n, title, day and its first words.",
       "The first time, it can answer \"reading the notebook first: run the same command again in a moment\"."
      ],
      [
-      "omarchy-shell uber-notebook readNotebook <id> <page id>",
+      "omarchy-shell sunshine readNotebook <id> <page id>",
       "Returns a notebook page as Markdown.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook addToNotebook <id> <file.md>",
+      "omarchy-shell sunshine addToNotebook <id> <file.md>",
       "Adds a new page at the end of a notebook from a Markdown file.",
       "The panel agent can use it with a file from its own folder, or with your approval."
      ],
      [
-      "omarchy-shell uber-notebook profiles",
+      "omarchy-shell sunshine profiles",
       "Lists your profiles: id, name, folder, whether it's open, and whether it's the demo. Every other command works on the open profile.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook profile <name or id>",
+      "omarchy-shell sunshine profile <name or id>",
       "Opens another profile. Anything open is saved first.",
       "Refused while an audio note is recording or saving. The panel agent can't use it."
      ],
      [
-      "omarchy-shell uber-notebook addProfile <name> <folder> <open>",
-      "A new profile, its notes in folder, opened unless open is false, no, off or 0 (an empty \"\" opens it too). A folder of \"\" is ~/Documents/Uber Notebook <name>. It starts empty, with the templates.",
-      "The name must be new (up to 60 characters). The folder must be a full or ~/ path and can't be the same as, inside, or around another profile's folder. If this is the first profile, \"\" means ~/Documents/Uber Notebook. Opening is refused while an audio note records. Only 30 profiles are kept, and add doesn't check the count: a 31st is reported as ok but dropped. The panel agent can't use it."
+      "omarchy-shell sunshine addProfile <name> <folder> <open>",
+      "A new profile, its notes in folder, opened unless open is false, no, off or 0 (an empty \"\" opens it too). A folder of \"\" is ~/Documents/Sunshine <name>. It starts empty, with the templates.",
+      "The name must be new (up to 60 characters). The folder must be a full or ~/ path and can't be the same as, inside, or around another profile's folder. If this is the first profile, \"\" means ~/Documents/Sunshine. Opening is refused while an audio note records. Only 30 profiles are kept, and add doesn't check the count: a 31st is reported as ok but dropped. The panel agent can't use it."
      ],
      [
-      "omarchy-shell uber-notebook renameProfile <name or id> <new name>",
+      "omarchy-shell sunshine renameProfile <name or id> <new name>",
       "Renames a profile.",
       "The name must be new. The panel agent can't use it."
      ],
      [
-      "omarchy-shell uber-notebook profileFolder <name or id> <folder>",
+      "omarchy-shell sunshine profileFolder <name or id> <folder>",
       "Points a profile at another folder for its notes. Nothing is moved.",
       "Refused for the demo, for a folder another profile uses, and, for the open profile, while an audio note records. The panel agent can't use it."
      ],
      [
-      "omarchy-shell uber-notebook removeProfile <name or id>",
+      "omarchy-shell sunshine removeProfile <name or id>",
       "Takes a profile off the list. Its notes stay in their folder. The open profile can't be removed.",
       "The panel agent can't use it."
      ],
      [
-      "omarchy-shell uber-notebook demo",
+      "omarchy-shell sunshine demo",
       "Opens the demo profile (example pages, people, events and templates), made the first time.",
       "Refused while an audio note records. Not for the panel's agent."
      ],
      [
-      "omarchy-shell uber-notebook restartDemo",
+      "omarchy-shell sunshine restartDemo",
       "Starts the demo over in a new folder; the demo as it was goes to the trash.",
       "Refused while an audio note records. Not for the panel's agent."
      ],
      [
-      "omarchy-shell uber-notebook backup <profile>",
+      "omarchy-shell sunshine backup <profile>",
       "Writes a backup (.tar.gz) to the backup folder. \"\" backs up the open profile, all puts every profile except the demo into one file, or you can give a profile's name or id.",
       "Refused while another backup or restore is running, and when no profile exists. It's written in the background, so backups shows the result. The panel agent can't use it."
      ],
      [
-      "omarchy-shell uber-notebook backups",
+      "omarchy-shell sunshine backups",
       "Lists the backups in the backup folder, newest first (name, file, made, size, automatic), with the folder, anything still running, and how the last one went.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook restoreBackup <file> <open>",
+      "omarchy-shell sunshine restoreBackup <file> <open>",
       "Restores a backup. Each profile in it comes back as a new profile in a new folder, and nothing you have now is changed. open true opens the first one.",
       "Needs a full path (/... or ~/...). Refused while another backup or restore is running. The panel agent can't use it."
      ],
      [
-      "omarchy-shell uber-notebook skill",
-      "Prints Uber Notebook's skill (SKILL.md) as Markdown: how an AI uses these commands.",
+      "omarchy-shell sunshine skill",
+      "Prints Sunshine's skill (SKILL.md) as Markdown: how an AI uses these commands.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook appVersion",
+      "omarchy-shell sunshine appVersion",
       "Shows the version running and whether there's a newer one: latest, updateAvailable, status, problem, when it last checked, automatic, releases, and how to install an update.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook checkUpdate",
+      "omarchy-shell sunshine checkUpdate",
       "Asks GitHub for the newest version now. appVersion shows the result a few seconds later.",
       ""
      ],
      [
-      "omarchy-shell uber-notebook releaseNotes",
+      "omarchy-shell sunshine releaseNotes",
       "Shows what's new as Markdown: the notes for newer releases, or this version's notes from CHANGELOG.md when you're up to date.",
       ""
      ]
@@ -3811,38 +3811,38 @@ var SECTIONS = [
     "title": "Install and update",
     "rows": [
      [
-      "omarchy plugin add https://github.com/marcho78/ubernotebook.git --enable",
-      "Installs and enables Uber Notebook. There's no setup step and your Hyprland config isn't edited: shortcuts and window rules are registered while it runs.",
+      "omarchy plugin add https://github.com/xavier/sunshine.git --enable",
+      "Installs and enables Sunshine. There's no setup step and your Hyprland config isn't edited: shortcuts and window rules are registered while it runs.",
       ""
      ],
      [
-      "Uber Notebook in the app launcher",
-      "While Uber Notebook runs, it adds an Uber Notebook entry with its icon to the app launcher, which opens the window (it runs omarchy-shell uber-notebook show). The entry is removed when it stops.",
-      "It's only created when nothing with that name exists, and only removed if it's still exactly what Uber Notebook made."
+      "Sunshine in the app launcher",
+      "While Sunshine runs, it adds an Sunshine entry with its icon to the app launcher, which opens the window (it runs omarchy-shell sunshine show). The entry is removed when it stops.",
+      "It's only created when nothing with that name exists, and only removed if it's still exactly what Sunshine made."
      ],
      [
-      "omarchy bar move marcho78.uber-notebook --section left",
+      "omarchy bar move xavier.sunshine --section left",
       "Moves the notebook icon to another section of the top bar.",
       ""
      ],
      [
-      "omarchy plugin update marcho78.uber-notebook && omarchy restart shell",
-      "Installs a newer version, then restarts the Omarchy shell (either way) so all of it runs. Run it in a terminal; it shows what will change and asks first. Uber Notebook never installs anything itself.",
+      "omarchy plugin update xavier.sunshine && omarchy restart shell",
+      "Installs a newer version, then restarts the Omarchy shell (either way) so all of it runs. Run it in a terminal; it shows what will change and asks first. Sunshine never installs anything itself.",
       "This works for a git checkout. Otherwise appVersion says to reinstall from git with `omarchy plugin add <its git URL>` first."
      ],
      [
-      "omarchy plugin remove marcho78.uber-notebook",
-      "Uninstalls Uber Notebook. It saves anything pending, removes its shortcuts, launcher entry and agent skill links, and deletes its settings entry and plugin folder. Your notes are never touched.",
-      "Your notes folders, backups (~/Documents/Uber Notebook Backups), the demo (~/.local/share/uber-notebook) and voxtype's meeting mode stay. Run `omarchy-shell uber-notebook profiles` first to see where every profile's notes are."
+      "omarchy plugin remove xavier.sunshine",
+      "Uninstalls Sunshine. It saves anything pending, removes its shortcuts, launcher entry and agent skill links, and deletes its settings entry and plugin folder. Your notes are never touched.",
+      "Your notes folders, backups (~/Documents/Sunshine Backups), the demo (~/.local/share/sunshine) and voxtype's meeting mode stay. Run `omarchy-shell sunshine profiles` first to see where every profile's notes are."
      ],
      [
       "voxtype config set meeting.enabled false",
-      "Turns voxtype's meeting mode off again, if you turned it on for Uber Notebook's meetings.",
+      "Turns voxtype's meeting mode off again, if you turned it on for Sunshine's meetings.",
       ""
      ],
      [
       "omarchy voxtype install",
-      "Installs voxtype, Omarchy's dictation. Uber Notebook needs it for dictation, transcribing audio notes, and meetings.",
+      "Installs voxtype, Omarchy's dictation. Sunshine needs it for dictation, transcribing audio notes, and meetings.",
       ""
      ]
     ]

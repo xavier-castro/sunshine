@@ -4,7 +4,7 @@ import QtQuick.Effects
 import "../MarkdownView.js" as MarkdownView
 
 // What's new: a newer version's release notes (or, up to date, the notes of
-// the one running, from CHANGELOG.md), read here in Uber Notebook. With a newer
+// the one running, from CHANGELOG.md), read here in Sunshine. With a newer
 // one: the command that installs it (`omarchy plugin update`), to copy and run
 // in a terminal, where it shows what changes and asks first.
 Popup {
@@ -73,7 +73,7 @@ Popup {
         width: parent.width
         wrapMode: Text.Wrap
         textFormat: Text.PlainText
-        text: rn.updates ? (rn.updates.available && !rn.own ? "You have " + rn.updates.current + "." + rn.released : "Uber Notebook " + rn.updates.current + (rn.updates.status === "current" ? ", the newest." : rn.updates.available ? "; " + rn.updates.latest.version + " is available." : ".")) : ""
+        text: rn.updates ? (rn.updates.available && !rn.own ? "You have " + rn.updates.current + "." + rn.released : "Sunshine " + rn.updates.current + (rn.updates.status === "current" ? ", the newest." : rn.updates.available ? "; " + rn.updates.latest.version + " is available." : ".")) : ""
         font.family: rn.theme.uiFont
         font.pixelSize: 13
         color: rn.theme.muted

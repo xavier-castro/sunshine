@@ -1,12 +1,12 @@
-// Scope.js - what an agent working in Uber Notebook's panel may do through
-// Uber Notebook's commands while it works: it calls them under their own
-// name (omarchy-shell uber-notebook-agent ..., Service.qml's IPC), so yours,
-// scripts' and a terminal's agent's (omarchy-shell uber-notebook ...) go on
+// Scope.js - what an agent working in Sunshine's panel may do through
+// Sunshine's commands while it works: it calls them under their own
+// name (omarchy-shell sunshine-agent ..., Service.qml's IPC), so yours,
+// scripts' and a terminal's agent's (omarchy-shell sunshine ...) go on
 // as always meanwhile.
 //
 // It works for you, on what you asked: it may read your notes and change
 // them (pages, People, the calendar, templates, tags, notebooks' pages). It
-// may not change Uber Notebook itself: its settings (the permissions you gave
+// may not change Sunshine itself: its settings (the permissions you gave
 // agents among them), profiles, backups. A file a command reads comes only
 // from the agent's own folder; a picture it puts on a page, from there or
 // from a folder of pictures it makes itself (`pictures`: Grok's image tool
@@ -21,7 +21,7 @@
 // JavaScript with no QML or Node APIs.
 .pragma library
 
-// Commands that only read (or show Uber Notebook).
+// Commands that only read (or show Sunshine).
 var READS = ["help", "list", "find", "read", "blocks", "tags", "library", "contacts", "contact", "tagged", "projects", "templates",
   "events", "trashed", "history", "version", "preferences", "notebooks", "notebook", "readNotebook", "profiles", "backups",
   "appVersion", "checkUpdate", "releaseNotes", "skill", "status", "toggle", "show", "hide", "search", "shelf", "pages", "calendar", "open", "settings"]
@@ -102,13 +102,13 @@ function paths(value) {
   return String(value || "").split(/\n|\|/).map(function(p) { return p.trim() }).filter(function(p) { return p !== "" })
 }
 
-// A command from you (`forAgent` false: the uber-notebook commands, from a
+// A command from you (`forAgent` false: the sunshine commands, from a
 // script, a terminal's agent or you) goes ahead as always; from the panel's
-// agent (the uber-notebook-agent commands), as check() says while it works,
+// agent (the sunshine-agent commands), as check() says while it works,
 // and not at all when no agent is working there. "" or why not.
 function forCaller(forAgent, scope, command, args) {
   if (!forAgent) return ""
-  if (!scope) return "no agent is working in Uber Notebook's panel: the uber-notebook-agent commands work only for the agent working there, while it works"
+  if (!scope) return "no agent is working in Sunshine's panel: the sunshine-agent commands work only for the agent working there, while it works"
   return check(scope, command, args)
 }
 
@@ -144,7 +144,7 @@ function check(scope, command, args) {
   var name = String(command || "")
   if (READS.indexOf(name) >= 0) return ""
   var who = String(scope.agent || "An agent")
-  if (CHANGES.indexOf(name) < 0) return "not while " + who + " is working in Uber Notebook's panel: it can read and change your notes, not Uber Notebook's settings, profiles or backups"
+  if (CHANGES.indexOf(name) < 0) return "not while " + who + " is working in Sunshine's panel: it can read and change your notes, not Sunshine's settings, profiles or backups"
   if (scope.frozen) return "not now: " + who + " is being stopped"
   var a = args || []
   var files = Object.prototype.hasOwnProperty.call(FILES, name) ? FILES[name] : []
@@ -157,7 +157,7 @@ function check(scope, command, args) {
       // (What to do instead, said: never a dead end.)
       var pics = Array.isArray(scope.pictures) && scope.pictures.length ? "; a picture you made yourself is taken from " + scope.pictures.join(" or ") + " too" : ""
       if (PICTURE_FILES.indexOf(name) >= 0 && name !== "attach" && !PICTURE.test(String(list[k] || ""))) pics += "; for a gallery, give each picture's own path (a folder of them from outside it isn't taken)"
-      return "not while " + who + " is working in Uber Notebook's panel: the files its commands read come only from its own folder (" + scope.dir + "): save or copy the file there and give that path" + pics
+      return "not while " + who + " is working in Sunshine's panel: the files its commands read come only from its own folder (" + scope.dir + "): save or copy the file there and give that path" + pics
     }
   }
   return ""

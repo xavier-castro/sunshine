@@ -1,4 +1,4 @@
-// Checks the environment Uber Notebook's commands get (Env.js).
+// Checks the environment Sunshine's commands get (Env.js).
 // Usage (from the plugin directory): node tests/env.test.cjs
 
 const assert = require("node:assert/strict");

@@ -39,7 +39,7 @@ check("what's on a page is text, never markup", () => {
 
 check("links: the web and email; a page in the document goes there; nothing else", () => {
   const html = doc([page(A, "Top", [
-    { type: "p", html: '<a href="https://e.org/?a=1&amp;b=2">web</a> <a href="mailto:a@e.org">mail</a> <a href="javascript:alert(1)">js</a> <a href="file:///etc/passwd">file</a> <a href="uber-notebook://page/' + B + '">in it</a> <a href="uber-notebook://page/' + C + '">not in it</a> <a href="uber-notebook://tag/x">#x</a>' }
+    { type: "p", html: '<a href="https://e.org/?a=1&amp;b=2">web</a> <a href="mailto:a@e.org">mail</a> <a href="javascript:alert(1)">js</a> <a href="file:///etc/passwd">file</a> <a href="sunshine://page/' + B + '">in it</a> <a href="sunshine://page/' + C + '">not in it</a> <a href="sunshine://tag/x">#x</a>' }
   ]), page(B, "Plans", [{ type: "p", html: "Hi" }])]);
   const hrefs = (html.match(/href="[^"]*"/g) || []);
   assert.deepEqual(hrefs, ['href="https://e.org/?a=1&amp;b=2"', 'href="mailto:a@e.org"', 'href="#p-' + B + '"']);
@@ -56,7 +56,7 @@ check("pictures: named for the helper, only Pages' own; never a path or the web"
     { type: "video", data: { src: "assets/v.mp4", name: "Clip", poster: "assets/v.jpg" } }
   ])]);
   const srcs = (html.match(/src="[^"]*"/g) || []);
-  assert.deepEqual(srcs.filter((s) => !s.startsWith('src="data:')), ['src="uber-notebook-asset:a.png"', 'src="uber-notebook-asset:g1.jpg"', 'src="uber-notebook-asset:bm-1.png"', 'src="uber-notebook-asset:v.jpg"']);
+  assert.deepEqual(srcs.filter((s) => !s.startsWith('src="data:')), ['src="sunshine-asset:a.png"', 'src="sunshine-asset:g1.jpg"', 'src="sunshine-asset:bm-1.png"', 'src="sunshine-asset:v.jpg"']);
   assert.ok(html.includes('style="width:50%;"'), "its share of the page, for the helper to size");
   assert.ok(!/passwd|evil\.example|\/home\/me/.test(html));
 });
@@ -80,7 +80,7 @@ check("diagrams as their pictures, by a plain name only; other code in its color
     { id: "d2", type: "code", lang: "Mermaid", html: "flowchart LR<br />C" },
     { id: "c1", type: "code", lang: "JavaScript", html: "const a = 1" }
   ])], { drawing: (id) => ({ d1: "d1.png", d2: "../../etc/x.png" })[id] });
-  assert.ok(html.includes('src="uber-notebook-drawing:d1.png"'));
+  assert.ok(html.includes('src="sunshine-drawing:d1.png"'));
   assert.ok(!html.includes("etc/x.png") && /<pre class="code" id="b-d2"/.test(html), "a name that isn't one: its Mermaid instead");
   assert.ok(/<pre class="code"[^>]*><span class="lang">JavaScript<\/span><br \/><span style="color:/.test(html));
 });

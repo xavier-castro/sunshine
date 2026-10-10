@@ -1,10 +1,10 @@
 import QtQuick
 import QtTest
-import "../.." as UberNotebook
+import "../.." as Sunshine
 import "../../app"
 import "../../Library.js" as Library
 
-// A picture out of Uber Notebook: Copy (onto the clipboard, to paste
+// A picture out of Sunshine: Copy (onto the clipboard, to paste
 // anywhere) and Save a copy (where you say, named for its caption or its
 // page) from its bar when it's picked, and where it's shown large (its
 // buttons, Ctrl+C, Ctrl+S). Shown large, a click is the one thing's it's
@@ -18,7 +18,7 @@ Item {
   FakeFiles { id: files }
   FakeService { id: service; user: ({ sounds: false }) }
   Theme { id: th }
-  UberNotebook.Workspace { id: ws; files: files }
+  Sunshine.Workspace { id: ws; files: files }
   property string lastToast: ""
 
   DocView {

@@ -1,6 +1,6 @@
 import QtQuick
 
-// The first time Uber Notebook opens: your first profile (its name, and the folder
+// The first time Sunshine opens: your first profile (its name, and the folder
 // its notes go in), the demo to look around in first, or your profiles put
 // back from a backup (from another computer, say). Nothing's made anywhere
 // until one of them is picked.
@@ -56,7 +56,7 @@ Rectangle {
 
     Text {
       textFormat: Text.PlainText
-      text: "Welcome to Uber Notebook"
+      text: "Welcome to Sunshine"
       font.family: fr.theme.uiFont
       font.pixelSize: 28
       font.weight: Font.DemiBold
@@ -141,7 +141,7 @@ Rectangle {
           width: parent.width
           wrapMode: Text.Wrap
           textFormat: Text.PlainText
-          text: fr.restoring === "working" ? "Putting your profiles back…" : fr.restoring || "Put your profiles back from a backup Uber Notebook made (Settings → Backups)."
+          text: fr.restoring === "working" ? "Putting your profiles back…" : fr.restoring || "Put your profiles back from a backup Sunshine made (Settings → Backups)."
           font.family: fr.theme.uiFont
           font.pixelSize: 12
           color: fr.restoring !== "" && fr.restoring !== "working" ? fr.theme.urgent : fr.theme.muted

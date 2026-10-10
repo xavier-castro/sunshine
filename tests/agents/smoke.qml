@@ -7,13 +7,13 @@ import "@PLUGIN@" as UN
 import "@PLUGIN@/Agent.js" as Agent
 import "@PLUGIN@/Scope.js" as Scope
 
-// The real-agent smoke test's Uber Notebook: the real Store, Workspace and
+// The real-agent smoke test's Sunshine: the real Store, Workspace and
 // Api, on notes of its own in a folder made for the run (never yours), and
 // the panel's agent run (DocView.runHere: Agent.js's command, input,
 // protocol and answers, the same sandbox and folder rules), with every
 // question an agent asks answered "Allow once" (and kept, for the report).
 // The agent's `omarchy-shell` comes here (smoke.cjs puts one in its folder,
-// first on its PATH): uber-notebook-agent, as Service.qml's, scoped
+// first on its PATH): sunshine-agent, as Service.qml's, scoped
 // (Scope.js) to the agent working. smoke.cjs drives it over IPC ("smoke").
 ShellRoot {
   id: smoke
@@ -36,11 +36,11 @@ ShellRoot {
     inbox: ""
     settings: ({})
     agentScope: smoke.scope
-    // (What Uber Notebook asks you itself, a file from outside the agent's
+    // (What Sunshine asks you itself, a file from outside the agent's
     // folder: answered "Allow once", and kept for the report.)
     ui: QtObject {
       function askAgentPermission(req) {
-        smoke.status.asks.push("Uber Notebook: " + String(req.text || "") + (req.detail ? ": " + req.detail : ""))
+        smoke.status.asks.push("Sunshine: " + String(req.text || "") + (req.detail ? ": " + req.detail : ""))
         Qt.callLater(function() { try { req.run([]) } catch (e) { console.warn("smoke: " + e) } })
         return true
       }
@@ -103,7 +103,7 @@ ShellRoot {
         Agent.fromLine(agent, line).forEach(function(ev) {
           if (ev.kind === "ask") {
             var a = Agent.askOf(ev.tool, ev.input, ev.title, ev.name)
-            // (As the panel: Uber Notebook's own commands, alone, not asked.)
+            // (As the panel: Sunshine's own commands, alone, not asked.)
             if (a.action === "shell" && ev.input && Agent.ownCommand(ev.input.command)) { if (run && run.send) run.send(Agent.answerFor(agent, ev, true)); return }
             if (Agent.ownFile(ev.tool, ev.input, dir)) { if (run && run.send) run.send(Agent.answerFor(agent, ev, true)); return }
             st.asks.push(String(a.text || ev.tool || "a tool") + (a.detail ? ": " + String(a.detail).slice(0, 160) : ""))
@@ -135,10 +135,10 @@ ShellRoot {
     begin(agent, dir)
     store.mkdirs([dir, dir + "/.grok", dir + "/.smoke-bin"], function() {
       store.agentPath(agent, function(exe) {
-        if (!exe) { finish(127, Agent.name(agent) + " isn't installed where Uber Notebook can find it"); return }
+        if (!exe) { finish(127, Agent.name(agent) + " isn't installed where Sunshine can find it"); return }
         where = { exe: exe, dir: dir, skill: smoke.skillDir, helper: store.filesHelper || "" }
         // (Its omarchy-shell: this instance, never your shell.)
-        var shim = "#!/usr/bin/bash\n# The smoke test's omarchy-shell: its calls go to the smoke test's Uber Notebook.\n"
+        var shim = "#!/usr/bin/bash\n# The smoke test's omarchy-shell: its calls go to the smoke test's Sunshine.\n"
           + "[[ ${1:-} == -q ]] && shift\nexec /usr/bin/qs ipc --pid " + Quickshell.processId + " call -- \"$@\"\n"
         store.putFile(dir, ".smoke-bin/omarchy-shell", shim, function(ok) {
           store.exec(["/usr/bin/chmod", "755", dir + "/.smoke-bin/omarchy-shell"], function() {
@@ -189,9 +189,9 @@ ShellRoot {
     function read(page: string): string { return api.read(page) }
   }
 
-  // The panel's agent's commands (Service.qml's uber-notebook-agent ones).
+  // The panel's agent's commands (Service.qml's sunshine-agent ones).
   IpcHandler {
-    target: "uber-notebook-agent"
+    target: "sunshine-agent"
 @HANDLERS@
   }
 }

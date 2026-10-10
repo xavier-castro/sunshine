@@ -1,6 +1,6 @@
-// Env.js - the environment Uber Notebook's commands run in.
+// Env.js - the environment Sunshine's commands run in.
 //
-// The programs Uber Notebook runs (Run.qml, Stream.qml) don't inherit the
+// The programs Sunshine runs (Run.qml, Stream.qml) don't inherit the
 // shell's whole environment. A tool's own command gets only what it needs to
 // find your session (your home, your language, the Wayland, D-Bus and
 // PipeWire sockets, Hyprland's instance, a proxy you set), with PATH as the
@@ -15,12 +15,12 @@
 
 var PATH = "/usr/bin"
 
-// How every program Uber Notebook runs is started: leading a process group
+// How every program Sunshine runs is started: leading a process group
 // of its own (setsid, so it's stopped with everything it started), and
 // making whatever it writes yours alone (umask 077: files 600, folders 700),
 // never readable by another account on the computer: a picture pasted, a
 // file brought in, a recording, an export, a backup, an agent's files.
-var START = ["/usr/bin/bash", "-c", "umask 077 && exec /usr/bin/setsid --wait \"$@\"", "uber-notebook"]
+var START = ["/usr/bin/bash", "-c", "umask 077 && exec /usr/bin/setsid --wait \"$@\"", "sunshine"]
 
 // What a tool's command gets, from the shell's environment.
 var TOOLS = [

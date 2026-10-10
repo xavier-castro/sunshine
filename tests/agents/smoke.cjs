@@ -7,7 +7,7 @@
 // skill, write a page, edit a block, put a picture on the page, search the
 // web, a command that asks, columns side by side (from the skill alone), a
 // file from outside its folder. What's on the
-// page is checked through Uber Notebook's commands; a pass/fail table, and
+// page is checked through Sunshine's commands; a pass/fail table, and
 // a report (JSON) in /tmp.
 //
 // Each with the model and effort you chose for it (Settings → AI). It makes
@@ -49,8 +49,8 @@ const has = (blocks, type, re) => blocks.some((b) => b.type === type && (!re || 
 
 const tasks = [
   { id: "skill", title: "Skill",
-    ask: () => "Read the uber-notebook skill first. Then write one sentence on this page that names the command that adds a new page.",
-    check: (b, r) => [r.steps.some((s) => /uber-notebook skill/i.test(s)) || "never read the skill", b.some((x) => String(x.text || "").trim()) || "nothing written"] },
+    ask: () => "Read the sunshine skill first. Then write one sentence on this page that names the command that adds a new page.",
+    check: (b, r) => [r.steps.some((s) => /sunshine skill/i.test(s)) || "never read the skill", b.some((x) => String(x.text || "").trim()) || "nothing written"] },
   { id: "write", title: "Notes",
     ask: () => "Write on this page: a heading that says Bees, three bullet points about bees, and a to-do that says Buy honey.",
     check: (b) => [b.some((x) => /^h[123]$/.test(x.type) && /bees/i.test(x.text || "")) || "no heading", b.filter((x) => x.type === "bullet").length >= 3 || "fewer than three bullets", has(b, "check", /honey/i) || "no to-do"] },
@@ -76,9 +76,9 @@ const tasks = [
     check: (b) => [b.some((x) => x.type === "image" || x.type === "gallery") || "no picture on the page: refused, and no way found round it"] },
 ].filter((t) => !only.length || only.includes(t.id));
 
-// ---- the smoke test's Uber Notebook ------------------------------------------------------------
+// ---- the smoke test's Sunshine ------------------------------------------------------------
 
-// Its commands: Service.qml's uber-notebook-agent ones, as they are there.
+// Its commands: Service.qml's sunshine-agent ones, as they are there.
 function handlers() {
   const lines = fs.readFileSync(path.join(root, "Service.qml"), "utf8").split("\n")
     .filter((l) => /^\s*function \w+\(.*\): string \{ return root\.scoped\(commands\.agent, "\w+", \[.*\], function\(\) \{ return (apiItem|root)\.\w+\(.*\}\) \}\s*$/.test(l));
@@ -90,13 +90,13 @@ function handlers() {
 // so each runs as it does for you.
 function choices() {
   try {
-    const find = (o) => !o || typeof o !== "object" ? null : o.id === "marcho78.uber-notebook" ? o : Object.values(o).map(find).find(Boolean) || null;
+    const find = (o) => !o || typeof o !== "object" ? null : o.id === "xavier.sunshine" ? o : Object.values(o).map(find).find(Boolean) || null;
     const e = find(JSON.parse(fs.readFileSync(path.join(os.homedir(), ".config", "omarchy", "shell.json"), "utf8"))) || {};
     return Object.fromEntries(ALL.map((a) => [a, { model: String(e[a + "Model"] || ""), effort: String(e[a + "Effort"] || "") }]));
   } catch { return {}; }
 }
 
-// Your shell's PATH: agents found where Uber Notebook finds them.
+// Your shell's PATH: agents found where Sunshine finds them.
 function shellPath() {
   try {
     const pid = execFileSync("/usr/bin/pgrep", ["-f", "quickshell -n -p /usr/share/omarchy/shell"], { encoding: "utf8" }).trim().split("\n")[0];
@@ -105,8 +105,8 @@ function shellPath() {
   } catch { return process.env.PATH; }
 }
 
-const work = fs.mkdtempSync(path.join(os.tmpdir(), "uber-notebook-smoke-"));
-const base = path.join(runtime, "uber-notebook-smoke-" + rand());
+const work = fs.mkdtempSync(path.join(os.tmpdir(), "sunshine-smoke-"));
+const base = path.join(runtime, "sunshine-smoke-" + rand());
 fs.mkdirSync(path.join(work, "notes"), { recursive: true });
 fs.mkdirSync(path.join(work, "shell"), { recursive: true });
 fs.mkdirSync(base, { recursive: true, mode: 0o700 });
@@ -115,7 +115,7 @@ fs.writeFileSync(path.join(work, "shell", "shell.qml"), fs.readFileSync(path.joi
 const log = fs.openSync(path.join(work, "shell.log"), "w");
 const shell = spawn("/usr/bin/quickshell", ["-p", path.join(work, "shell", "shell.qml")], {
   env: { ...process.env, PATH: shellPath(), QT_QPA_PLATFORM: "offscreen", SMOKE_NOTES: path.join(work, "notes"), SMOKE_RUNTIME: base,
-    SMOKE_SKILL: path.join(root, "skills", "uber-notebook"), SMOKE_CHOICES: JSON.stringify(choices()) },
+    SMOKE_SKILL: path.join(root, "skills", "sunshine"), SMOKE_CHOICES: JSON.stringify(choices()) },
   stdio: ["ignore", log, log], detached: true,
 });
 
@@ -191,7 +191,7 @@ function cleanUp() {
 (async () => {
   const results = {};
   try {
-    if (!(await until(() => call("smoke", "ready") === "true", 30000))) throw new Error("the smoke test's Uber Notebook didn't start: " + path.join(work, "shell.log"));
+    if (!(await until(() => call("smoke", "ready") === "true", 30000))) throw new Error("the smoke test's Sunshine didn't start: " + path.join(work, "shell.log"));
     for (const agent of agents) {
       results[agent] = {};
       for (const task of tasks) {
@@ -205,7 +205,7 @@ function cleanUp() {
     console.error(e.message);
     process.exitCode = 2;
   } finally {
-    const report = path.join(os.tmpdir(), "uber-notebook-smoke-report.json");
+    const report = path.join(os.tmpdir(), "sunshine-smoke-report.json");
     fs.writeFileSync(report, JSON.stringify(results, null, 2));
     console.log("\n" + ["task".padEnd(10), ...agents.map((a) => a.padEnd(8))].join(" "));
     for (const task of tasks) console.log([task.id.padEnd(10), ...agents.map((a) => (results[a] && results[a][task.id] ? (results[a][task.id].ok ? "pass" : "FAIL") : "-").padEnd(8))].join(" "));

@@ -1,6 +1,6 @@
 import QtQuick
 import QtTest
-import "../.." as UberNotebook
+import "../.." as Sunshine
 import "../../app"
 import "../../Workspace.js" as Workspace
 import "../../Html.js" as Html
@@ -20,7 +20,7 @@ Item {
   FakeService { id: service; user: ({ sounds: false }) }
   Theme { id: th }
 
-  UberNotebook.Workspace {
+  Sunshine.Workspace {
     id: ws
     files: files
   }
@@ -596,7 +596,7 @@ Item {
       var target = ws.createPage({ parent: "", title: "Target" })
       ws.editPage(home, function(p) {
         var id = Workspace.uuid4()
-        p.blocks[id] = { id: id, type: "p", parent: p.id, html: 'about <a href="uber-notebook://page/' + target.id + '">Target</a>' }
+        p.blocks[id] = { id: id, type: "p", parent: p.id, html: 'about <a href="sunshine://page/' + target.id + '">Target</a>' }
         p.content.push(id)
         return true
       })
@@ -614,9 +614,9 @@ Item {
       var old = iso(new Date(now - 3 * 86400000))
       var later = iso(new Date(now + 86400000))
       ws.createPage({ parent: "", title: "Errands", blocks: [
-        { type: "check", html: 'Call the bank <a href="uber-notebook://remind/' + recent + '">x</a>', indent: 0 },
-        { type: "check", html: 'Old one <a href="uber-notebook://remind/' + old + '">x</a>', indent: 0 },
-        { type: "check", html: 'Later <a href="uber-notebook://remind/' + later + '">x</a>', indent: 0 }
+        { type: "check", html: 'Call the bank <a href="sunshine://remind/' + recent + '">x</a>', indent: 0 },
+        { type: "check", html: 'Old one <a href="sunshine://remind/' + old + '">x</a>', indent: 0 },
+        { type: "check", html: 'Later <a href="sunshine://remind/' + later + '">x</a>', indent: 0 }
       ] })
       ws.checkReminders()
       compare(files.notified.length, 1, "the one due now comes; one long gone doesn't; one to come waits")
@@ -658,7 +658,7 @@ Item {
       verify(/^assets\//.test(src), "the picture is in Pages' assets")
       compare(files.disk[files.rootPath + "/Pages/" + src], "PNG", "copied")
       var tripList = Workspace.flatten(fileOf(tripId))
-      verify(tripList[0].html.indexOf("uber-notebook://page/" + plansId) >= 0, "[[Plans]] links to the page imported")
+      verify(tripList[0].html.indexOf("sunshine://page/" + plansId) >= 0, "[[Plans]] links to the page imported")
       compare(tripList[1].type, "callout")
       compare(tripList[2].lang, "Bash")
       tryVerify(function() { return view.page && view.page.id === ws.index.pages[plansId].parent || true }, 100)
@@ -810,7 +810,7 @@ Item {
       compare(view.titleHint, "What's the meeting?", "you name the meeting")
       var list = view.editor.serialize()
       compare(list.slice(0, 3).map(function(b) { return b.type }).join(","), "p,columns,column", "today's date, then who's there and the agenda side by side")
-      verify(list[0].html.indexOf("uber-notebook://date/") >= 0)
+      verify(list[0].html.indexOf("sunshine://date/") >= 0)
       verify(list.some(function(b) { return b.type === "check" && b.hint === "Who does what, by when" }), "every line says what goes on it")
       compare(view.page.icon, "\u{1f465}")
       view.commit()
@@ -1227,7 +1227,7 @@ Item {
       compare(run[5], "/usr/lib/chromium/chromium", "Chromium itself, not the launcher that reads your flags")
       verify(view.exporter.browsers.every(function(b) { return !/^\/usr\/(local\/)?bin\//.test(b) }), "never a launcher on the PATH (chromium-flags.conf, extensions)")
       verify(run.indexOf("--proxy-server=http://127.0.0.1:9") > 0 && run.indexOf("--host-resolver-rules=MAP * ~NOTFOUND") > 0, "every request sent nowhere")
-      verify(run.indexOf("--disable-extensions") > 0 && run.some(function(a) { return /^--user-data-dir=\/tmp\/uber-notebook-export-[0-9a-f]{8}\/profile$/.test(a) }), "a profile of its own")
+      verify(run.indexOf("--disable-extensions") > 0 && run.some(function(a) { return /^--user-data-dir=\/tmp\/sunshine-export-[0-9a-f]{8}\/profile$/.test(a) }), "a profile of its own")
       var work = /^--user-data-dir=(.*)\/profile$/.exec(run.filter(function(a) { return a.indexOf("--user-data-dir=") === 0 })[0])[1]
       var src = files.disk[work + "/page.src.html"]
       verify(src.indexOf("Content-Security-Policy") > 0 && src.indexOf(title) > 0, "the page as a document")
@@ -1241,7 +1241,7 @@ Item {
       tryVerify(function() { return files.disk["/tmp/picked/Doc.docx"] === "DOCX" }, 3000)
       var office = lastRun(function(a) { return a.indexOf("--convert-to") >= 0 })
       compare(office.slice(0, 6), ["/usr/bin/unshare", "--user", "--map-current-user", "--net", "--", "/usr/lib/libreoffice/program/soffice"])
-      verify(office.some(function(a) { return /^-env:UserInstallation=file:\/\/\/tmp\/uber-notebook-export-[0-9a-f]{8}\/lo$/.test(a) }))
+      verify(office.some(function(a) { return /^-env:UserInstallation=file:\/\/\/tmp\/sunshine-export-[0-9a-f]{8}\/lo$/.test(a) }))
       compare(office[office.indexOf("--convert-to") + 1], "docx:MS Word 2007 XML")
       // Not saved: nothing kept.
       service.nextSave = ""
@@ -1250,7 +1250,7 @@ Item {
       // Printing: in the print folder, opened in your PDF viewer.
       view.exportAs("print", false)
       tryVerify(function() { return files.printed.length === 1 }, 3000)
-      compare(files.printed[0], "/tmp/uber-notebook-print/" + title + ".pdf")
+      compare(files.printed[0], "/tmp/sunshine-print/" + title + ".pdf")
       // The Exports folder (Settings), never over a file that's there.
       service.setSetting("exportTo", "folder")
       view.exportAs("pdf", false)
@@ -1269,7 +1269,7 @@ Item {
       files.exportTools = "/usr/lib/chromium/chromium\n"
       view.exportAs("docx", false)
       tryVerify(function() { return said.some(function(t) { return t.indexOf("needs LibreOffice") >= 0 }) }, 3000)
-      // (The package named, not a command: Uber Notebook installs nothing.)
+      // (The package named, not a command: Sunshine installs nothing.)
       verify(said.some(function(t) { return t.indexOf("the libreoffice-fresh package") >= 0 && t.indexOf("pkg add") < 0 }), JSON.stringify(said))
       service.nextSave = "/tmp/picked/Plain.pdf"
       view.exportAs("pdf", false)
@@ -1289,7 +1289,7 @@ Item {
       var page = JSON.parse(JSON.stringify(view.page))
       page.content = ["m1", "m2", "d1"]
       page.blocks = {
-        m1: { id: "m1", type: "p", html: 'A line with <a href="uber-notebook://math/x%5E2">x^2</a> in it' },
+        m1: { id: "m1", type: "p", html: 'A line with <a href="sunshine://math/x%5E2">x^2</a> in it' },
         m2: { id: "m2", type: "code", lang: "Math", html: "\\frac{1}{2}" },
         d1: { id: "d1", type: "code", lang: "Mermaid", html: "flowchart LR<br />A --&gt; B" }
       }
@@ -1300,7 +1300,7 @@ Item {
       var work2 = /^--user-data-dir=(.*)\/profile$/.exec(run2.filter(function(a) { return a.indexOf("--user-data-dir=") === 0 })[0])[1]
       var src2 = files.disk[work2 + "/page.src.html"]
       compare((src2.match(/src="data:image\/svg\+xml;base64,/g) || []).length, 2, "both equations drawn")
-      verify(src2.indexOf('src="uber-notebook-drawing:d1.png"') > 0, "the diagram, as its picture")
+      verify(src2.indexOf('src="sunshine-drawing:d1.png"') > 0, "the diagram, as its picture")
       compare(files.disk[work2 + "/drawings/d1.png"], "PNG")
       service.setSetting("exportTo", "ask")
       view.toast.disconnect(heard)
@@ -1399,7 +1399,7 @@ Item {
         // Unzipped on disk (the runtime folder is memory), in a folder of its own.
         var unzip = files.ran.filter(function(a) { return a[4] === "unzip" })[0]
         verify(unzip && unzip[6].indexOf(files.cacheDir + "/import-") === 0, JSON.stringify(unzip))
-        var made = files.ran.filter(function(a) { return a[3] === "uber-notebook-import-dir" })[0]
+        var made = files.ran.filter(function(a) { return a[3] === "sunshine-import-dir" })[0]
         compare(made[4], files.cacheDir)
         verify(made[5] && unzip[6].indexOf(made[5] + "/") === 0)
       } finally {
@@ -1526,7 +1526,7 @@ Item {
         verify(said.indexOf("Not imported: your notes are still opening. Try again in a moment") >= 0, JSON.stringify(said))
         wait(200)
         compare(Object.keys(ws.index.pages).length, before, "nothing made in the one before")
-        verify(!files.ran.some(function(a) { return a[3] === "uber-notebook-import-dir" }), "not even begun")
+        verify(!files.ran.some(function(a) { return a[3] === "sunshine-import-dir" }), "not even begun")
         // Open: imported as always.
         files.switching = false
         result = null

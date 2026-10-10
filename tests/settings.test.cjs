@@ -1,5 +1,5 @@
 // Checks settings validation, the shortcuts and their conflicts, the folder,
-// and the path to hypr/uber-notebook.lua and back.
+// and the path to hypr/sunshine.lua and back.
 // Usage (from the plugin directory): node tests/settings.test.cjs
 
 const assert = require("node:assert/strict");
@@ -30,7 +30,7 @@ check("merging validates", () => {
   assert.equal(merged.quickTo, "pages", "quick notes go to Pages or a notebook, nowhere else");
   assert.equal(plain(Settings.merge(defaults, { quickTo: "notebook" }, schema)).quickTo, "notebook");
   assert.equal(defaults.quickTo, "pages", "quick notes go to the Pages Inbox, unless you say");
-  assert.equal(defaults.space, "pages", "Uber Notebook opens in Pages the first time");
+  assert.equal(defaults.space, "pages", "Sunshine opens in Pages the first time");
   assert.equal(plain(Settings.merge(defaults, { space: "notebooks" }, schema)).space, "notebooks", "or where you were");
   assert.equal(merged.paper, "grid");
   assert.equal(merged.pen, "sans", "not a choice");
@@ -77,11 +77,11 @@ check("folders", () => {
   for (const bad of ["Notes", "../etc", "/home/u/../etc", "/a\nb", "~user/x", "~/", "~//", 42, null]) {
     assert.equal(Settings.cleanFolder(bad), null, JSON.stringify(bad));
   }
-  assert.equal(Settings.resolveFolder("", "/home/u", true), "/home/u/Documents/Uber Notebook");
-  assert.equal(Settings.resolveFolder("", "/home/u", false), "/home/u/Uber Notebook");
+  assert.equal(Settings.resolveFolder("", "/home/u", true), "/home/u/Documents/Sunshine");
+  assert.equal(Settings.resolveFolder("", "/home/u", false), "/home/u/Sunshine");
   assert.equal(Settings.resolveFolder("~/Notes", "/home/u", true), "/home/u/Notes");
   assert.equal(Settings.resolveFolder("/srv/notes", "/home/u", true), "/srv/notes");
-  assert.equal(Settings.resolveFolder("relative", "/home/u", true), "/home/u/Documents/Uber Notebook", "bad folders fall back");
+  assert.equal(Settings.resolveFolder("relative", "/home/u", true), "/home/u/Documents/Sunshine", "bad folders fall back");
   assert.equal(plain(Settings.merge(defaults, { lastNotebook: "../x" }, schema)).lastNotebook, "", "ids are plain");
 });
 
@@ -109,7 +109,7 @@ check("wanted binds and conflicts", () => {
 
   const hypr = [
     { modmask: 72, key: "n", description: "Something of yours" },
-    { modmask: 64, key: "N", description: "Open or close the notebook (Uber Notebook)" },
+    { modmask: 64, key: "N", description: "Open or close the notebook (Sunshine)" },
     { modmask: 64, key: "N", description: "Ours, in a submap", submap: "resize" },
   ];
   const checked = plain(Settings.checkBinds(wanted, hypr));
@@ -125,7 +125,7 @@ check("wanted binds and conflicts", () => {
 check("hyprland options", () => {
   const options = plain(Settings.hyprOptions(plain(Settings.wantedBinds(defaults)), defaults));
   assert.deepEqual(options.window, { floating: true, width: 1320, height: 900 });
-  assert.equal(options.binds[0].description, "Open or close the notebook (Uber Notebook)");
+  assert.equal(options.binds[0].description, "Open or close the notebook (Sunshine)");
   const odd = plain(Settings.hyprOptions([{ keys: "SUPER + N; x", event: "toggle", description: "" }, { keys: "SUPER + N", event: "exec", description: "" }], { floating: false, width: 1e9, height: 12 }));
   assert.equal(odd.binds.length, 0, "only plain keys and known events");
   assert.deepEqual(odd.window, { floating: false, width: 5000, height: 480 });
@@ -140,7 +140,7 @@ check("lua literals", () => {
 check("the registration runs in lua", () => {
   // The same text the service hands `hyprctl eval`, against the fake hl.
   const options = Settings.hyprOptions(Settings.wantedBinds(defaults), defaults);
-  const code = Settings.hyprRegistration(path.join(root, "hypr/uber-notebook.lua"), options);
+  const code = Settings.hyprRegistration(path.join(root, "hypr/sunshine.lua"), options);
   const script = 'package.path = "' + path.join(root, "tests") + '/?.lua;" .. package.path\n'
     + 'local fake = require("fake_hl")\n'
     + 'local result = (function() ' + code + ' end)()\n'
@@ -149,7 +149,7 @@ check("the registration runs in lua", () => {
   assert.equal(out, "ok 2 4");
   // Taken out as it stops, from the module's text (its folder may be gone by
   // then): nothing of it left.
-  const off = Settings.hyprRegistrationText(require("node:fs").readFileSync(path.join(root, "hypr/uber-notebook.lua"), "utf8"), { remove: true });
+  const off = Settings.hyprRegistrationText(require("node:fs").readFileSync(path.join(root, "hypr/sunshine.lua"), "utf8"), { remove: true });
   assert.ok(off.indexOf("return load(") === 0, "run from its text, not its file");
   const both = 'package.path = "' + path.join(root, "tests") + '/?.lua;" .. package.path\n'
     + 'local fake = require("fake_hl");\n'
@@ -160,27 +160,27 @@ check("the registration runs in lua", () => {
 });
 
 check("events", () => {
-  assert.deepEqual(plain(Settings.parseEvent("marcho78.uber-notebook|toggle")), { type: "command", command: "toggle" });
-  assert.deepEqual(plain(Settings.parseEvent("marcho78.uber-notebook|quick")), { type: "command", command: "quick" });
-  assert.equal(Settings.parseEvent("marcho78.uber-notebook|exec"), null);
+  assert.deepEqual(plain(Settings.parseEvent("xavier.sunshine|toggle")), { type: "command", command: "toggle" });
+  assert.deepEqual(plain(Settings.parseEvent("xavier.sunshine|quick")), { type: "command", command: "quick" });
+  assert.equal(Settings.parseEvent("xavier.sunshine|exec"), null);
   assert.equal(Settings.parseEvent("someone-else|toggle"), null);
-  assert.equal(Settings.parseEvent("marcho78.uber-notebook|toggle" + "x".repeat(80)), null);
+  assert.equal(Settings.parseEvent("xavier.sunshine|toggle" + "x".repeat(80)), null);
 });
 
 check("the entry in the bar", () => {
-  const bar = { layout: { left: [], right: [{ id: "omarchy.clock" }, { id: "marcho78.uber-notebook", paper: "grid" }] } };
-  assert.deepEqual(plain(Settings.entryInBar(bar, "marcho78.uber-notebook")), { paper: "grid" });
-  assert.deepEqual(plain(Settings.entryInBar(null, "marcho78.uber-notebook")), {});
+  const bar = { layout: { left: [], right: [{ id: "omarchy.clock" }, { id: "xavier.sunshine", paper: "grid" }] } };
+  assert.deepEqual(plain(Settings.entryInBar(bar, "xavier.sunshine")), { paper: "grid" });
+  assert.deepEqual(plain(Settings.entryInBar(null, "xavier.sunshine")), {});
 });
 
 check("the app launcher entry, with its icon", () => {
   const fs = require("node:fs");
   const os = require("node:os");
-  const entry = Settings.desktopEntry("/home/u/.config/omarchy/plugins/marcho78.uber-notebook");
+  const entry = Settings.desktopEntry("/home/u/.config/omarchy/plugins/xavier.sunshine");
   assert.match(entry, /^\[Desktop Entry\]\n/);
-  assert.match(entry, /\nName=Uber Notebook\n/);
-  assert.match(entry, /\nExec=\/usr\/bin\/omarchy-shell uber-notebook show\n/);
-  assert.match(entry, /\nIcon=\/home\/u\/\.config\/omarchy\/plugins\/marcho78\.uber-notebook\/icon\.svg\n/);
+  assert.match(entry, /\nName=Sunshine\n/);
+  assert.match(entry, /\nExec=\/usr\/bin\/omarchy-shell sunshine show\n/);
+  assert.match(entry, /\nIcon=\/home\/u\/\.config\/omarchy\/plugins\/xavier\.sunshine\/icon\.svg\n/);
   assert.equal(Settings.desktopEntry("relative/dir"), "", "only an absolute folder");
   assert.equal(Settings.desktopEntry("/a\nExec=evil"), "", "no line breaks sneaking in keys");
   assert.match(Settings.desktopEntry("/odd\\dir"), /Icon=\/odd\\\\dir\/icon\.svg/, "backslashes escaped");
@@ -189,7 +189,7 @@ check("the app launcher entry, with its icon", () => {
   assert.match(svg, /^<svg [^>]*xmlns="http:\/\/www\.w3\.org\/2000\/svg"/);
   // And the desktop's own checker is happy with it, where it's installed.
   if (fs.existsSync("/usr/bin/desktop-file-validate")) {
-    const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "uber-notebook-")), "marcho78-uber-notebook.desktop");
+    const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "sunshine-")), "xavier-sunshine.desktop");
     fs.writeFileSync(file, Settings.desktopEntry(root));
     const out = execFileSync("/usr/bin/desktop-file-validate", [file], { encoding: "utf8" });
     assert.equal(out.trim(), "", "desktop-file-validate: " + out);

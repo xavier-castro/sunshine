@@ -94,7 +94,7 @@ ShellRoot {
   // and then the page is gone, never written back.
   function trashWhileWriting(d, notes) {
     var doomed = notes + "/Pages/doomed.json"
-    function sig(s, done) { store.exec(["/usr/bin/bash", "-c", "/usr/bin/pkill -" + s + " -f -- \"uber-notebook-files serve $1\\$\"", "x", notes], function(ok) { done(ok) }) }
+    function sig(s, done) { store.exec(["/usr/bin/bash", "-c", "/usr/bin/pkill -" + s + " -f -- \"sunshine-files serve $1\\$\"", "x", notes], function(ok) { done(ok) }) }
     sig("STOP", function(paused) {
       store.writeKept(doomed, "one", function() {})
       store.writeKept(doomed, "two", function() {})
@@ -124,7 +124,7 @@ ShellRoot {
   // then one off (it failed too often).
   function fallbackChecks(d, notes) {
     var h = store.notes
-    store.exec(["/usr/bin/bash", "-c", "/usr/bin/pkill -STOP -f -- \"uber-notebook-files serve $1\\$\"", "x", notes], function(paused) {
+    store.exec(["/usr/bin/bash", "-c", "/usr/bin/pkill -STOP -f -- \"sunshine-files serve $1\\$\"", "x", notes], function(paused) {
       if (!paused) { say("fallback: helper paused", false, ""); Qt.quit(); return }
       root.fallbackWrite(d, notes, h)
       h.run.stop()
@@ -229,7 +229,7 @@ ShellRoot {
       })
     })
   }
-  // Nothing Uber Notebook writes can be read by another account: notes and
+  // Nothing Sunshine writes can be read by another account: notes and
   // their folders (by the files helper), whatever a program it runs writes,
   // folders made with mkdir -p, a notes folder from before (755) made 700,
   // and an agent's request in a file of its own, never on a command line.
@@ -253,10 +253,10 @@ ShellRoot {
     say("private: by default a reminder says only that it's due, and where to turn its words on", byDefault === false && r0.summary === "A reminder is due" && JSON.stringify(r0).indexOf("Patel") < 0 && JSON.stringify(r0).indexOf("Health") < 0
       && r0.body === "Click to open it. Turn on reminder details in Settings → Notifications." && e1.body === "Click to see it. Turn on reminder details in Settings → Notifications.", JSON.stringify([r0, e1.body]))
     say("private: turned off, a reminder's and an event's words aren't in a notification",
-      r1.summary === "A reminder is due" && JSON.stringify(r1).indexOf("Patel") < 0 && JSON.stringify(r1).indexOf("Health") < 0 && r1.exec.join(" ") === "/usr/bin/omarchy-shell uber-notebook open " + pid
+      r1.summary === "A reminder is due" && JSON.stringify(r1).indexOf("Patel") < 0 && JSON.stringify(r1).indexOf("Health") < 0 && r1.exec.join(" ") === "/usr/bin/omarchy-shell sunshine open " + pid
       && e1.summary === "An event is starting" && JSON.stringify(e1).indexOf("Lawyer") < 0 && e1.exec[3] === "2026-10-09"
       && own.summary === "Not saved yet" && r2.summary === "Health" && r2.body.indexOf("Patel") >= 0
-      && e2.summary === "An event is starting" && JSON.stringify(e2).indexOf("Lawyer") < 0 && JSON.stringify(e2).indexOf("Main St") < 0 && e2.exec.join(" ") === "/usr/bin/omarchy-shell uber-notebook open " + pid,
+      && e2.summary === "An event is starting" && JSON.stringify(e2).indexOf("Lawyer") < 0 && JSON.stringify(e2).indexOf("Main St") < 0 && e2.exec.join(" ") === "/usr/bin/omarchy-shell sunshine open " + pid,
       JSON.stringify([r1.summary, e1.summary, own.summary, r2.summary]))
     var notes = d + "/notes"
     function modes(paths, done) {
@@ -403,10 +403,10 @@ ShellRoot {
           && store2.notebooks.length === 0 && refused === null && quickRefused,
           "had " + had + " now " + store2.notebooks.length + " " + store2.blockedFolder + " " + store2.blockedWhy + " refused " + (refused === null))
         // One that can't even be made (a drive that's gone).
-        store2.folder = "/proc/uber-notebook-nope"
+        store2.folder = "/proc/sunshine-nope"
         store2.locate()
         until(function() { return store2.blockedWhy === "made" }, function() {
-          say("private: a notes folder that can't be made isn't opened, and it's said", store2.blockedFolder === "/proc/uber-notebook-nope" && store2.rootPath === "" && store2.notebooks.length === 0, store2.blockedFolder + " " + store2.blockedWhy)
+          say("private: a notes folder that can't be made isn't opened, and it's said", store2.blockedFolder === "/proc/sunshine-nope" && store2.rootPath === "" && store2.notebooks.length === 0, store2.blockedFolder + " " + store2.blockedWhy)
           // Back to the first: opened again, its notebook there, made 700.
           store2.folder = d + "/n3"
           store2.locate()
@@ -435,7 +435,7 @@ ShellRoot {
   // the folder it's in, so nothing's put where that drive goes; said
   // ("made"). Looked at again once it's there (Try again, the folder
   // picked again): opened. A new profile's is made, and the folders it's
-  // in; so is one in Uber Notebook's own data folder (the demo's).
+  // in; so is one in Sunshine's own data folder (the demo's).
   function unmountedChecks(d) {
     var until = root.until
     function later(ms, fn) {
@@ -472,7 +472,7 @@ ShellRoot {
                     store2.dataFolder = d + "/data"
                     store2.folder = d + "/data/demo"
                     until(function() { return store2.ready && store2.rootPath === d + "/data/demo" }, function() {
-                      say("private: Uber Notebook's own data folder made as it's needed (the demo's in it)", store2.blockedFolder === "" && store2.rootPath === d + "/data/demo", store2.rootPath + " | " + store2.blockedFolder)
+                      say("private: Sunshine's own data folder made as it's needed (the demo's in it)", store2.blockedFolder === "" && store2.rootPath === d + "/data/demo", store2.rootPath + " | " + store2.blockedFolder)
                       store2.newProfile = true
                       store2.folder = d + "/new/Work/Notes"
                       until(function() { return store2.ready && store2.rootPath === d + "/new/Work/Notes" }, function() {
@@ -485,8 +485,8 @@ ShellRoot {
                           var fake = function(name, said) { return "/usr/bin/printf '#!/bin/sh\\necho \"chmod: changing permissions: " + said + "\" >&2\\nexit 1\\n' > " + d + "/" + name + "; /usr/bin/chmod 700 " + d + "/" + name }
                           var on = function(name) { return store2.privateScript.split("/usr/bin/chmod go-rwx").join(d + "/" + name + " go-rwx") }
                           store.exec(["/usr/bin/bash", "-c", fake("refuses", "Operation not supported") + "; " + fake("readonly", "Read-only file system")], function() {
-                            store.exec(["/usr/bin/bash", "-c", on("refuses"), "uber-notebook-private", d + "/new/Work/Notes"], function(refused) {
-                              store.exec(["/usr/bin/bash", "-c", on("readonly"), "uber-notebook-private", d + "/new/Work/Notes"], function(readOnly) {
+                            store.exec(["/usr/bin/bash", "-c", on("refuses"), "sunshine-private", d + "/new/Work/Notes"], function(refused) {
+                              store.exec(["/usr/bin/bash", "-c", on("readonly"), "sunshine-private", d + "/new/Work/Notes"], function(readOnly) {
                                 say("private: a drive that refuses the change isn't private; one that's read-only, by its mode", store2.privateScript.indexOf("/usr/bin/chmod go-rwx") > 0 && refused === false && readOnly === true, "refused " + refused + ", read-only " + readOnly)
                           // A notebook search as another profile opens: nothing
                           // of this one found (to be shown under that one).

@@ -112,8 +112,8 @@ function inline(inner, notes) {
     if (f.strike) body = "~~" + body + "~~"
     if (f.italic) body = "*" + body + "*"
     if (f.bold) body = "**" + body + "**"
-    // (A link written before Uber Notebook was renamed comes out with its new name.)
-    if (g.href) body = "[" + body + "](" + g.href.replace(/^omanote:\/\//, "uber-notebook://").replace(/[()\s]/g, function(c) { return encodeURIComponent(c) }) + ")"
+    // (A link written before Sunshine was renamed comes out with its new name.)
+    if (g.href) body = "[" + body + "](" + g.href.replace(/^omanote:\/\//, "sunshine://").replace(/[()\s]/g, function(c) { return encodeURIComponent(c) }) + ")"
     out += lead + body + trail
   })
   return out
@@ -254,7 +254,7 @@ function fromDocPage(page, lookup, options) {
   var syncedCount = 0
   var syncedChars = 0
   var pass = opts.syncedBudget && typeof opts.syncedBudget === "object" ? opts.syncedBudget : null
-  var pastPass = "*(A synced block: open the page in Uber Notebook)*"
+  var pastPass = "*(A synced block: open the page in Sunshine)*"
   function syncedLines(b) {
     var id = b.data ? b.data.page : ""
     if (!id || id === page.id || syncedCount >= 50 || syncedChars >= 4000000) return "*(A synced block)*"
@@ -372,7 +372,7 @@ function fromDocPage(page, lookup, options) {
     else if (b.type === "table") line = Table.toMarkdown(b.table, inline)
     else if (b.type === "sketch") {
       var file = typeof opts.sketchFile === "function" ? opts.sketchFile(b.id) : ""
-      line = file ? "![Sketch](" + file + ")" : "*(A sketch, drawn in Uber Notebook)*"
+      line = file ? "![Sketch](" + file + ")" : "*(A sketch, drawn in Sunshine)*"
     }
     else if (b.type === "audio") {
       // A link to the recording, and what was said in it, quoted.

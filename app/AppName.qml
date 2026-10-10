@@ -1,6 +1,6 @@
 import QtQuick
 
-// Uber Notebook's icon and name, at the top left of Pages' sidebar and the
+// Sunshine's icon and name, at the top left of Pages' sidebar and the
 // shelf: a click on it, Settings → About.
 Row {
   id: name
@@ -22,7 +22,7 @@ Row {
   Text {
     anchors.verticalCenter: parent.verticalCenter
     textFormat: Text.PlainText
-    text: "Uber Notebook"
+    text: "Sunshine"
     font.family: name.theme ? name.theme.uiFont : ""
     font.pixelSize: 14
     font.weight: Font.DemiBold

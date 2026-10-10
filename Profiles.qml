@@ -16,8 +16,8 @@ QtObject {
   property var service: null
   // Store.qml: home, and programs to run (exec).
   property var files: null
-  // Uber Notebook's own data folder ("~/.local/share/uber-notebook"): the demo's is in it.
-  property string dataFolder: "~/.local/share/uber-notebook"
+  // Sunshine's own data folder ("~/.local/share/sunshine"): the demo's is in it.
+  property string dataFolder: "~/.local/share/sunshine"
 
   readonly property var list: service ? service.settings.profiles : []
   readonly property var current: service ? Profiles.find(list, service.settings.profile) : null
@@ -25,7 +25,7 @@ QtObject {
   property bool settled: false
   // Then every profile's notes folder that's there made yours alone (700),
   // not only the one opened: one from before was open to other accounts
-  // (755). Only the folder (in your home folder itself, what Uber Notebook
+  // (755). Only the folder (in your home folder itself, what Sunshine
   // keeps there); nothing in it is touched, and one that can't be is left
   // till it's opened (then said).
   onSettledChanged: if (settled) makeAllPrivate()
@@ -38,7 +38,7 @@ QtObject {
       if (!h || !path || seen[path]) return
       seen[path] = true
       if (path !== h) { files.makePrivate(path); return }
-      // (In your home folder itself: what Uber Notebook keeps there, its
+      // (In your home folder itself: what Sunshine keeps there, its
       // notebooks' folders too, never anything else.)
       if (typeof files.notebookFoldersIn === "function") files.notebookFoldersIn(h, function(ids) { files.privateEntries(h, files.ownEntries.concat(ids)) })
       else files.privateEntries(h, files.ownEntries)
@@ -106,15 +106,15 @@ QtObject {
     }
     // The folder set in Settings, or the default places.
     var set = service.settings.folder || ""
-    var places = set ? [set, "~/Documents/Uber Notebook"] : ["~/Documents/Uber Notebook", "~/Uber Notebook"]
+    var places = set ? [set, "~/Documents/Sunshine"] : ["~/Documents/Sunshine", "~/Sunshine"]
     var paths = places.map(function(p) { return Settings.resolveFolder(p, pm.home(), true) })
     var s = service.settings
-    files.exec(["/usr/bin/bash", "-c", notesScript, "uber-notebook-notes", s.inbox || "", s.lastPage || "", s.lastNotebook || ""].concat(paths), function(ok, out) {
+    files.exec(["/usr/bin/bash", "-c", notesScript, "sunshine-notes", s.inbox || "", s.lastPage || "", s.lastNotebook || ""].concat(paths), function(ok, out) {
       var rows = String(out || "").split("\n").filter(function(l) { return l.trim() }).map(function(l) { return l.trim().split(/\s+/).map(function(x) { return x === "1" }) })
       var had = rows.map(function(r) { return r[0] === true })
       var made = null
       if (set) {
-        // The folder Uber Notebook's been using is open; the default place, if it
+        // The folder Sunshine's been using is open; the default place, if it
         // has notes and isn't that one, is a profile too: "Personal", with
         // the Inbox, the page and the notebook the settings name if they're its.
         made = Profiles.fromBefore(set)
@@ -203,7 +203,7 @@ QtObject {
   // yet (then it's the folder the first one is made of, as before). The
   // profiles themselves: never set whole.
   function setByCommand(key, value) {
-    if (key === "profiles") return "Profiles are changed one at a time: addProfile, renameProfile, removeProfile, profileFolder (omarchy-shell uber-notebook help)"
+    if (key === "profiles") return "Profiles are changed one at a time: addProfile, renameProfile, removeProfile, profileFolder (omarchy-shell sunshine help)"
     if (key === "folder" && current) return current.demo ? "The demo keeps its own folder" : setFolder(current.id, String(value))
     if (key === "profile" && list.length) return use(String(value))
     return null
@@ -238,7 +238,7 @@ QtObject {
     return ""
   }
 
-  // The demo: its profile open (made the first time, in Uber Notebook's data folder).
+  // The demo: its profile open (made the first time, in Sunshine's data folder).
   readonly property var demo: list.filter(function(p) { return p.demo })[0] || null
   function openDemo() {
     // (Refused (an audio note being recorded): the welcome screen stays.)
@@ -266,7 +266,7 @@ QtObject {
     var demoOpen = current !== null && current.id === demo.id
     var changes = Profiles.switchTo(list2, demoOpen ? { profile: "" } : service.settings, demo.id)
     apply(changes)
-    // (Only ever a demo folder of Uber Notebook's own: "demo", or "demo-" and
+    // (Only ever a demo folder of Sunshine's own: "demo", or "demo-" and
     // the time it was made, in its own data folder.)
     // (What couldn't be saved in it isn't tried again: it would bring it back.)
     if (old.indexOf(base + "/") === 0 && /^demo(-[0-9a-z]{1,13})?$/.test(old.slice(base.length + 1))) {

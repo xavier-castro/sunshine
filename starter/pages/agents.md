@@ -4,7 +4,7 @@ icon: 🤖
 parent: welcome
 order: 3
 ---
-Uber Notebook works with Omarchy's default coding agent (Claude Code, Codex, OpenCode…). Ask it from any page, and its changes show up as it works, each one a step you can undo.
+Sunshine works with Omarchy's default coding agent (Claude Code, Codex, OpenCode…). Ask it from any page, and its changes show up as it works, each one a step you can undo.
 
 > [!TIP] Press **Ctrl+J**, type `/agent`, or select some words and click *Ask* on the toolbar.
 
@@ -19,19 +19,19 @@ Uber Notebook works with Omarchy's default coding agent (Claude Code, Codex, Ope
 
 ## From the terminal
 
-Agents and scripts reach your notes with `omarchy-shell uber-notebook`. The app does every write, so a page shows up in the window as it's added:
+Agents and scripts reach your notes with `omarchy-shell sunshine`. The app does every write, so a page shows up in the window as it's added:
 
 ```bash
-omarchy-shell uber-notebook help                  # every command, as JSON
-omarchy-shell uber-notebook find "launch"         # pages with those words
-omarchy-shell uber-notebook add "Ideas" ideas.md  # a new page in the Inbox, from Markdown
-omarchy-shell uber-notebook events "" ""          # what's on the calendar this week
-omarchy-shell uber-notebook contacts "northwind"  # people at Northwind
+omarchy-shell sunshine help                  # every command, as JSON
+omarchy-shell sunshine find "launch"         # pages with those words
+omarchy-shell sunshine add "Ideas" ideas.md  # a new page in the Inbox, from Markdown
+omarchy-shell sunshine events "" ""          # what's on the calendar this week
+omarchy-shell sunshine contacts "northwind"  # people at Northwind
 ```
 
 <details>
 <summary>What can an agent change?</summary>
 
-Pages and the blocks on them, boards, tags, projects, the calendar and People. It can't record audio or draw. Before it changes a page, Uber Notebook keeps the page as it was in its *Page history*, and a locked page doesn't change at all.
+Pages and the blocks on them, boards, tags, projects, the calendar and People. It can't record audio or draw. Before it changes a page, Sunshine keeps the page as it was in its *Page history*, and a locked page doesn't change at all.
 
 </details>

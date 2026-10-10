@@ -191,7 +191,7 @@ function parseList(text) {
 // ---- meeting mode, waiting for voxtype -----------------------------------------------------
 
 // Meeting mode turned on in voxtype's settings takes effect when voxtype
-// starts again: Uber Notebook doesn't restart it (it never manages a
+// starts again: Sunshine doesn't restart it (it never manages a
 // service), it says so until voxtype has.
 var WAITING = "Meeting mode is on in voxtype's settings. It takes effect once voxtype restarts: log out and back in, or restart the voxtype service yourself."
 

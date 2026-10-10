@@ -8,10 +8,10 @@ import "../../Agent.js" as Agent
 QtObject {
   id: files
 
-  property string rootPath: "/tmp/uber-notebook-dev"
+  property string rootPath: "/tmp/sunshine-dev"
   property string home: "/tmp"
   property string runtimeDir: "/tmp"
-  property string cacheDir: "/home/u/.cache/uber-notebook"
+  property string cacheDir: "/home/u/.cache/sunshine"
   // path -> text
   property var disk: ({})
   // The helper's reads answered later, as the real one's are (else at once).
@@ -110,7 +110,7 @@ QtObject {
   property var fetchPages: ({})
   property var fetchPictures: ({})
   // GitHub, for the update check: { url: { code, body } } (a URL not in it:
-  // GitHub can't be reached). Uber Notebook installed from git, and what
+  // GitHub can't be reached). Sunshine installed from git, and what
   // `omarchy plugin update` was asked to update.
   property var http: ({})
   property bool gitCheckout: false
@@ -234,7 +234,7 @@ QtObject {
   property string probeId: "1:1"
   property string probeFails: ""
   // The archive helper (Store.qml), as its commands' first words.
-  readonly property string filesHelper: "/plugin/bin/uber-notebook-files"
+  readonly property string filesHelper: "/plugin/bin/sunshine-files"
   function helper(args, done, options) { exec(["/usr/bin/python3", "-I", "-S", filesHelper].concat(args), done, options) }
 
   // Exports (app/Exporter.qml): the programs there ("" for none), a refusal
@@ -244,7 +244,7 @@ QtObject {
   property var printed: []
   function openPrint(path, done) { printed = printed.concat([path]); if (done) done(true) }
 
-  // A file of Uber Notebook's own (Store.putFile: the files helper's put).
+  // A file of Sunshine's own (Store.putFile: the files helper's put).
   property bool failPut: false
   function putFile(folder, path, text, done) {
     if (failPut) { if (done) done(false); return }
@@ -278,10 +278,10 @@ QtObject {
     inputs = inputs.concat([String(options && options.input || "")])
     // (holdReads: a zip unpacked, or a file copied in, when answerReads() is.)
     if (holdReads && argv[3] === filesHelper && argv[4] === "unzip") { heldReads.push(function() { files.execNow(argv, done, options) }); return }
-    if (holdReads && argv[3] === "uber-notebook-import-file") { heldReads.push(function() { files.execNow(argv, done, options) }); return }
+    if (holdReads && argv[3] === "sunshine-import-file") { heldReads.push(function() { files.execNow(argv, done, options) }); return }
     // (holdReads: a link's page read, and a page's history listed, when answerReads() is.)
     if (holdReads && argv[0] === "/usr/bin/curl" && argv.indexOf("\n%{http_code}\t%{redirect_url}") > 0) { heldReads.push(function() { files.execNow(argv, done, options) }); return }
-    if (holdReads && argv[3] === "uber-notebook-list") { heldReads.push(function() { files.execNow(argv, done, options) }); return }
+    if (holdReads && argv[3] === "sunshine-list") { heldReads.push(function() { files.execNow(argv, done, options) }); return }
     execNow(argv, done, options)
   }
   function execNow(argv, done, options) {
@@ -298,8 +298,8 @@ QtObject {
       }).join("\n") + "\n")
       return
     }
-    if (argv[0] === "/usr/bin/bash" && argv[3] === "uber-notebook-export-tools") { done(true, exportTools); return }
-    // The Markdown copy's changes (bin/uber-notebook-files mirror-apply):
+    if (argv[0] === "/usr/bin/bash" && argv[3] === "sunshine-export-tools") { done(true, exportTools); return }
+    // The Markdown copy's changes (bin/sunshine-files mirror-apply):
     // each made only to a file still as it wrote it (its fingerprint), else
     // kept; the plan taken away.
     if (argv[3] === filesHelper && argv[4] === "mirror-apply") {
@@ -334,7 +334,7 @@ QtObject {
     if (pdfTo) { disk[pdfTo.slice(15)] = "PDF"; done(true, ""); return }
     if (argv.indexOf("--convert-to") >= 0) { disk[argv[argv.indexOf("--outdir") + 1] + "/page.docx"] = "DOCX"; done(true, ""); return }
     if (argv[0] === "/usr/bin/test" && argv[1] === "-s") { done(disk[argv[2]] !== undefined, ""); return }
-    if (argv[0] === "/usr/bin/bash" && argv[3] === "uber-notebook-scan") {
+    if (argv[0] === "/usr/bin/bash" && argv[3] === "sunshine-scan") {
       var out = ""
       argv.slice(4).forEach(function(root) {
         if (disk[root] !== undefined) { out += "R\t" + root + "\u0000" + root + "\u0000"; return }
@@ -345,7 +345,7 @@ QtObject {
       return
     }
     // A folder's folders and files, for the picture picker ("d\t0\tname", "f\tmtime\tname").
-    if (argv[0] === "/usr/bin/bash" && argv[3] === "uber-notebook-pictures") {
+    if (argv[0] === "/usr/bin/bash" && argv[3] === "sunshine-pictures") {
       var base = argv[4].replace(/\/+$/, "") + "/"
       var seenDirs = {}
       var rows = []
@@ -361,7 +361,7 @@ QtObject {
     }
     // Notes from before profiles: for each folder, whether it has them, and
     // the Inbox, the page and the notebook the settings name.
-    if (argv[0] === "/usr/bin/bash" && argv[3] === "uber-notebook-notes") {
+    if (argv[0] === "/usr/bin/bash" && argv[3] === "sunshine-notes") {
       var ids = argv.slice(4, 7)
       done(true, argv.slice(7).map(function(d) {
         var bit = function(on) { return on ? "1" : "0" }
@@ -372,32 +372,32 @@ QtObject {
       return
     }
     // The update check (Updates.qml): GitHub's answer, then its status.
-    if (argv[0] === "/usr/bin/bash" && argv[3] === "uber-notebook-update") {
+    if (argv[0] === "/usr/bin/bash" && argv[3] === "sunshine-update") {
       var answer = http[argv[4]]
       if (!answer) { done(false, "curl: (6) Could not resolve host: api.github.com"); return }
       done(true, answer.body + "\n" + answer.code)
       return
     }
     if (argv[0] === "/usr/bin/test" && /\/\.git$/.test(argv[2])) { done(gitCheckout, ""); return }
-    if (argv[0] === "/usr/bin/bash" && argv[3] === "uber-notebook-install") {
+    if (argv[0] === "/usr/bin/bash" && argv[3] === "sunshine-install") {
       installed = installed.concat([argv[4]])
       done(true, "Updated " + argv[4] + ".")
       return
     }
     // Backups (Backups.js). A backup here is "FAKE-TAR:" then JSON:
     // { manifest, files: { p1: { "Pages/x.json": text } } }.
-    if (argv[0] === "/usr/bin/bash" && argv[3] === "uber-notebook-backup-has") {
+    if (argv[0] === "/usr/bin/bash" && argv[3] === "sunshine-backup-has") {
       done(true, argv.slice(4).map(function(d) { return Object.keys(disk).some(function(p) { return p.indexOf(d + "/") === 0 }) ? "1" : "0" }).join("\n") + "\n")
       return
     }
-    if (argv[0] === "/usr/bin/bash" && argv[3] === "uber-notebook-backups") {
+    if (argv[0] === "/usr/bin/bash" && argv[3] === "sunshine-backups") {
       var bdir = argv[4].replace(/\/+$/, "") + "/"
       var rows2 = Object.keys(disk).filter(function(p) { var n = p.slice(bdir.length); return p.indexOf(bdir) === 0 && n.indexOf("/") < 0 && n.charAt(0) !== "." && /\.tar\.gz$/.test(n) })
         .map(function(p) { return (mtimes[p] || 1759455000) + "\t" + String(disk[p]).length + "\t" + p.slice(bdir.length) })
       done(true, (openFolders[argv[4]] ? "open\n" : "") + rows2.join("\n") + (rows2.length ? "\n" : ""))
       return
     }
-    if (argv[0] === "/usr/bin/bash" && argv[3] === "uber-notebook-backup") {
+    if (argv[0] === "/usr/bin/bash" && argv[3] === "sunshine-backup") {
       var a = argv.slice(4)
       if (openFolders[a[0]]) { done(false, "open\nThat folder can't keep your backups private: another account on this computer could read them there. Pick another folder for backups"); return }
       var out2 = a[0] + "/" + a[1] + a[2]
@@ -413,13 +413,13 @@ QtObject {
           packed[a[t + 1]][rel] = disk[p]
         })
       }
-      // (Its uber-notebook-backup.json on its input, never its command line.)
+      // (Its sunshine-backup.json on its input, never its command line.)
       disk[out2] = "FAKE-TAR:" + JSON.stringify({ manifest: JSON.parse(String(options && options.input || "null")), files: packed })
       mtimes[out2] = Date.now() / 1000
       done(true, String(disk[out2].length) + "\n" + out2 + "\n")
       return
     }
-    // The archive helper (bin/uber-notebook-files): a backup looked into,
+    // The archive helper (bin/sunshine-files): a backup looked into,
     // and one profile in it put back (only if it's still the one looked into).
     if (argv[0] === "/usr/bin/python3" && argv[3] === filesHelper && argv[4] === "read") {
       var held2 = disk[argv[6]]
@@ -463,7 +463,7 @@ QtObject {
       done(true, "")
       return
     }
-    if (argv[0] === "/usr/bin/bash" && argv[3] === "uber-notebook-list") {
+    if (argv[0] === "/usr/bin/bash" && argv[3] === "sunshine-list") {
       var dir = argv[4] + "/"
       var names = Object.keys(disk).filter(function(p) { return p.indexOf(dir) === 0 && p.slice(dir.length).indexOf("/") < 0 && /\.json$/.test(p) })
         .map(function(p) { return p.slice(dir.length) })
@@ -471,7 +471,7 @@ QtObject {
       return
     }
     // The Markdown copy's own files in a folder (Mirror.qml).
-    if (argv[0] === "/usr/bin/bash" && argv[3] === "uber-notebook-mirror-list") {
+    if (argv[0] === "/usr/bin/bash" && argv[3] === "sunshine-mirror-list") {
       var top = argv[4] + "/"
       var mine = Object.keys(disk).filter(function(p) { return p.indexOf(top) === 0 })
         .map(function(p) { return p.slice(top.length) })
@@ -488,14 +488,14 @@ QtObject {
     }
     // A file copied into assets: its size.
     // An email's attachment: its base64, decoded into a file.
-    if (argv[0] === "/usr/bin/bash" && argv[3] === "uber-notebook-unpack") {
+    if (argv[0] === "/usr/bin/bash" && argv[3] === "sunshine-unpack") {
       if (disk[argv[4]] === undefined) { done(false, "No such file"); return }
       disk[argv[5]] = Qt.atob(String(disk[argv[4]]))
       delete disk[argv[4]]
       done(true, "")
       return
     }
-    if (argv[0] === "/usr/bin/bash" && argv[3] === "uber-notebook-import-file") {
+    if (argv[0] === "/usr/bin/bash" && argv[3] === "sunshine-import-file") {
       if (disk[argv[4]] === undefined) { done(false, "No such file"); return }
       disk[argv[5]] = disk[argv[4]]
       done(true, String(disk[argv[4]].length) + "\n")
@@ -620,7 +620,7 @@ QtObject {
     disk[path] = "PNG"
     return true
   }
-  function tempPath(name) { return "/tmp/uber-notebook-" + name }
+  function tempPath(name) { return "/tmp/sunshine-" + name }
   // A copy of a file where you said (Store.qml: the files helper's place,
   // a new file yours alone; "keep": never over one that's there).
   function copyFileTo(from, to, done) { placeFile(from, to, true, done) }

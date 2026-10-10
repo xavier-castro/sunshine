@@ -1,8 +1,8 @@
-// Agent.js - asking your agent from Uber Notebook. The agent is Omarchy's default
+// Agent.js - asking your agent from Sunshine. The agent is Omarchy's default
 // coding agent: whichever harness `omarchy default agent` set (Claude Code,
 // Codex, OpenCode, Gemini...), launched by Omarchy with a prompt that says
 // where you are in your notes and what you'd like. It does the work through
-// the uber-notebook skill's commands, so its changes show up in the page as it
+// the sunshine skill's commands, so its changes show up in the page as it
 // goes, each one a step you can undo.
 //
 // Shared by the Pages view (app/DocView.qml, app/AgentPop.qml) and
@@ -58,7 +58,7 @@ function clip(text, max) {
 // The prompt the agent starts with. `o`: { request, page: { id, title },
 // scope, blocks (ids picked), words (selected), line (the empty line's
 // block id), into (for a new page: the page it's in, { id, title }, or none
-// for the top of Pages), skill (the uber-notebook skill's SKILL.md),
+// for the top of Pages), skill (the sunshine skill's SKILL.md),
 // earlier (a conversation it can't pick up where it was: [{ request,
 // answer }], what was said, for it to go on from), here (in the panel), dir
 // (its folder there), agent (who it's for) }. It carries ids, not the
@@ -67,7 +67,7 @@ function clip(text, max) {
 function prompt(o) {
   var page = o.page || {}
   var out = []
-  out.push("I'm in Uber Notebook, the notes app in my Omarchy shell, and I'd like your help with my notes.")
+  out.push("I'm in Sunshine, the notes app in my Omarchy shell, and I'd like your help with my notes.")
   out.push("")
   // A new page, made for it and open: written there, not somewhere else.
   if (o.scope === "new") {
@@ -101,10 +101,10 @@ function prompt(o) {
   out.push("What I'd like" + (earlier.length ? " now" : "") + ": " + clip(o.request, MAX_REQUEST))
   out.push("")
   if (o.here) {
-    out.push("You're working inside Uber Notebook, with no terminal: what you write shows in a small panel on the page, "
+    out.push("You're working inside Sunshine, with no terminal: what you write shows in a small panel on the page, "
       + "so keep it short, and end by saying what you changed in a sentence or two.")
-    out.push("Here Uber Notebook's commands go under their panel name: run each as omarchy-shell uber-notebook-agent <command> ... "
-      + "(the skill's omarchy-shell uber-notebook <command> ..., the same commands and arguments), and only so: if one's refused, "
+    out.push("Here Sunshine's commands go under their panel name: run each as omarchy-shell sunshine-agent <command> ... "
+      + "(the skill's omarchy-shell sunshine <command> ..., the same commands and arguments), and only so: if one's refused, "
       + "say why rather than trying it another way.")
     // (What it writes for a command: a file of its own, not one made in a
     // shell; reading, the skill included, isn't held back.)
@@ -112,21 +112,21 @@ function prompt(o) {
       + o.dir + " (your working folder), and give the command that file's full path.")
     // (Codex's sandbox has no network here, which keeps its commands from
     // the shell's socket too: they go outside it, each reviewed by Codex.)
-    if (o.agent === "codex") out.push("Your sandbox has no network here, and that keeps Uber Notebook's commands from reaching it "
-      + "(they'd say omarchy-shell is not running): run each omarchy-shell uber-notebook-agent command with escalated "
+    if (o.agent === "codex") out.push("Your sandbox has no network here, and that keeps Sunshine's commands from reaching it "
+      + "(they'd say omarchy-shell is not running): run each omarchy-shell sunshine-agent command with escalated "
       + "permissions, outside the sandbox.")
     out.push("")
   }
   // (One way to it that works in any sandbox and needs no file tool: the
-  // skill command, one of Uber Notebook's own; else the file.)
-  var name = o.here ? "omarchy-shell uber-notebook-agent" : "omarchy-shell uber-notebook"
-  out.push("Use the uber-notebook skill: it explains the omarchy-shell uber-notebook commands that read and change my notes "
+  // skill command, one of Sunshine's own; else the file.)
+  var name = o.here ? "omarchy-shell sunshine-agent" : "omarchy-shell sunshine"
+  out.push("Use the sunshine skill: it explains the omarchy-shell sunshine commands that read and change my notes "
     + "(blocks, read, replace, insertAfter, append, add, find). Get it with `" + name + " skill`, which prints it (and `"
     + name + " help` lists every command), or with your skill mechanism, or read the file directly:")
   out.push("")
   out.push("  " + o.skill)
   out.push("")
-  out.push("Read and change my notes only through those commands: don't open the files my notes are kept in, or Uber Notebook's own "
+  out.push("Read and change my notes only through those commands: don't open the files my notes are kept in, or Sunshine's own "
     + "files and code, its skill excepted (the skill says what its commands and its Markdown can do). Change only what my request "
     + "is about. When you're done, tell me what you changed.")
   return out.join("\n")
@@ -176,7 +176,7 @@ function menuAgents(text) {
 //
 // Claude Code, Grok and Codex can work without their terminal and say each
 // step as a line of JSON as they go: what they're doing, their answer (as
-// it's written, for Claude Code and Grok), how it ended. Uber Notebook shows
+// it's written, for Claude Code and Grok), how it ended. Sunshine shows
 // those in a panel on the page (app/AgentPanel.qml). Each is started with
 // the permission mode Omarchy starts it with (omarchy-agent); the other
 // agents open in a terminal, as Omarchy starts them.
@@ -193,8 +193,8 @@ function cleanChoice(v) {
 
 // The command, the agent run by its full path (`where`: { exe, dir, skill }:
 // the program, found where it's installed and checked, its working folder,
-// and Uber Notebook's skill folder). What it does beyond the panel's needs
-// (Uber Notebook's commands, files in its own folder) is asked of you:
+// and Sunshine's skill folder). What it does beyond the panel's needs
+// (Sunshine's commands, files in its own folder) is asked of you:
 //   Claude Code: print mode, stream-json on its input and output (its
 //     request, and your answers: input, answer). Your own setup as in your
 //     terminal (your plugins and MCP servers, CLAUDE.md, your allow rules);
@@ -237,8 +237,8 @@ function command(agent, prompt, choice, session, where) {
   // its way here, the input of a tool it asks to use included.)
   var helper = /^\/[^\u0000-\u001f]{1,4000}$/.test(String(w.helper || "")) ? String(w.helper) : ""
   function filtered(input) {
-    return helper ? ["/usr/bin/bash", "-c", "h=$1; n=$2; t=$3; shift 3; set -o pipefail; \"$@\"" + input + " | /usr/bin/python3 -I -S \"$h\" ascii-lines \"$n\" \"$t\"", "uber-notebook-agent", helper, String(LINE_MAX), String(OUTPUT_MAX)]
-      : ["/usr/bin/bash", "-c", "exec \"$@\"" + input, "uber-notebook-agent"]
+    return helper ? ["/usr/bin/bash", "-c", "h=$1; n=$2; t=$3; shift 3; set -o pipefail; \"$@\"" + input + " | /usr/bin/python3 -I -S \"$h\" ascii-lines \"$n\" \"$t\"", "sunshine-agent", helper, String(LINE_MAX), String(OUTPUT_MAX)]
+      : ["/usr/bin/bash", "-c", "exec \"$@\"" + input, "sunshine-agent"]
   }
   var c = choice || {}
   var model = cleanChoice(c.model)
@@ -251,7 +251,7 @@ function command(agent, prompt, choice, session, where) {
   if (agent === "claude") return filtered("").concat([exe, "-p", "--input-format", "stream-json",
     "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--setting-sources", "user", "--tools", CLAUDE_TOOLS]
     .concat(skill ? ["--add-dir", skill] : [], ["--permission-mode", "manual", "--permission-prompt-tool", "stdio",
-      "--allowedTools", "Bash(omarchy-shell uber-notebook-agent *)", "Edit(/" + dir + "/**)", "Write(/" + dir + "/**)"])
+      "--allowedTools", "Bash(omarchy-shell sunshine-agent *)", "Edit(/" + dir + "/**)", "Write(/" + dir + "/**)"])
     .concat(s ? [s.resume ? "--resume" : "--session-id", s.id] : [], model ? ["--model", model] : [], effort ? ["--effort", effort] : []))
   // (Grok works over ACP, its agent protocol, on its input and output:
   // acpInit, acpSession, acpPrompt, fromAcp, reply. Its sandbox: env().)
@@ -279,7 +279,7 @@ function input(agent, prompt) {
 // is (Store.launchAgent wrote it there, a file yours alone), never the
 // request itself, which its command line would show to every account.
 function requestPointer(path) {
-  return "Your request from Uber Notebook is in the file " + String(path) + ". Read that file first and do what it asks."
+  return "Your request from Sunshine is in the file " + String(path) + ". Read that file first and do what it asks."
 }
 
 // Whether its input's closed once its request is on it (Codex reads it to
@@ -362,20 +362,20 @@ function answerFor(agent, ev, allow) {
   }
   return answer(ev.id, allow, ev.input)
 }
-// To anything else it asks Uber Notebook, which it doesn't do.
+// To anything else it asks Sunshine, which it doesn't do.
 function unsupportedFor(agent, id) {
-  if (agent === "grok") return JSON.stringify({ jsonrpc: "2.0", id: id, error: { code: -32601, message: "Uber Notebook doesn't do that" } }) + "\n"
+  if (agent === "grok") return JSON.stringify({ jsonrpc: "2.0", id: id, error: { code: -32601, message: "Sunshine doesn't do that" } }) + "\n"
   return unsupported(id)
 }
 // Your answer to what it asked (Claude Code's can_use_tool): a line for its
-// input. And to anything else it asks Uber Notebook, which it doesn't do.
+// input. And to anything else it asks Sunshine, which it doesn't do.
 function answer(id, allow, toolInput, message) {
   var response = allow ? { behavior: "allow", updatedInput: toolInput && typeof toolInput === "object" ? toolInput : {} }
     : { behavior: "deny", message: String(message || "The user said no.") }
   return JSON.stringify({ type: "control_response", response: { subtype: "success", request_id: String(id), response: response } }) + "\n"
 }
 function unsupported(id) {
-  return JSON.stringify({ type: "control_response", response: { subtype: "error", request_id: String(id), error: "Uber Notebook doesn't do that" } }) + "\n"
+  return JSON.stringify({ type: "control_response", response: { subtype: "error", request_id: String(id), error: "Sunshine doesn't do that" } }) + "\n"
 }
 
 // Text it shows you in a question, every character as it is: what can't be
@@ -468,15 +468,15 @@ function grokPictures(grokHome, dir) {
   return h + "/sessions/" + encodeURIComponent(d)
 }
 
-// One of Uber Notebook's own commands, alone: `omarchy-shell
-// uber-notebook-agent <command> ...` with nothing chained or put in it (no
+// One of Sunshine's own commands, alone: `omarchy-shell
+// sunshine-agent <command> ...` with nothing chained or put in it (no
 // ; & | $ ` < > \ or a line break): run without asking you, as Claude
-// Code's are (its --allowedTools); what it may do is Uber Notebook's to say
+// Code's are (its --allowedTools); what it may do is Sunshine's to say
 // (Scope.js). Anything else an agent runs is asked about.
 function ownCommand(command) {
   var c = String(command || "").trim()
   if (c.length > 20000 || /[;&|$`<>\\\n\r\u0000]/.test(c)) return false
-  return /^omarchy-shell\s+uber-notebook-agent\s+[A-Za-z]+(\s|$)/.test(c)
+  return /^omarchy-shell\s+sunshine-agent\s+[A-Za-z]+(\s|$)/.test(c)
 }
 
 // A file tool's use wholly inside the agent's own conversation folder
@@ -502,10 +502,10 @@ function ownFile(tool, toolInput, dir) {
 // Grok's sandbox for the panel, kept in its working folder's
 // .grok/sandbox.toml: strict (it reads its folder and the system's, writes
 // there and in temp), and it may read where the shell's socket is
-// (`runtime`: $XDG_RUNTIME_DIR), so Uber Notebook's commands reach it, and
-// the uber-notebook skill's folder (`skill`), so it can read the skill the
+// (`runtime`: $XDG_RUNTIME_DIR), so Sunshine's commands reach it, and
+// the sunshine skill's folder (`skill`), so it can read the skill the
 // prompt names (as Claude Code's --add-dir); nothing else of yours.
-var GROK_PROFILE = "uber-notebook"
+var GROK_PROFILE = "sunshine"
 function grokSandbox(runtime, skill) {
   var safe = /^\/[A-Za-z0-9._\/-]{1,400}$/
   var r = String(runtime || "")
@@ -513,9 +513,9 @@ function grokSandbox(runtime, skill) {
   var reads = [r + "/quickshell"]
   var k = String(skill || "")
   if (safe.test(k) && !/(^|\/)\.\.?(\/|$)/.test(k)) reads.push(k)
-  return "# Uber Notebook's panel: Grok reads only its own folder, the system's and\n"
-    + "# Uber Notebook's skill, writes only there and in temp, and reaches Uber\n"
-    + "# Notebook's commands.\n"
+  return "# Sunshine's panel: Grok reads only its own folder, the system's and\n"
+    + "# Sunshine's skill, writes only there and in temp, and reaches Sunshine's\n"
+    + "# commands.\n"
     + "[profiles." + GROK_PROFILE + "]\n"
     + "extends = \"strict\"\n"
     + "restrict_network = false\n"
@@ -530,7 +530,7 @@ function grokSandbox(runtime, skill) {
 // path as found on the PATH, not where its links lead (a version manager's
 // shim, mise's or asdf's, is a link to the manager itself, which tells
 // which program to run by the name it's run by). Run with
-// bash -c AGENTS_SCRIPT uber-notebook-agents <path> <names...>.
+// bash -c AGENTS_SCRIPT sunshine-agents <path> <names...>.
 var AGENTS_SCRIPT = "uid=$(/usr/bin/id -u); IFS=: read -r -a dirs <<< \"$1\"; shift; "
   + "mine() { local o m; read -r o m < <(/usr/bin/stat -c '%u %a' -- \"$1\") || return 1; { [ \"$o\" = \"$uid\" ] || [ \"$o\" = 0 ]; } && (( (8#$m & 022) == 0 )); }; "
   + "for a in \"$@\"; do for d in \"${dirs[@]}\"; do case \"$d\" in /*) ;; *) continue ;; esac; "
@@ -579,7 +579,7 @@ function cleanTurn(t) {
     answer: clip(t.answer, 8000), status: status, failure: status === "failed" ? clip(t.failure, 400) : "" }
 }
 function cleanId(id) { return /^[A-Za-z0-9_-]{1,64}$/.test(String(id || "")) ? String(id) : "" }
-// A conversation's folder of its own (in Uber Notebook's agent folder): "c-"
+// A conversation's folder of its own (in Sunshine's agent folder): "c-"
 // and 12 hex.
 function isConversationFolder(name) { return /^c-[0-9a-f]{12}$/.test(String(name || "")) }
 function cleanChats(raw) {
@@ -701,7 +701,7 @@ function choiceLabel(list, model, effort) {
 
 // What a step is, said simply.
 var STEP_WORDS = {
-  help: "Reading Uber Notebook's commands", skill: "Reading the uber-notebook skill", read: "Reading the page", blocks: "Reading the page",
+  help: "Reading Sunshine's commands", skill: "Reading the sunshine skill", read: "Reading the page", blocks: "Reading the page",
   find: "Searching your notes", list: "Looking through your pages", library: "Looking through the Library",
   tags: "Looking at your tags", tagged: "Looking at a tag", contacts: "Looking in People", contact: "Looking in People",
   events: "Looking at your calendar", templates: "Looking at your templates", projects: "Looking at your projects",
@@ -723,7 +723,7 @@ function baseName(path) { var p = String(path || "").split("/"); return p[p.leng
 function commandSteps(cmd) {
   var c = String(cmd || "")
   var out = []
-  var re = /omarchy-shell\s+uber-notebook(?:-agent)?\s+([A-Za-z]+)/g
+  var re = /omarchy-shell\s+sunshine(?:-agent)?\s+([A-Za-z]+)/g
   var m
   while ((m = re.exec(c)) !== null) {
     var t = STEP_WORDS[m[1]] || "Running " + m[1]
@@ -731,7 +731,7 @@ function commandSteps(cmd) {
   }
   if (out.length) return out
   // (Codex reads the skill with a command.)
-  if (/uber-notebook\/SKILL\.md/.test(c)) return ["Reading the uber-notebook skill"]
+  if (/sunshine\/SKILL\.md/.test(c)) return ["Reading the sunshine skill"]
   return ["Running a command"]
 }
 function commandStep(cmd) { return commandSteps(cmd)[0] }
@@ -741,8 +741,8 @@ function stepText(name, input) {
   var i = input && typeof input === "object" ? input : {}
   var file = i.file_path || i.target_file || i.path || ""
   if (name === "Bash" || name === "run_terminal_command") return commandSteps(i.command || i.cmd).join("\n")
-  if (name === "Skill") return "Reading the uber-notebook skill"
-  if (name === "Read" || name === "read_file") return /SKILL\.md$/.test(String(file)) ? "Reading the uber-notebook skill" : "Reading " + baseName(file)
+  if (name === "Skill") return "Reading the sunshine skill"
+  if (name === "Read" || name === "read_file") return /SKILL\.md$/.test(String(file)) ? "Reading the sunshine skill" : "Reading " + baseName(file)
   if (name === "Write" || name === "Edit" || name === "search_replace" || name === "write_file" || name === "write" || name === "edit") return "Writing " + baseName(file)
   if (name === "image_gen" || name === "generate_image") return "Making a picture"
   if (name === "Glob" || name === "Grep" || name === "grep" || name === "list_dir") return "Searching files"

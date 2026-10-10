@@ -54,7 +54,7 @@ Item {
     if (tools && (!need || (need === "any" ? tools.browser && tools.office : tools[need]))) { done(tools); return }
     var files = workspace ? workspace.files : null
     if (!files) { done({ browser: "", office: "", unshare: false }); return }
-    files.exec(["/usr/bin/bash", "-c", probeScript, "uber-notebook-export-tools"].concat(browsers, ["/usr/lib/libreoffice/program/soffice"]), function(ok, out) {
+    files.exec(["/usr/bin/bash", "-c", probeScript, "sunshine-export-tools"].concat(browsers, ["/usr/lib/libreoffice/program/soffice"]), function(ok, out) {
       var lines = String(out || "").split("\n")
       var t = { browser: "", office: "", unshare: lines.indexOf("unshare") >= 0 }
       lines.forEach(function(l) {
@@ -89,7 +89,7 @@ Item {
         read.forEach(function(p) { byId[p.id] = p })
         byId[page.id] = page
         var pages = ids.map(function(pid) { return byId[pid] }).filter(function(p) { return !!p })
-        var work = files.runtimeDir + "/uber-notebook-export-" + Workspace.uuid4().slice(0, 8)
+        var work = files.runtimeDir + "/sunshine-export-" + Workspace.uuid4().slice(0, 8)
         // (A folder of its own, made new: never one that's there, which is
         // taken away after; one it couldn't make, it leaves.)
         workspace.readSyncedOf(pages, function() {
@@ -219,7 +219,7 @@ Item {
     var ext = kind === "docx" ? ".docx" : ".pdf"
     var name = Library.saveName(top.title || "Untitled", "x" + ext)
     if (kind === "print") {
-      var dir = files.runtimeDir + "/uber-notebook-print"
+      var dir = files.runtimeDir + "/sunshine-print"
       files.mkdirs([dir], function() {
         // (What was printed a day ago or more goes.)
         files.exec(["/usr/bin/find", dir, "-maxdepth", "1", "-type", "f", "-name", "*.pdf", "-mmin", "+1440", "-delete"], function() {

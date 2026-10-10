@@ -26,7 +26,7 @@ import "Env.js" as Env
 // never through a shell, as the leader of a process group of its own
 // (setsid), with only the environment a tool needs (Env.js). It's stopped
 // with SIGINT, which has it finish its file; if it doesn't, it's ended with
-// anything it started (its group, SIGKILL), as it is when Uber Notebook
+// anything it started (its group, SIGKILL), as it is when Sunshine
 // closes. What it prints is read in pieces, a line at most 4 KB, 64 MB in
 // all (counted in characters, as they're kept), and as many levels as its
 // longest recording has.
@@ -40,7 +40,7 @@ Item {
   // Where dictation and a note being written out are kept for a moment: a
   // folder of its own in the store's runtime folder (yours alone, never
   // /tmp; tests give another).
-  property string tempDir: files && files.runtimeDir ? files.runtimeDir + "/uber-notebook-audio" : ""
+  property string tempDir: files && files.runtimeDir ? files.runtimeDir + "/sunshine-audio" : ""
   // It's made if it isn't there, and used only if it's a folder (not a
   // link) that's yours and no one else's to look in (700): one another
   // account made first, or one opened up, is never recorded into
@@ -148,7 +148,7 @@ Item {
     // Its folder first (an audio note's not through a shell; the folder of
     // its own checked, tempScript, its path an argument), then ffmpeg;
     // stopped before it started: nothing recorded.
-    var making = temp ? ["/usr/bin/bash", "-c", tempScript, "uber-notebook-audio", dir] : ["/usr/bin/mkdir", "-p", "-m", "700", "--", dir]
+    var making = temp ? ["/usr/bin/bash", "-c", tempScript, "sunshine-audio", dir] : ["/usr/bin/mkdir", "-p", "-m", "700", "--", dir]
     files.exec(making, function(made, out) {
       if (rec._file !== path || rec.phase === "") return
       if (!made || rec._stopping) {
@@ -320,8 +320,8 @@ Item {
         var even = rec._boosted ? file.replace(/\.wav$/, "") + "-even.wav" : ""
         // (What it says comes back ASCII, through the files helper's
         // to-json: no character cut in two on its way here.)
-        transcriber.start(["/usr/bin/bash", "-c", "h=$1; n=$2; shift 2; set -o pipefail; \"$@\" | /usr/bin/python3 -I -S \"$h\" to-json \"$n\"", "uber-notebook-text",
-          files.filesHelper, String(2 * 1024 * 1024), "/usr/bin/bash", "-c", Audio.TRANSCRIBE_SCRIPT, "uber-notebook-transcribe", file, even, rec._boosted ? Audio.BOOST : ""])
+        transcriber.start(["/usr/bin/bash", "-c", "h=$1; n=$2; shift 2; set -o pipefail; \"$@\" | /usr/bin/python3 -I -S \"$h\" to-json \"$n\"", "sunshine-text",
+          files.filesHelper, String(2 * 1024 * 1024), "/usr/bin/bash", "-c", Audio.TRANSCRIBE_SCRIPT, "sunshine-transcribe", file, even, rec._boosted ? Audio.BOOST : ""])
         return
       }
       var result = { file: rec._final || file, duration: Math.round(seconds * 10) / 10, peaks: Audio.peaks(rec._levels, 120) }
@@ -330,7 +330,7 @@ Item {
         rec.phase = "finishing"
         finisher.result = result
         finisher.timeoutMs = 60000 + Math.round(seconds * 1000)
-        finisher.start(["/usr/bin/bash", "-c", Audio.LOUDER_SCRIPT, "uber-notebook-louder", file, rec._final, Audio.BOOST])
+        finisher.start(["/usr/bin/bash", "-c", Audio.LOUDER_SCRIPT, "sunshine-louder", file, rec._final, Audio.BOOST])
         return
       }
       rec._end(true, result)
@@ -368,7 +368,7 @@ Item {
   // A recording made louder into a new file (it stays, for Undo): done(ok, peaks).
   function louder(file, to, done) {
     if (!files || !canRecord) { done(false, []); return }
-    files.exec(["/usr/bin/bash", "-c", Audio.LOUDER_SCRIPT, "uber-notebook-louder", file, to, Audio.BOOST, "keep"], function(ok, output) {
+    files.exec(["/usr/bin/bash", "-c", Audio.LOUDER_SCRIPT, "sunshine-louder", file, to, Audio.BOOST, "keep"], function(ok, output) {
       done(ok, ok ? Audio.peaks(Audio.levelsIn(output), 120) : [])
     }, { timeoutMs: 600000, maxBytes: 4 * 1024 * 1024 })
   }
@@ -380,10 +380,10 @@ Item {
     var even = boost ? Audio.BOOST : ""
     if (!dir) { done(false, "", "There's nowhere to write it out"); return }
     // (Its WAV in the folder of its own, checked first: tempScript.)
-    files.exec(["/usr/bin/bash", "-c", tempScript, "uber-notebook-audio", dir], function(made, out) {
+    files.exec(["/usr/bin/bash", "-c", tempScript, "sunshine-audio", dir], function(made, out) {
       if (!made) { done(false, "", rec.shared(out) ? "Not written out: " + dir + " isn't yours alone" : "There's nowhere to write it out"); return }
       var wav = dir + "/transcribe-" + Date.now().toString(36) + ".wav"
-      rec.files.execText(["/usr/bin/bash", "-c", Audio.TRANSCRIBE_SCRIPT, "uber-notebook-transcribe", file, wav, even], function(ok, output) {
+      rec.files.execText(["/usr/bin/bash", "-c", Audio.TRANSCRIBE_SCRIPT, "sunshine-transcribe", file, wav, even], function(ok, output) {
         var text = ok ? Audio.transcriptOf(output) : ""
         done(ok && text !== "", text, !ok ? "voxtype couldn't write it out" : text === "" ? "No words were heard" : "")
       }, { timeoutMs: Audio.transcribeTimeout(seconds), maxBytes: 2 * 1024 * 1024 })

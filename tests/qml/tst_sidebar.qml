@@ -1,6 +1,6 @@
 import QtQuick
 import QtTest
-import "../.." as UberNotebook
+import "../.." as Sunshine
 import "../../app"
 import "../../Workspace.js" as Workspace
 import "../../Tags.js" as Tags
@@ -18,7 +18,7 @@ Item {
   FakeFiles { id: files }
   FakeService { id: service; user: ({ sounds: false }) }
   Theme { id: th }
-  UberNotebook.Workspace { id: ws; files: files }
+  Sunshine.Workspace { id: ws; files: files }
 
   property var lastUndo: null
   property string lastToast: ""
@@ -278,11 +278,11 @@ Item {
       var before = Object.keys(ws.index.pages).length
       mouseClick(named("newPageButton"))
       tryVerify(function() { return Object.keys(ws.index.pages).length === before + 1 }, 2000, "a new page")
-      // Uber Notebook's name, at the top: a click, Settings → About (and
+      // Sunshine's name, at the top: a click, Settings → About (and
       // nothing under it clicked too).
       var name = named("appName")
       verify(name !== null && name.visible)
-      verify(find(name, function(it) { return it.text === "Uber Notebook" }, []).length === 1)
+      verify(find(name, function(it) { return it.text === "Sunshine" }, []).length === 1)
       verify(find(name, function(it) { return it.status === Image.Ready }, []).length === 1, "its icon")
       var asked = 0
       function about() { asked++ }

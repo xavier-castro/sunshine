@@ -1,6 +1,6 @@
 import QtQuick
 import QtTest
-import "../.." as UberNotebook
+import "../.." as Sunshine
 import "../../app"
 import "../../Workspace.js" as Workspace
 import "../../Scope.js" as Scope
@@ -20,7 +20,7 @@ Item {
   FakeService { id: service; user: ({ sounds: false }) }
   Theme { id: th }
 
-  UberNotebook.Workspace {
+  Sunshine.Workspace {
     id: ws
     files: files
   }
@@ -45,7 +45,7 @@ Item {
     function askAgentPermission(req) { return view.askAgentPermission(req) }
   }
 
-  UberNotebook.Api {
+  Sunshine.Api {
     id: api
     workspace: ws
     files: files
@@ -133,7 +133,7 @@ Item {
       var page = fileOf(r.id)
       compare(kinds(page).join("|"), "check:0:milk|check:0:eggs|p:0:see Getting started|p:0:for Sunday|p:0:")
       verify(page.blocks[page.content[1]].checked, "ticked as it was")
-      verify(page.blocks[page.content[2]].html.indexOf("uber-notebook://page/" + named("Getting started")) >= 0, "a link to the page")
+      verify(page.blocks[page.content[2]].html.indexOf("sunshine://page/" + named("Getting started")) >= 0, "a link to the page")
       verify(page.blocks[page.content[3]].html.indexOf("font-weight:700") >= 0, "Markdown")
       compare(fileOf(api.inbox).blocks[r.id].type, "page", "its block is on the Inbox")
       // One line: a page with that title, to write in.
@@ -218,15 +218,15 @@ Item {
       var home = named("Getting started")
       var inner = named("A page inside a page")
       var r = json(api.addTo(home, "Trip", file("trip.md",
-        "See [[a page inside a page]] and [[Nobody]]. Due [@Fri 2 Oct](uber-notebook://date/2026-10-02), and [\u23f0 Fri 2 Oct 9:30](uber-notebook://remind/2026-10-02T09:30)")))
+        "See [[a page inside a page]] and [[Nobody]]. Due [@Fri 2 Oct](sunshine://date/2026-10-02), and [\u23f0 Fri 2 Oct 9:30](sunshine://remind/2026-10-02T09:30)")))
       verify(r.ok, JSON.stringify(r))
       compare(r.path, "Getting started / Trip")
       compare(ws.index.pages[r.id].parent, home)
       compare(fileOf(home).blocks[r.id].type, "page", "its block is on the page it's in")
       var html = fileOf(r.id).blocks[fileOf(r.id).content[0]].html
-      verify(html.indexOf("uber-notebook://page/" + inner) >= 0, "a [[link]] to the page called that: " + html)
-      verify(html.indexOf("Nobody") >= 0 && html.indexOf("uber-notebook://page/\"") < 0, "and text, when there's none")
-      verify(html.indexOf("uber-notebook://date/2026-10-02") >= 0 && html.indexOf("uber-notebook://remind/2026-10-02T09:30") >= 0)
+      verify(html.indexOf("sunshine://page/" + inner) >= 0, "a [[link]] to the page called that: " + html)
+      verify(html.indexOf("Nobody") >= 0 && html.indexOf("sunshine://page/\"") < 0, "and text, when there's none")
+      verify(html.indexOf("sunshine://date/2026-10-02") >= 0 && html.indexOf("sunshine://remind/2026-10-02T09:30") >= 0)
       compare(ws.index.pages[r.id].reminders.length, 1, "the reminder is kept")
       verify(Workspace.backlinks(ws.index, inner).indexOf(r.id) >= 0, "and the link, for backlinks")
       var top = json(api.addTo("", "At the top", file("top.md", "x")))
@@ -252,7 +252,7 @@ Item {
       // Read from its file, when it wasn't written this session.
       ws.written = ({})
       verify(api.read(named("Getting started")).indexOf("# \u{1f44b} Getting started") === 0)
-      verify(api.read(named("Getting started")).indexOf("(uber-notebook://page/" + named("A page inside a page") + ")") > 0, "pages in it, by their ids")
+      verify(api.read(named("Getting started")).indexOf("(sunshine://page/" + named("A page inside a page") + ")") > 0, "pages in it, by their ids")
       compare(json(api.read("nonsense")).ok, false)
     }
 
@@ -1002,7 +1002,7 @@ Item {
       files.deferHelperReads = false
     }
 
-    // While an agent works, Uber Notebook contacts a site for it only with
+    // While an agent works, Sunshine contacts a site for it only with
     // your yes: asked in its panel (Allow once, Always for that agent and
     // site, No); redirects and pictures only from sites it may contact.
     // The panel's agent taking things away: pages to the trash, Always may
@@ -1195,7 +1195,7 @@ Item {
       compare(view.agentAsks.length, 2)
       // Asked in the panel, in words; Allow once: that link read, nothing kept.
       tryVerify(function() { return find(view.agentPanel, "agentAskText") !== null }, 1000)
-      verify(find(view.agentPanel, "agentAskText").text.indexOf("Grok wants to have Uber Notebook contact e.org") === 0, find(view.agentPanel, "agentAskText").text)
+      verify(find(view.agentPanel, "agentAskText").text.indexOf("Grok wants to have Sunshine contact e.org") === 0, find(view.agentPanel, "agentAskText").text)
       files.fetchPages["https://e.org/?note=private+text"] = '<html><head><title>One</title></head></html>'
       files.fetchPages["https://e.org/two"] = '<html><head><title>Two</title></head></html>'
       view.answerAgentAsk(view.agentAsks[0].key, "once")
@@ -1249,7 +1249,7 @@ Item {
       api.settings = null
     }
 
-    // Just after Uber Notebook starts, while the files helper reads the pages
+    // Just after Sunshine starts, while the files helper reads the pages
     // in the background: a page not read yet is read first, and the command
     // says to run it again (never "isn't there"); one that can't be read
     // says so, not "again" over and over.

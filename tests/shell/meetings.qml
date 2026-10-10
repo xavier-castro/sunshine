@@ -25,7 +25,7 @@ ShellRoot {
         Qt.callLater(function() { done(true, "") })
         return
       }
-      if (argv[0] === "/usr/bin/bash" && argv[3] === "uber-notebook-meetings") {
+      if (argv[0] === "/usr/bin/bash" && argv[3] === "sunshine-meetings") {
         var out = "voxtype\n" + (enabled ? "true" : "false") + "\n" + (argv[2].indexOf("daemon $n") >= 0 ? "daemon " + daemon + "\n" : "")
         Qt.callLater(function() { done(true, out) })
         return

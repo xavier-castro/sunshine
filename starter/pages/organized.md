@@ -4,7 +4,7 @@ icon: 🗂
 parent: welcome
 order: 2
 ---
-Uber Notebook has a place for everything, and finds anything in a moment.
+Sunshine has a place for everything, and finds anything in a moment.
 
 | To | Use |
 |---|---|
@@ -15,7 +15,7 @@ Uber Notebook has a place for everything, and finds anything in a moment.
 | Track a project | *Make it a project* in a page's **⋯** menu: a status, a due date and how far along it is |
 | Tag anything | **#** and a name in a line: #idea, #errand, #work/acme |
 | Put a page away | *Archive* in its **⋯** menu. It stays searchable |
-| Go back in time | *Page history* in a page's **⋯** menu: every version Uber Notebook kept |
+| Go back in time | *Page history* in a page's **⋯** menu: every version Sunshine kept |
 
 ## In the sidebar
 

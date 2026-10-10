@@ -4,11 +4,11 @@ import Quickshell.Io
 // (tests/run writes the plugin folder here, as a file: URL.)
 import "@PLUGIN@" as UN
 
-// Uber Notebook's skill links: made when it's turned on (one from an install
+// Sunshine's skill links: made when it's turned on (one from an install
 // before, gone, pointed here; anyone else's left); its own taken out when
 // it's turned off (an install before's too); made only once the lock is
 // free; turned on and off, or on, off and on, quickly: as it was left. Then
-// Uber Notebook taking itself out as it stops, when its folder may be gone
+// Sunshine taking itself out as it stops, when its folder may be gone
 // already (`omarchy plugin remove` moves it away as soon as it's unloaded):
 // by the files helper run from its text, kept as it started, not from its
 // file; a link being made then taken out after it's made; one asked for
@@ -25,7 +25,7 @@ ShellRoot {
   property string older: ""
   property string text: ""
   // Where each of claude, agents, codex, hermes links ("none" for no link).
-  readonly property string links: "for d in claude agents codex hermes; do /usr/bin/readlink -- \"$1/.$d/skills/uber-notebook\" || echo none; done"
+  readonly property string links: "for d in claude agents codex hermes; do /usr/bin/readlink -- \"$1/.$d/skills/sunshine\" || echo none; done"
   function read(done) { store.exec(["/usr/bin/bash", "-c", links, "x", h], function(ok, out) { done(String(out).trim().split("\n")) }) }
 
   // One step after another, each handed the next.
@@ -36,16 +36,16 @@ ShellRoot {
 
   Component.onCompleted: {
     store.exec(["/usr/bin/bash", "-c", "h=$(/usr/bin/mktemp -d) || exit 1; "
-      + "/usr/bin/mkdir -p \"$h/.claude/skills\" \"$h/.agents/skills\" \"$h/.codex/skills\" \"$h/.hermes/skills\" \"$h/plugins/marcho78.uber-notebook/skills/uber-notebook\" \"$h/older/marcho78.uber-notebook/skills/uber-notebook\"; "
-      + "/usr/bin/ln -s \"$h/older/marcho78.uber-notebook/skills/uber-notebook\" \"$h/.hermes/skills/uber-notebook\"; "
-      + "/usr/bin/ln -s \"$h/old/marcho78.uber-notebook/skills/uber-notebook\" \"$h/.agents/skills/uber-notebook\"; "
-      + "/usr/bin/ln -s \"$h/someone-else\" \"$h/.codex/skills/uber-notebook\"; printf '%s' \"$h\""], function(ok, out) {
+      + "/usr/bin/mkdir -p \"$h/.claude/skills\" \"$h/.agents/skills\" \"$h/.codex/skills\" \"$h/.hermes/skills\" \"$h/plugins/xavier.sunshine/skills/sunshine\" \"$h/older/xavier.sunshine/skills/sunshine\"; "
+      + "/usr/bin/ln -s \"$h/older/xavier.sunshine/skills/sunshine\" \"$h/.hermes/skills/sunshine\"; "
+      + "/usr/bin/ln -s \"$h/old/xavier.sunshine/skills/sunshine\" \"$h/.agents/skills/sunshine\"; "
+      + "/usr/bin/ln -s \"$h/someone-else\" \"$h/.codex/skills/sunshine\"; printf '%s' \"$h\""], function(ok, out) {
       root.h = String(out).trim()
       if (!ok || !root.h) { console.log("FAIL setup"); Qt.quit(); return }
       store.home = root.h
       store.skillLock = root.h + "/skills.lock"
-      root.target = root.h + "/plugins/marcho78.uber-notebook/skills/uber-notebook"
-      root.older = root.h + "/older/marcho78.uber-notebook/skills/uber-notebook"
+      root.target = root.h + "/plugins/xavier.sunshine/skills/sunshine"
+      root.older = root.h + "/older/xavier.sunshine/skills/sunshine"
       root.text = store.readNow(store.filesHelper, 512 * 1024) || ""
       root.run(root.steps())
     })
@@ -61,7 +61,7 @@ ShellRoot {
     // A run stopping: the helper's cleanup, as that run.
     function stopAs(run) {
       store.skillDirs().forEach(function(dir) {
-        store.exec(["/usr/bin/python3", "-I", "-S", "-c", root.text, "unlink-link", dir + "/uber-notebook", target, store.skillLock, run], null)
+        store.exec(["/usr/bin/python3", "-I", "-S", "-c", root.text, "unlink-link", dir + "/sunshine", target, store.skillLock, run], null)
       })
     }
     return [
@@ -126,7 +126,7 @@ ShellRoot {
       // at the end): taken out after it's made, not before.
       function(next) {
         store.exec(["/usr/bin/bash", "-c", "(/usr/bin/flock \"$1\" /usr/bin/bash -c '/usr/bin/sleep 1; /usr/bin/ln -sT -- \"$1\" \"$2\"' x \"$2\" \"$3\") >/dev/null 2>&1 & /usr/bin/sleep 0.2",
-          "x", store.skillLock, target, h + "/.claude/skills/uber-notebook"], function() {
+          "x", store.skillLock, target, h + "/.claude/skills/sunshine"], function() {
           store.unlinkSkill(target, ["/usr/bin/python3", "-I", "-S", "-c", root.text])
           after(2500, function() { read(function(m) {
             say("a link made as it stops: taken out after", m[0] === "none", m.join(" | "))

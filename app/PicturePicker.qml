@@ -50,7 +50,7 @@ Rectangle {
     var d = String(dir || home()).replace(/\/+$/, "") || "/"
     folder = d
     loading = true
-    files.execText(["/usr/bin/bash", "-c", listScript, "uber-notebook-pictures", d], function(ok, out) {
+    files.execText(["/usr/bin/bash", "-c", listScript, "sunshine-pictures", d], function(ok, out) {
       if (pk.folder !== d) return
       pk.loading = false
       if (!ok) {

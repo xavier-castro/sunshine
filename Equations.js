@@ -3,7 +3,7 @@
 //
 // An equation on a line of its own is a code block in Math (`$$ … $$` in
 // Markdown). One in a line of text (`$ … $`) is kept as a link that holds
-// its LaTeX, uber-notebook://math/<LaTeX>, so search, agents and the
+// its LaTeX, sunshine://math/<LaTeX>, so search, agents and the
 // Markdown copy read it as it's written; the editor shows it as its drawing:
 // an image (one character to the cursor), whose address says which
 // equation it is, so what's typed around it, copied or pasted keeps it.
@@ -15,9 +15,9 @@
 
 // The code block language that's drawn as an equation.
 var LANG = "Math"
-var PREFIX = "uber-notebook://math/"
+var PREFIX = "sunshine://math/"
 // What an image of one says about itself in its address.
-var MARK = "uber-notebook-math"
+var MARK = "sunshine-math"
 var MAX_TEX = 4000
 // TeX's letters are shorter than a UI font's at the same size: one in a
 // line is drawn this much bigger, to look the size of the words around it.
@@ -49,7 +49,7 @@ function clean(tex) {
 
 // ---- what's been drawn -------------------------------------------------------------
 
-// Drawings kept while Uber Notebook runs, shared by every editor: key ("D:"
+// Drawings kept while Sunshine runs, shared by every editor: key ("D:"
 // on its own, "I:" in a line, then its LaTeX) -> { svg, error }. Up to
 // MAX_DRAWN of them, with up to MAX_DRAWN_SVG characters of SVG in all;
 // then they're all let go (and drawn again as they're needed).
@@ -223,7 +223,7 @@ function imageUrl(svg, tex) {
 
 // The LaTeX an image's address says it is, or "" (not one of these).
 function texOfImage(src) {
-  var m = /^data:image\/svg\+xml;uber-notebook-math=([^,;"]*)[,;]/.exec(String(src || ""))
+  var m = /^data:image\/svg\+xml;sunshine-math=([^,;"]*)[,;]/.exec(String(src || ""))
   if (!m) return ""
   try { return clean(decodeURIComponent(m[1])) } catch (e) { return "" }
 }
@@ -235,7 +235,7 @@ function texOfImage(src) {
 function toImages(inner, drawing, em, color) {
   var text = String(inner || "")
   if (text.indexOf(PREFIX) < 0) return text
-  return text.replace(/<a\b[^>]*?\bhref="(uber-notebook:\/\/math\/[^"]*)"[^>]*>[\s\S]*?<\/a>/g, function(all, url) {
+  return text.replace(/<a\b[^>]*?\bhref="(sunshine:\/\/math\/[^"]*)"[^>]*>[\s\S]*?<\/a>/g, function(all, url) {
     var tex = texOf(Html.decodeEntities(url))
     if (!tex) return all
     var d = typeof drawing === "function" ? drawing(tex) : null
@@ -262,7 +262,7 @@ function imageSize(svg) {
 function toLinks(inner) {
   var text = String(inner || "")
   if (text.indexOf(MARK) < 0) return text
-  return text.replace(/<img\b[^>]*?\bsrc="(data:image\/svg\+xml;uber-notebook-math=[^"]*)"[^>]*>/g, function(all, src) {
+  return text.replace(/<img\b[^>]*?\bsrc="(data:image\/svg\+xml;sunshine-math=[^"]*)"[^>]*>/g, function(all, src) {
     var tex = texOfImage(Html.decodeEntities(src))
     return tex ? link(tex) : ""
   })

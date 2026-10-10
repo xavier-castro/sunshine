@@ -131,7 +131,7 @@ Item {
   function copyInto(dir, gen, from, stale) {
     loadManifest(dir, function() {
       if (stale()) return finish(gen)
-      store.exec(["/usr/bin/bash", "-c", listScript, "uber-notebook-mirror-list", dir], function(ok, output) {
+      store.exec(["/usr/bin/bash", "-c", listScript, "sunshine-mirror-list", dir], function(ok, output) {
         if (stale()) return finish(gen)
         var existing = {}
         String(output || "").split("\n").forEach(function(p) { if (p) existing[p] = true })
@@ -354,7 +354,7 @@ Item {
         // never written through.)
         // (A list that couldn't be kept is said: without it, the next start
         // would take the copy's files for yours.)
-        if (changed) store.putFile(dir, Mirror.MANIFEST, JSON.stringify({ version: 1, app: "Uber Notebook", files: next }, null, 1) + "\n", function(ok, why) {
+        if (changed) store.putFile(dir, Mirror.MANIFEST, JSON.stringify({ version: 1, app: "Sunshine", files: next }, null, 1) + "\n", function(ok, why) {
           done()
           if (!ok) mirror.status = "Copied, but its list of what it wrote couldn't be kept" + (why ? ": " + why : "")
         }, true)
@@ -362,7 +362,7 @@ Item {
       })
     }
     if (!ops.length) { after([]); return }
-    var plan = store.runtimeDir + "/uber-notebook-mirror-plan-" + Workspace.uuid4().slice(0, 8) + ".json"
+    var plan = store.runtimeDir + "/sunshine-mirror-plan-" + Workspace.uuid4().slice(0, 8) + ".json"
     store.mkdirs([dir], function(made) {
       if (!made) { mirror.status = "Couldn't make " + dir; return finish(gen) }
       store.writeFile(plan, JSON.stringify({ ops: ops }), function(wrote) {
@@ -394,7 +394,7 @@ Item {
       // (Never over a file that's there: a picture's name is new each time.
       // Neither folder a link: one put there would copy a folder of yours
       // into the copy, or the pictures somewhere else.)
-      store.exec(["/usr/bin/bash", "-c", "[ -d \"$1\" ] && [ ! -L \"$1\" ] && [ ! -L \"$2\" ] || exit 0; /usr/bin/mkdir -p -- \"$2\" && /usr/bin/cp -r --update=none -- \"$1\"/. \"$2\"/", "uber-notebook-mirror-copy", c[0], c[1]], function() { next() }, { timeoutMs: 60000, okCodes: [0, 1] })
+      store.exec(["/usr/bin/bash", "-c", "[ -d \"$1\" ] && [ ! -L \"$1\" ] && [ ! -L \"$2\" ] || exit 0; /usr/bin/mkdir -p -- \"$2\" && /usr/bin/cp -r --update=none -- \"$1\"/. \"$2\"/", "sunshine-mirror-copy", c[0], c[1]], function() { next() }, { timeoutMs: 60000, okCodes: [0, 1] })
     }
     next()
   }

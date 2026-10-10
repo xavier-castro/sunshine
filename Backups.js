@@ -1,8 +1,8 @@
 // Backups.js - a profile's notes (or every profile's) kept in one file, and
 // put back as profiles of their own.
 //
-// A backup is a .tar.gz any archive tool opens: `uber-notebook-backup.json` (what's
-// in it: which profiles, when, which Uber Notebook made it), and each profile's
+// A backup is a .tar.gz any archive tool opens: `sunshine-backup.json` (what's
+// in it: which profiles, when, which Sunshine made it), and each profile's
 // folder as it was, under p1/, p2/... Putting one back never writes over
 // anything: each profile in it comes back as a new profile, in a new folder.
 // Automatic ones (daily or weekly, in Settings) are named so they're told
@@ -13,10 +13,10 @@
 // with the real tar), so keep it plain JavaScript with no QML or Node APIs.
 .pragma library
 
-var APP = "Uber Notebook"
-var APP_ID = "uber-notebook"
+var APP = "Sunshine"
+var APP_ID = "sunshine"
 var FORMAT = 1
-var MANIFEST = "uber-notebook-backup.json"
+var MANIFEST = "sunshine-backup.json"
 var EVERY = ["off", "daily", "weekly"]
 var KEEP = [3, 5, 10, 20, 50]
 var DAY = 24 * 3600 * 1000
@@ -38,8 +38,8 @@ function safeLabel(text) {
 
 // A backup's file name, before ".tar.gz" (and the " 2" that tells two
 // made in the same minute apart): { stem, suffix }.
-//   "Uber Notebook Personal 2026-10-03 0130" + ".tar.gz"
-//   "Uber Notebook 2026-10-03 0130" + " (automatic).tar.gz"
+//   "Sunshine Personal 2026-10-03 0130" + ".tar.gz"
+//   "Sunshine 2026-10-03 0130" + " (automatic).tar.gz"
 function fileName(label, date, automatic) {
   if (automatic) return { stem: APP + " " + stamp(date), suffix: " (automatic).tar.gz" }
   return { stem: APP + " " + (safeLabel(label) || "backup") + " " + stamp(date), suffix: ".tar.gz" }
@@ -50,7 +50,7 @@ function isAutomatic(name) {
   return n.indexOf(pre) === 0 && /^\d{4}-\d{2}-\d{2} \d{4}( \d+)? \(automatic\)\.tar\.gz$/.test(n.slice(pre.length))
 }
 
-// What a backup holds, as its uber-notebook-backup.json says: the profiles, each
+// What a backup holds, as its sunshine-backup.json says: the profiles, each
 // under its own folder in it (p1, p2...), with the page and notebook it was
 // on and its Inbox.
 function savedOf(saved) {
@@ -75,7 +75,7 @@ function line(value, max) {
   return typeof value === "string" ? value.replace(/[\u0000-\u001f\u007f]+/g, " ").replace(/\s+/g, " ").trim().slice(0, max) : ""
 }
 
-// A backup's uber-notebook-backup.json, checked: { version, created, profiles:
+// A backup's sunshine-backup.json, checked: { version, created, profiles:
 // [{ dir, name, demo, saved }] }, or null if it isn't one.
 function readManifest(text) {
   var m = null
@@ -95,7 +95,7 @@ function readManifest(text) {
 }
 
 // What the check script says about a file: { ok, problem, manifest, leftOut }.
-// A backup holds only uber-notebook-backup.json and its profiles' folders
+// A backup holds only sunshine-backup.json and its profiles' folders
 // (p1/...), nothing reaching outside them. Links and special files in it (one
 // synced into a profile, say) are left out when it's put back (`leftOut`);
 // a sparse file, or one of a kind it doesn't know, refuses it.
@@ -156,7 +156,7 @@ function restoredName(taken, name) {
 }
 
 // Where a profile put back goes (a new folder; the script adds " 2"... if
-// it's there already): "~/Documents/Uber Notebook Personal (restored)".
+// it's there already): "~/Documents/Sunshine Personal (restored)".
 function restoreFolder(name) {
   return "~/Documents/" + APP + " " + (safeLabel(name) || "Restored") + " (restored)"
 }
@@ -207,7 +207,7 @@ var LIST_SCRIPT = "[ -d \"$1\" ] || exit 0; c=1; e=$(LC_ALL=C /usr/bin/chmod go-
 
 // A backup made: <folder> <stem> <suffix> then, for each profile, <its
 // folder> <p1...> <a folder in it to leave out, or "">; its
-// uber-notebook-backup.json (the profiles' names) on its input, never on a
+// sunshine-backup.json (the profiles' names) on its input, never on a
 // command line, where every account on the computer can read it. Everything
 // it makes is yours alone (umask 077), the backups' folder too (700, one
 // from before as well): backups hold all your notes.
@@ -251,9 +251,9 @@ var BACKUP_SCRIPT = [
 ].join("\n")
 
 // Looking into a backup and putting one back is the archive helper's
-// (bin/uber-notebook-files): inspect-backup prints whether it's readable,
+// (bin/sunshine-files): inspect-backup prints whether it's readable,
 // the kinds of things in it ("-" files, "d" folders), how many names fall
 // outside what a backup holds or reach up (..), the file's sha256, then its
-// uber-notebook-backup.json (checked() reads that); restore-backup puts one
+// sunshine-backup.json (checked() reads that); restore-backup puts one
 // profile back from that same file (if it's still the one looked into),
 // into a new folder.

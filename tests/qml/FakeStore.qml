@@ -15,7 +15,7 @@ QtObject {
   // (Looked at again: how many times.)
   property int retried: 0
   function retry() { retried++ }
-  property string rootPath: "/tmp/uber-notebook-dev"
+  property string rootPath: "/tmp/sunshine-dev"
   // Another profile being opened (Store.qml).
   property bool switching: false
   // With holdSearch, a search waits for answerSearches().

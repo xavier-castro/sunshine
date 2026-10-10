@@ -1,7 +1,7 @@
 // Tags.js - tags in Pages: "#idea" in any line. A tag is a link in the
-// block's text, uber-notebook://tag/<name>, its words "#Idea" as they were written;
+// block's text, sunshine://tag/<name>, its words "#Idea" as they were written;
 // its name is those words in lowercase, so #Idea and #idea are one tag. A
-// name is letters, digits, "_", "-" and "/" (#project/uber-notebook), not only
+// name is letters, digits, "_", "-" and "/" (#project/sunshine), not only
 // digits (#1 is a number), at most 60 long.
 //
 // It reads and writes tag links, finds the tags in a block and in a page,
@@ -11,8 +11,8 @@
 .pragma library
 .import "Html.js" as Html
 
-var PREFIX = "uber-notebook://tag/"
-// (What tags' links said before Uber Notebook was renamed: read the same.)
+var PREFIX = "sunshine://tag/"
+// (What tags' links said before Sunshine was renamed: read the same.)
 var LEGACY_PREFIX = "omanote://tag/"
 var MAX = 60
 // What a tag's name is made of (no white space, no punctuation but _ - /).
@@ -51,7 +51,7 @@ function of(url) {
   return clean(name) === name ? name : ""
 }
 
-// Is it a tag's link, as Uber Notebook writes them?
+// Is it a tag's link, as Sunshine writes them?
 function isLink(url) { return of(url) !== "" }
 
 // A tag's link in a block's text.

@@ -7,7 +7,7 @@ import "@PLUGIN@" as UN
 
 // Text in any script, read through real pipes, in a real Quickshell (tests/run
 // starts it offscreen): Quickshell decodes what a program prints a piece at a
-// time, so every way Uber Notebook reads long text has it arrive ASCII, and
+// time, so every way Sunshine reads long text has it arrive ASCII, and
 // nothing comes back with a character cut in two (U+FFFD). Megabytes of
 // "é中😀" through the notes helper, the fallback read, execText, and the
 // agents' line filter. Prints PASS/FAIL lines, then DONE.
@@ -60,7 +60,7 @@ ShellRoot {
                 })
               })
             })
-            stream.start(["/usr/bin/bash", "-c", "h=$1; shift; set -o pipefail; \"$@\" | /usr/bin/python3 -I -S \"$h\" ascii-lines", "uber-notebook-agent", store.filesHelper, "/usr/bin/cat", "--", d + "/lines.jsonl"])
+            stream.start(["/usr/bin/bash", "-c", "h=$1; shift; set -o pipefail; \"$@\" | /usr/bin/python3 -I -S \"$h\" ascii-lines", "sunshine-agent", store.filesHelper, "/usr/bin/cat", "--", d + "/lines.jsonl"])
           }, { maxBytes: 4 * 1024 * 1024 })
         })
       })

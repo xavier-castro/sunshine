@@ -9,7 +9,7 @@ import "Settings.js" as Settings
 import "Agent.js" as Agent
 
 // The notebooks on disk. Each notebook is a folder in the notebooks folder
-// (~/Documents/Uber Notebook by default):
+// (~/Documents/Sunshine by default):
 //
 //   <notebook>/notebook.json         title, cover, paper, pen, kind of page, pages in order
 //   <notebook>/pages/<page>.json     one page each
@@ -28,13 +28,13 @@ Item {
 
   property string home: Quickshell.env("HOME")
   // Where imports are unpacked and converted for a moment (a tmpfs of your
-  // own). Without one (no XDG_RUNTIME_DIR), a folder of Uber Notebook's own in
+  // own). Without one (no XDG_RUNTIME_DIR), a folder of Sunshine's own in
   // your cache, yours alone (made as it starts), never /tmp, which every
   // account on the computer can look in.
   readonly property string runtimeDir: Quickshell.env("XDG_RUNTIME_DIR") || cacheDir + "/run"
   // On disk, for what may be big (an import unzipped): the runtime folder is
   // memory, shared with the whole session.
-  readonly property string cacheDir: { var c = Quickshell.env("XDG_CACHE_HOME") || ""; return (c.charAt(0) === "/" ? c : home + "/.cache") + "/uber-notebook" }
+  readonly property string cacheDir: { var c = Quickshell.env("XDG_CACHE_HOME") || ""; return (c.charAt(0) === "/" ? c : home + "/.cache") + "/sunshine" }
   // Settings.folder: "" is the default place.
   property string folder: ""
   // Off (no profile yet): no folder is looked for, and nothing's made.
@@ -124,9 +124,9 @@ Item {
     }
   }
 
-  // The helper that opens archives (bin/uber-notebook-files): a zip of notes,
+  // The helper that opens archives (bin/sunshine-files): a zip of notes,
   // a backup. Run isolated (python3 -I -S), as an argument list.
-  readonly property string filesHelper: decodeURIComponent(Qt.resolvedUrl("bin/uber-notebook-files").toString().replace(/^file:\/\//, ""))
+  readonly property string filesHelper: decodeURIComponent(Qt.resolvedUrl("bin/sunshine-files").toString().replace(/^file:\/\//, ""))
   function helper(args, done, options) {
     exec(["/usr/bin/python3", "-I", "-S", filesHelper].concat(args), done, options)
   }
@@ -209,7 +209,7 @@ Item {
     }, { maxBytes: 3 * max + 1024 * 1024, timeoutMs: 30000 })
   }
 
-  // A file of Uber Notebook's own in a folder of its own (an agent's sandbox
+  // A file of Sunshine's own in a folder of its own (an agent's sandbox
   // profile), by the files helper (put): never through a link planted there.
   // done(ok).
   // (`copy`: the Markdown copy's folder, which may be a link to where you
@@ -229,7 +229,7 @@ Item {
     for (var k in (options || {})) o[k] = options[k]
     var max = o.maxBytes || 256 * 1024
     o.maxBytes = 6 * max + 1024
-    exec(["/usr/bin/bash", "-c", "h=$1; n=$2; shift 2; set -o pipefail; \"$@\" | /usr/bin/python3 -I -S \"$h\" to-json \"$n\"", "uber-notebook-text", filesHelper, String(Math.round(max))].concat(argv), function(ok, out) {
+    exec(["/usr/bin/bash", "-c", "h=$1; n=$2; shift 2; set -o pipefail; \"$@\" | /usr/bin/python3 -I -S \"$h\" to-json \"$n\"", "sunshine-text", filesHelper, String(Math.round(max))].concat(argv), function(ok, out) {
       var t = store.parseJson(String(out || "").trim())
       if (typeof t === "string") { done(ok, t); return }
       done(false, ok ? "it printed more than it may" : String(out || ""))
@@ -239,7 +239,7 @@ Item {
   // ---- your notes, by the files helper ------------------------------------------------------
   //
   // The files in your notes folder are read and written by the files helper,
-  // kept running for that folder (bin/uber-notebook-files serve): every path
+  // kept running for that folder (bin/sunshine-files serve): every path
   // below the folder walked without following a link, to a plain file only,
   // read within its size, written as a new file put in its place. Only when
   // it doesn't answer (it can't start, it stopped, it's stuck) is a file read
@@ -287,7 +287,7 @@ Item {
       if (store.notes === h) store.notes = null
       if (code !== 0 && code !== -1) {
         store.notesFailures++
-        console.warn("Uber Notebook: the files helper stopped (" + code + "): " + String(errors || "").slice(0, 300))
+        console.warn("Sunshine: the files helper stopped (" + code + "): " + String(errors || "").slice(0, 300))
       }
       var left = h.waiting
       h.waiting = {}
@@ -324,7 +324,7 @@ Item {
       if (!h || h.dead) return
       var now = Date.now()
       for (var id in h.sent) {
-        if (now - h.sent[id] > 60000) { console.warn("Uber Notebook: the files helper isn't answering: started again"); h.run.stop(); return }
+        if (now - h.sent[id] > 60000) { console.warn("Sunshine: the files helper isn't answering: started again"); h.run.stop(); return }
       }
     }
   }
@@ -378,12 +378,12 @@ Item {
 
   // Omarchy launches it, in its own terminal; nothing here waits for it.
   // Its request (your words, the page's, what was said) is put in a file of
-  // its own, yours alone, in Uber Notebook's agent folder (in
+  // its own, yours alone, in Sunshine's agent folder (in
   // $XDG_RUNTIME_DIR), and it starts with a line saying to read it: a
   // program's command line is there for every account on the computer to
   // read, as long as it runs. done(ok) once it's launched (or not).
   property var agentLauncher: ["/usr/bin/omarchy-agent-prompt"]
-  property string agentRequests: runtimeDir + "/uber-notebook-agent"
+  property string agentRequests: runtimeDir + "/sunshine-agent"
   function launchAgent(prompt, done) {
     var dir = agentRequests
     var name = "request-" + Date.now().toString(36) + "-" + Math.floor(Math.random() * 0x7fffffff).toString(36) + ".md"
@@ -391,7 +391,7 @@ Item {
       if (!made) { if (done) done(false); return }
       putFile(dir, name, String(prompt), function(ok) {
         if (ok) Quickshell.execDetached(agentLauncher.concat([Agent.requestPointer(dir + "/" + name)]))
-        else console.warn("Uber Notebook: the agent's request couldn't be written")
+        else console.warn("Sunshine: the agent's request couldn't be written")
         if (done) done(ok)
       })
     })
@@ -406,7 +406,7 @@ Item {
   function findAgents(names, done) {
     var list = (names || []).filter(function(n) { return /^[a-z][a-z0-9-]{0,30}$/.test(n) })
     if (list.length === 0) { done({}); return }
-    exec(["/usr/bin/bash", "-c", Agent.AGENTS_SCRIPT, "uber-notebook-agents", String(Quickshell.env("PATH") || "")].concat(list), function(ok, output) {
+    exec(["/usr/bin/bash", "-c", Agent.AGENTS_SCRIPT, "sunshine-agents", String(Quickshell.env("PATH") || "")].concat(list), function(ok, output) {
       var found = ok ? Agent.agentPaths(output) : {}
       var all = {}
       for (var k in store.agentPaths) all[k] = store.agentPaths[k]
@@ -443,10 +443,10 @@ Item {
     Quickshell.execDetached(["/usr/bin/omarchy-menu", "summon", "setup.default.agent"])
   }
 
-  // The uber-notebook skill, linked into the folders agents read skills from (the
+  // The sunshine skill, linked into the folders agents read skills from (the
   // ones Omarchy links its own skills into) once you turn it on, so whichever
-  // agent you use knows Uber Notebook's commands. A link is only made where
-  // nothing has that name, and only Uber Notebook's own links are taken out
+  // agent you use knows Sunshine's commands. A link is only made where
+  // nothing has that name, and only Sunshine's own links are taken out
   // (to `target`, or to its skill in another place: an install before).
   readonly property var skillFolders: [".agents/skills", ".claude/skills", ".codex/skills", ".hermes/skills", ".pi/agent/skills"]
   // (Under a lock, `skillLock`, the one taking them out as it stops waits
@@ -460,25 +460,25 @@ Item {
   readonly property string skillScript: "mode=$1; target=$2; lock=$3; token=$4; shift 4; { exec 9>>\"$lock\"; } 2>/dev/null && /usr/bin/flock -w 10 9; "
     + "if [ -n \"$token\" ]; then [ -e \"$lock.stopped-$token\" ] && exit 0; "
     + "{ printf '%s\\n' \"$token\" > \"$lock.active\"; } 2>/dev/null; fi; "
-    + "for dir in \"$@\"; do link=\"$dir/uber-notebook\"; "
+    + "for dir in \"$@\"; do link=\"$dir/sunshine\"; "
     + "if [ \"$mode\" = link ]; then if [ -d \"$dir\" ] && [ ! -e \"$link\" ] && [ ! -L \"$link\" ]; then /usr/bin/ln -sT -- \"$target\" \"$link\"; "
     // (A link to its skill in another place, gone (an install before, moved
     // away): made to point here. Anything else there is left.)
-    + "elif [ -L \"$link\" ] && [ ! -e \"$link\" ]; then case \"$(/usr/bin/readlink -- \"$link\")\" in */marcho78.uber-notebook/skills/uber-notebook) /usr/bin/ln -sfnT -- \"$target\" \"$link\";; esac; fi; "
-    + "elif [ -L \"$link\" ]; then case \"$(/usr/bin/readlink -- \"$link\")\" in \"$target\"|*/marcho78.uber-notebook/skills/uber-notebook) /usr/bin/rm -f -- \"$link\";; esac; fi; done; exit 0"
+    + "elif [ -L \"$link\" ] && [ ! -e \"$link\" ]; then case \"$(/usr/bin/readlink -- \"$link\")\" in */xavier.sunshine/skills/sunshine) /usr/bin/ln -sfnT -- \"$target\" \"$link\";; esac; fi; "
+    + "elif [ -L \"$link\" ]; then case \"$(/usr/bin/readlink -- \"$link\")\" in \"$target\"|*/xavier.sunshine/skills/sunshine) /usr/bin/rm -f -- \"$link\";; esac; fi; done; exit 0"
 
   function skillDirs() { return skillFolders.map(function(f) { return store.home + "/" + f }) }
   // This run's, for the marks beside the lock: when it started (9
   // characters, so a later run's sorts after), then a random part. Made
   // once, as it starts.
   readonly property string skillToken: ("000000000" + Date.now().toString(36)).slice(-9) + (Math.random().toString(36) + "00000000").slice(2, 10)
-  property string skillLock: { var r = Quickshell.env("XDG_RUNTIME_DIR"); return (r && r.indexOf("/") === 0 ? r : store.home + "/.cache") + "/uber-notebook-skills.lock" }
-  // Linked (`on`), or Uber Notebook's own links taken out: one at a time, the
+  property string skillLock: { var r = Quickshell.env("XDG_RUNTIME_DIR"); return (r && r.indexOf("/") === 0 ? r : store.home + "/.cache") + "/sunshine-skills.lock" }
+  // Linked (`on`), or Sunshine's own links taken out: one at a time, the
   // last asked for done last, so turning it on and off quickly ends as it was
   // left.
   property bool skillBusy: false
   property var skillNext: null
-  // Uber Notebook stopping (Service.qml, as it goes): never linked again,
+  // Sunshine stopping (Service.qml, as it goes): never linked again,
   // it's taking them out. (Not `stopping`: the window sets that as it's
   // reloaded, while this goes on running.)
   property bool skillsStopped: false
@@ -490,20 +490,20 @@ Item {
     skillNext = null
     if (!w.target) return
     skillBusy = true
-    exec(["/usr/bin/bash", "-c", skillScript, "uber-notebook-skills", w.on ? "link" : "unlink", w.target, skillLock, skillToken].concat(skillDirs()), function() {
+    exec(["/usr/bin/bash", "-c", skillScript, "sunshine-skills", w.on ? "link" : "unlink", w.target, skillLock, skillToken].concat(skillDirs()), function() {
       store.skillBusy = false
       if (store.skillNext) store.setSkillLinks(store.skillNext.on, store.skillNext.target)
     }, { timeoutMs: 5000 })
   }
   // Only as this run stops (it marks the run stopped: nothing it asks for
-  // links after). (Each link taken out only if it's still Uber Notebook's:
+  // links after). (Each link taken out only if it's still Sunshine's:
   // read where it's kept, then taken out there; by the archive helper:
   // `runner`, the helper run from its text, kept as it started, when its
   // folder may be gone by now.)
   function unlinkSkill(target, runner) {
     var run = runner && runner.length ? runner : ["/usr/bin/python3", "-I", "-S", filesHelper]
     skillDirs().forEach(function(dir) {
-      Quickshell.execDetached(run.concat(["unlink-link", dir + "/uber-notebook", target, skillLock, skillToken]))
+      Quickshell.execDetached(run.concat(["unlink-link", dir + "/sunshine", target, skillLock, skillToken]))
     })
   }
 
@@ -548,7 +548,7 @@ Item {
       if (view) view.destroy()
       if (!ok && !quiet) failed("Couldn't save " + path.replace(home, "~") + (error ? ": " + error : ""))
       waiters.forEach(function(w) {
-        try { w(ok) } catch (e) { console.warn("Uber Notebook: after saving " + path + ": " + e) }
+        try { w(ok) } catch (e) { console.warn("Sunshine: after saving " + path + ": " + e) }
       })
       var next = queued[path]
       if (next) {
@@ -560,7 +560,7 @@ Item {
     function asBefore() {
       view = writerComponent.createObject(store, { path: path, blockWrites: stopping })
       view.saved.connect(function() {
-        // (Yours alone, as everything Uber Notebook writes: Qt makes a new
+        // (Yours alone, as everything Sunshine writes: Qt makes a new
         // file readable by others. As the shell stops, nothing more runs;
         // what's written then is in a folder that's yours alone.)
         if (!stopping) exec(["/usr/bin/chmod", "go-rwx", "--", path], null, { okCodes: [0, 1] })
@@ -695,7 +695,7 @@ Item {
     })
   }
 
-  // A folder of Uber Notebook's own (a profile's notes, the backups') made
+  // A folder of Sunshine's own (a profile's notes, the backups') made
   // yours alone (700), as one from before was made (755): nothing in it can
   // be reached by another account on the computer, whatever it holds. Never
   // your home folder itself (a profile there: its own files and folders in
@@ -707,14 +707,14 @@ Item {
   function makePrivate(folder, done) {
     var f = String(folder || "").replace(/\/+$/, "")
     if (!/^\/./.test(f) || f === home) { if (done) done(f === home); return }
-    exec(["/usr/bin/bash", "-c", privateScript, "uber-notebook-private", f], function(ok) { if (done) done(ok) }, { okCodes: [0] })
+    exec(["/usr/bin/bash", "-c", privateScript, "sunshine-private", f], function(ok) { if (done) done(ok) }, { okCodes: [0] })
   }
   function privateEntries(root, names, done) {
     var paths = (names || []).filter(function(n) { return /^[^\/]+$/.test(String(n)) && n !== "." && n !== ".." }).map(function(n) { return root + "/" + n })
     if (!paths.length) { if (done) done(true); return }
-    exec(["/usr/bin/bash", "-c", privateScript, "uber-notebook-private"].concat(paths), function(ok) { if (done) done(ok) }, { okCodes: [0] })
+    exec(["/usr/bin/bash", "-c", privateScript, "sunshine-private"].concat(paths), function(ok) { if (done) done(ok) }, { okCodes: [0] })
   }
-  // What Uber Notebook keeps in a notes folder (a profile in your home
+  // What Sunshine keeps in a notes folder (a profile in your home
   // folder itself: these made yours alone, not the home folder).
   readonly property var ownEntries: ["Pages", ".trash", "library.json", "Exports", "Markdown"]
   // The notebooks' folders in a notes folder (each one with its
@@ -723,14 +723,14 @@ Item {
   // else there.)
   readonly property string notebookFoldersScript: "for f in \"$1\"/*/notebook.json; do [ -f \"$f\" ] || continue; d=${f%/notebook.json}; printf '%s\\n' \"${d##*/}\"; done"
   function notebookFoldersIn(root, done) {
-    exec(["/usr/bin/bash", "-c", notebookFoldersScript, "uber-notebook-notebooks", String(root)], function(ok, out) {
+    exec(["/usr/bin/bash", "-c", notebookFoldersScript, "sunshine-notebooks", String(root)], function(ok, out) {
       done(ok ? String(out || "").split("\n").filter(function(n) { return Library.isId(n) }) : [])
     }, { okCodes: [0, 1], timeoutMs: 8000, maxBytes: 256 * 1024 })
   }
   // `mkdir -p` making every folder it makes yours alone (700): notes are
   // never readable by other accounts on the computer.
   function privateMkdir(paths) {
-    return ["/usr/bin/bash", "-c", "umask 077 && exec /usr/bin/mkdir -p -- \"$@\"", "uber-notebook-mkdir"].concat(paths)
+    return ["/usr/bin/bash", "-c", "umask 077 && exec /usr/bin/mkdir -p -- \"$@\"", "sunshine-mkdir"].concat(paths)
   }
   function mkdirs(paths, done) {
     // (In the notes folder, by the files helper; else, or when it doesn't answer, as before.)
@@ -797,13 +797,13 @@ Item {
   function retry() {
     if (blockedFolder && active) locateTimer.restart()
   }
-  // Uber Notebook's own data folder (the demo's notes are in it).
+  // Sunshine's own data folder (the demo's notes are in it).
   property string dataFolder: ""
   // The open profile is new: its folder hasn't been opened yet (Profiles,
   // `fresh`).
   property bool newProfile: false
   // The notes folder made, if it isn't there yet: only a new profile's
-  // (and the folders it's in), or one in Uber Notebook's own data folder
+  // (and the folders it's in), or one in Sunshine's own data folder
   // (the demo's). One that was opened before and isn't there now is never
   // made again (a drive mounted in a folder of yours, ~/GDrive/Notes, not
   // mounted now: its mount point is an empty folder of yours), so nothing's
@@ -814,7 +814,7 @@ Item {
   readonly property string notesMkdirScript: "umask 077; [ -d \"$1\" ] && exit 0; [ \"$2\" = new ] && exec /usr/bin/mkdir -p -- \"$1\"; echo gone; exit 1"
   function makeNotesFolder(path, done) {
     var made = newProfile || (dataFolder !== "" && path.indexOf(dataFolder + "/") === 0)
-    exec(["/usr/bin/bash", "-c", notesMkdirScript, "uber-notebook-mkdir", path, made ? "new" : "there"], function(ok, output) {
+    exec(["/usr/bin/bash", "-c", notesMkdirScript, "sunshine-mkdir", path, made ? "new" : "there"], function(ok, output) {
       var out = String(output || "").trim()
       var shown = path.replace(home, "~")
       if (!ok) failed(out === "gone" ? "Your notes folder " + shown + " isn't there (a drive that isn't mounted?). It isn't made again, so nothing's put where that drive goes: Try again once it's there, or pick another folder"
@@ -1239,7 +1239,7 @@ Item {
       paper: { pattern: "ruled", color: "ivory", spacing: "regular" },
       pen: "sans"
     }, [{
-      title: "Welcome to Uber Notebook",
+      title: "Welcome to Sunshine",
       blocks: [
         { type: "p", html: "This is your notebook. Everything you write is <span style=\"font-weight:700;\">saved as you go</span>, as plain files in " + Html.escapeText(rootPath.replace(home, "~")) + "." },
         { type: "h2", html: "Things to try" },
@@ -1249,7 +1249,7 @@ Item {
         tip("Turn the page with Ctrl+PgDown, or click the page's bottom corner"),
         tip("Paste or drop a picture onto the page"),
         tip("Give a page an index tab: \u22ef, then Add a tab"),
-        { type: "callout", tone: "yellow", html: "<span style=\"font-weight:700;\">Super+N</span> opens and closes Uber Notebook from anywhere. <span style=\"font-weight:700;\">Super+Alt+N</span> jots a quick note." },
+        { type: "callout", tone: "yellow", html: "<span style=\"font-weight:700;\">Super+N</span> opens and closes Sunshine from anywhere. <span style=\"font-weight:700;\">Super+Alt+N</span> jots a quick note." },
         { type: "p", html: "Back to the shelf (top left) to start another notebook, with the cover, paper and pen you like." }
       ]
     }, {}])
@@ -1376,7 +1376,7 @@ Item {
     })
   }
 
-  // A picture copied in (bin/uber-notebook-files copy-picture): only a plain
+  // A picture copied in (bin/sunshine-files copy-picture): only a plain
   // file that's a picture Qt can show (at most pictureMax bytes, 16384 px a
   // side), as a new file in `folder` named `name`, never over one; with
   // `within` (an agent's folder), only a picture in it, through no link.
@@ -1433,7 +1433,7 @@ Item {
       var name = Library.pageId(new Date()) + "." + ext
       store.mkdirs([dest], function(made) {
         if (!made) { done(""); return }
-        store.exec(["/usr/bin/bash", "-c", store.pasteScript, "uber-notebook-paste", pick, dest + "/" + name, String(store.pasteMax)], function(pasted) {
+        store.exec(["/usr/bin/bash", "-c", store.pasteScript, "sunshine-paste", pick, dest + "/" + name, String(store.pasteMax)], function(pasted) {
           done(pasted ? "assets/" + name : "")
         }, { timeoutMs: 15000 })
       })
@@ -1471,7 +1471,7 @@ Item {
     }, { okCodes: [0, 1], timeoutMs: 3000, maxBytes: 64 * 1024 })
   }
 
-  // ---- out of Uber Notebook -----------------------------------------------------------------------
+  // ---- out of Sunshine -----------------------------------------------------------------------
 
   // Text onto the clipboard, given to wl-copy on its stdin (never as an
   // argument, which anyone on the computer could read while it's held).
@@ -1489,20 +1489,20 @@ Item {
   function copyPicture(path, done) {
     var type = Library.pictureType(path)
     if (!type || String(path || "").charAt(0) !== "/") { if (done) done(false); return }
-    exec(["/usr/bin/bash", "-c", copyPictureScript, "uber-notebook-copy-picture", type, path], function(ok) { if (done) done(ok) }, { timeoutMs: 20000, keepChildren: true })
+    exec(["/usr/bin/bash", "-c", copyPictureScript, "sunshine-copy-picture", type, path], function(ok) { if (done) done(ok) }, { timeoutMs: 20000, keepChildren: true })
   }
 
   // A picture made here (a diagram or an equation, grabbed) written to
   // `path` (a PNG, or as its ending says): true when it is.
   function saveGrab(result, path) {
     var ok = !!result && result.saveToFile(path)
-    // (Yours alone, as everything Uber Notebook writes.)
+    // (Yours alone, as everything Sunshine writes.)
     if (ok) exec(["/usr/bin/chmod", "go-rwx", "--", path], null, { okCodes: [0, 1] })
     return ok
   }
   // A file for a moment (a picture on its way to the clipboard), where only
   // you can read it.
-  function tempPath(name) { return runtimeDir + "/uber-notebook-" + name }
+  function tempPath(name) { return runtimeDir + "/sunshine-" + name }
 
   // A copy of a file at `to` (a picture saved where you said): done(ok, why).
   function copyFileTo(from, to, done) { placeFile(from, to, true, done) }
@@ -1516,7 +1516,7 @@ Item {
       if (ok && /^open$/m.test(String(out || ""))) store.failed(store.openDriveNote(to))
     }, { timeoutMs: 120000, maxBytes: 8192 })
   }
-  // Files of a folder of Uber Notebook's own (Pages/assets), by their names,
+  // Files of a folder of Sunshine's own (Pages/assets), by their names,
   // copied into `to` (an export's assets folder, made yours alone first):
   // only those (never the whole folder), each a new file yours alone (as
   // umask 077 leaves it, whatever the one copied was), a link copied as a
@@ -1527,7 +1527,7 @@ Item {
   function copyAssets(from, names, to, done) {
     var list = (names || []).map(String).filter(function(n) { return /^[A-Za-z0-9][A-Za-z0-9._-]{0,120}$/.test(n) && n.indexOf("..") < 0 })
     if (!list.length || !/^\/./.test(String(from)) || !/^\/./.test(String(to))) { if (done) done(list.length === 0); return }
-    exec(["/usr/bin/bash", "-c", copyAssetsScript, "uber-notebook-copy-assets", String(from), String(to)], function(ok) { if (done) done(ok) },
+    exec(["/usr/bin/bash", "-c", copyAssetsScript, "sunshine-copy-assets", String(from), String(to)], function(ok) { if (done) done(ok) },
       { input: list.join("\n") + "\n", timeoutMs: 300000, maxBytes: 1024 * 1024 })
   }
 
@@ -1545,7 +1545,7 @@ Item {
     Quickshell.execDetached(["/usr/bin/uwsm-app", "--", "/usr/bin/xdg-open", u])
   }
 
-  // A folder or file of Uber Notebook's own, by its full path (a profile's
+  // A folder or file of Sunshine's own, by its full path (a profile's
   // folder, the backups folder, a notebook's picture): never from a page.
   function openLocal(path) {
     var p = String(path || "")
@@ -1559,7 +1559,7 @@ Item {
   readonly property string appScript: "t=$(/usr/bin/xdg-mime query filetype \"$1\" 2>/dev/null); d=$(/usr/bin/xdg-mime query default \"$t\" 2>/dev/null); printf '%s\\n%s\\n' \"$t\" \"$d\""
   readonly property var browsers: /(^|[-.])(google-chrome|chrome|chromium|firefox|brave|vivaldi|opera|microsoft-edge|zen|librewolf|epiphany|qutebrowser|falkon|midori)/i
   function openFile(path, done) {
-    exec(["/usr/bin/bash", "-c", appScript, "uber-notebook-app", path], function(ok, out) {
+    exec(["/usr/bin/bash", "-c", appScript, "sunshine-app", path], function(ok, out) {
       var app = String(out || "").split("\n")[1] || ""
       app = app.trim()
       if (!app) { if (done) done(false, "none"); return }
@@ -1572,10 +1572,10 @@ Item {
   // A PDF made to print, in your PDF viewer (or whatever opens PDFs, a
   // browser too: it prints them): only one in the print folder.
   function openPrint(path, done) {
-    var dir = runtimeDir + "/uber-notebook-print/"
+    var dir = runtimeDir + "/sunshine-print/"
     var p = String(path || "")
     if (p.indexOf(dir) !== 0 || p.slice(dir.length).indexOf("/") >= 0 || !/\.pdf$/.test(p)) { if (done) done(false); return }
-    exec(["/usr/bin/bash", "-c", appScript, "uber-notebook-app", p], function(ok, out) {
+    exec(["/usr/bin/bash", "-c", appScript, "sunshine-app", p], function(ok, out) {
       var app = (String(out || "").split("\n")[1] || "").trim()
       if (!app) { if (done) done(false); return }
       Quickshell.execDetached(["/usr/bin/uwsm-app", "--", "/usr/bin/xdg-open", p])
@@ -1608,17 +1608,17 @@ Item {
     // event's, whatever it opens.)
     if (!reminderWords && isDay) { title = "An event is starting"; text = "Click to see it. Turn on reminder details in Settings → Notifications." }
     else if (!reminderWords && isPage) { title = "A reminder is due"; text = "Click to open it. Turn on reminder details in Settings → Notifications." }
-    var click = isPage ? ["/usr/bin/omarchy-shell", "uber-notebook", "open", pageId] : isDay ? ["/usr/bin/omarchy-shell", "uber-notebook", "calendar", day] : []
+    var click = isPage ? ["/usr/bin/omarchy-shell", "sunshine", "open", pageId] : isDay ? ["/usr/bin/omarchy-shell", "sunshine", "calendar", day] : []
     return { summary: String(title || "Reminder").slice(0, 120), body: String(text || "").slice(0, 300), glyph: "\u{f009e}", exec: click }
   }
   function notify(title, text, pageId, day) {
     var note = notification(title, text, pageId, day)
     helper(["notify"], function(ok, out) {
-      if (!ok) console.warn("Uber Notebook: a notification wasn't sent: " + String(out || "").trim().slice(0, 200))
+      if (!ok) console.warn("Sunshine: a notification wasn't sent: " + String(out || "").trim().slice(0, 200))
     }, { input: JSON.stringify(note), timeoutMs: 10000, maxBytes: 4096 })
   }
 
-  // A folder Uber Notebook made (an export), in the file manager.
+  // A folder Sunshine made (an export), in the file manager.
   function openPath(path) {
     if (path && path.indexOf(rootPath + "/") === 0) Quickshell.execDetached(["/usr/bin/uwsm-app", "--", "/usr/bin/xdg-open", path])
   }
@@ -1672,7 +1672,7 @@ Item {
         })
         // (Its pictures, if it has any: a copy that fails is an export
         // that isn't whole, said.)
-        store.exec(["/usr/bin/bash", "-c", "[ -d \"$1\" ] || exit 0; exec /usr/bin/cp -r -- \"$1\" \"$2\"", "uber-notebook-export-assets", from + "/" + id + "/assets", dir + "/assets"], function(copied) { one(copied) }, { timeoutMs: 300000 })
+        store.exec(["/usr/bin/bash", "-c", "[ -d \"$1\" ] || exit 0; exec /usr/bin/cp -r -- \"$1\" \"$2\"", "sunshine-export-assets", from + "/" + id + "/assets", dir + "/assets"], function(copied) { one(copied) }, { timeoutMs: 300000 })
       })
     })
   }

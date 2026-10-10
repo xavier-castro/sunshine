@@ -6,7 +6,7 @@ import "../Covers.js" as Covers
 import "../Blocks.js" as Blocks
 import "../Overlays.js" as Overlays
 
-// Uber Notebook: a desk with your notebooks on it. The shelf shows them cover up;
+// Sunshine: a desk with your notebooks on it. The shelf shows them cover up;
 // pick one and it slides onto the desk and its cover swings open. Or Pages:
 // a workspace of pages made of blocks, the way Notion does it (DocView.qml).
 //
@@ -56,7 +56,7 @@ FocusScope {
     else root.forceActiveFocus()
   }
 
-  // Esc on the shelf: put Uber Notebook away.
+  // Esc on the shelf: put Sunshine away.
   signal hideRequested()
 
   Theme {
@@ -73,7 +73,7 @@ FocusScope {
     clockSetting: root.settings.clock || "12"
   }
 
-  // The fonts Uber Notebook brings with it (the notebook window loads them once
+  // The fonts Sunshine brings with it (the notebook window loads them once
   // for itself and the quick note, and turns this off).
   property bool loadFonts: true
   property int fontsLoaded: 0
@@ -207,8 +207,8 @@ FocusScope {
         width: Math.min(implicitWidth, setupStrip.width - 32 - setupTurnOn.width - setupDismiss.width - 28)
         wrapMode: Text.WordWrap
         textFormat: Text.PlainText
-        text: setupStrip.asks.length > 1 ? "Use the Uber Notebook skill in Claude Code and Codex, and see reminder details in notifications."
-          : setupStrip.asks[0] === "skill" ? "Use the Uber Notebook skill in Claude Code and Codex."
+        text: setupStrip.asks.length > 1 ? "Use the Sunshine skill in Claude Code and Codex, and see reminder details in notifications."
+          : setupStrip.asks[0] === "skill" ? "Use the Sunshine skill in Claude Code and Codex."
           : "See reminder details in notifications."
         font.family: themeObject.uiFont
         font.pixelSize: 13

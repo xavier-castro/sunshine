@@ -4,7 +4,7 @@
 // kinds it knows, entry points that are there, no links in the repository,
 // and a README, a license and a preview at its root. And no text its
 // security baseline reads as installing software or managing a service
-// (scripts/security-baseline-analysis.mjs): Uber Notebook does neither.
+// (scripts/security-baseline-analysis.mjs): Sunshine does neither.
 // Usage (from the plugin directory): node tests/manifest.test.cjs
 
 const assert = require("node:assert/strict");

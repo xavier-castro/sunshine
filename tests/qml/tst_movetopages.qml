@@ -1,6 +1,6 @@
 import QtQuick
 import QtTest
-import "../.." as UberNotebook
+import "../.." as Sunshine
 import "../../app"
 import "../../Workspace.js" as Workspace
 
@@ -10,7 +10,7 @@ import "../../Workspace.js" as Workspace
 // drawn on them a sketch at their end; the notebook in the trash, and Pages
 // open at the page. A picture that can't be copied: the pages are made
 // without it, and the notebook stays on the shelf. And Pages is where
-// Uber Notebook opens, and where quick notes go, unless you say.
+// Sunshine opens, and where quick notes go, unless you say.
 Item {
   id: root
   width: 1320
@@ -20,7 +20,7 @@ Item {
   FakeService { id: service; store: store; user: ({ sounds: false, space: "notebooks" }) }
   FakeService { id: firstService; store: store; user: ({ sounds: false }) }
   FakeFiles { id: files }
-  UberNotebook.Workspace { id: ws; files: files }
+  Sunshine.Workspace { id: ws; files: files }
 
   App {
     id: app

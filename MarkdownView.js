@@ -2,8 +2,8 @@
 // release's notes), shown as rich text that Qt draws without fetching or
 // running anything. It's read as a page's Markdown is (Import.js): a picture
 // becomes a link to it, HTML in it is left out (its words kept), links go
-// only to the web or an email address, and every run's look is one Uber
-// Notebook writes itself (Html.sanitize). Headings are bold and bigger, lists
+// only to the web or an email address, and every run's look is one Sunshine
+// writes itself (Html.sanitize). Headings are bold and bigger, lists
 // keep their bullets and numbers, to-dos their boxes; quotes are in italics,
 // code in a fixed-width font, tables a line a row.
 //

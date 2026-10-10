@@ -7,8 +7,8 @@ import "../Agent.js" as Agent
 // you picked, the words you selected, or the line you're on; or a new page
 // (the switch at the top; with no page open, Ctrl+J, a new page only), at
 // the top of Pages or inside the page you're on. Omarchy's default coding
-// agent does it (whichever `omarchy default agent` chose), through Uber
-// Notebook's commands, so what it changes shows up here as it goes.
+// agent does it (whichever `omarchy default agent` chose), through Sunshine's
+// commands, so what it changes shows up here as it goes.
 Pop {
   id: pop
 
@@ -428,8 +428,8 @@ Pop {
       wrapMode: Text.Wrap
       textFormat: Text.PlainText
       text: Agent.runsHere(pop.agent)
-        ? Agent.name(pop.agent) + " works here, in a panel on the page, through Uber Notebook's commands: what it changes shows up as it goes, each change a step you can undo. The terminal button beside Ask asks it in a terminal instead, with all its own controls."
-        : "It opens in a terminal and works through Uber Notebook's commands: what it changes shows up here, each change a step you can undo."
+        ? Agent.name(pop.agent) + " works here, in a panel on the page, through Sunshine's commands: what it changes shows up as it goes, each change a step you can undo. The terminal button beside Ask asks it in a terminal instead, with all its own controls."
+        : "It opens in a terminal and works through Sunshine's commands: what it changes shows up here, each change a step you can undo."
       font.family: pop.theme.uiFont
       font.pixelSize: 11
       color: pop.theme.faint

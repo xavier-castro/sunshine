@@ -1,6 +1,6 @@
 # Changelog
 
-Every notable change to Uber Notebook is listed here, newest first. The format
+Every notable change to Sunshine is listed here, newest first. The format
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and version
 numbers follow [Semantic Versioning](https://semver.org/).
 
@@ -8,28 +8,28 @@ numbers follow [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- **The Uber Notebook skill is yours to turn on.** It's off until you turn
-  on Settings → AI → *Enable Uber Notebook skill*. On, Claude Code,
+- **The Sunshine skill is yours to turn on.** It's off until you turn
+  on Settings → AI → *Enable Sunshine skill*. On, Claude Code,
   Codex and other agents find it in their skill folders, as before; off,
-  Uber Notebook takes its own links out. The agent panel, and agents
-  started from Uber Notebook, are given the skill either way. If you had
+  Sunshine takes its own links out. The agent panel, and agents
+  started from Sunshine, are given the skill either way. If you had
   it before, turn it on again.
-- **Choose what to turn on.** The first time Uber Notebook opens (and once
+- **Choose what to turn on.** The first time Sunshine opens (and once
   after this update) it asks about the skill and reminder details in
   notifications. While one's off, a strip over Pages has *Turn on* and
   *Dismiss*, till you turn it on or off yourself or dismiss it.
 - **Reminder details** moved to Settings → Notifications → *Show reminder
   details in notifications*. Setting a reminder while they're off asks
   whether to show them, with *Turn on*, till you've decided.
-- **Updating restarts the shell.** The command Uber Notebook gives you is
-  now `omarchy plugin update marcho78.uber-notebook && omarchy restart
-  shell`: part of Uber Notebook stays as it was through an update till the
+- **Updating restarts the shell.** The command Sunshine gives you is
+  now `omarchy plugin update xavier.sunshine && omarchy restart
+  shell`: part of Sunshine stays as it was through an update till the
   shell starts again. Updating to this version from 1.1.1, run
   `omarchy restart shell` after it.
 
 ### Fixed
 
-- After a plugin was installed, updated or turned on, Uber Notebook went on
+- After a plugin was installed, updated or turned on, Sunshine went on
   as if the shell were stopping: your notes were written without its files
   helper, and new files weren't made yours alone. Not any more.
 
@@ -71,7 +71,7 @@ profile's kept to itself, and fixes, after the marketplace's review.
   **Alt+Shift+↑/↓** no longer moves a locked page's blocks.
 - On a locked page, the window's own keys (**Ctrl+N**, **Ctrl+P**,
   **Ctrl+J**, **Ctrl+\\**, **Ctrl+,**, Help) work from its text again.
-- `omarchy-shell uber-notebook set clock 24` works: a value is read as its
+- `omarchy-shell sunshine set clock 24` works: a value is read as its
   setting takes it.
 
 ### Security
@@ -83,7 +83,7 @@ profile's kept to itself, and fixes, after the marketplace's review.
   on a computer you share, Settings → Writing → *Show what reminders say*
   (on by default) can be turned off: a reminder's or an event alert's
   notification then says only "A reminder is due" or "An event is
-  starting" (a click opens it). Every profile's folder is made yours alone as Uber Notebook
+  starting" (a click opens it). Every profile's folder is made yours alone as Sunshine
   starts, not only the one opened; a folder that isn't yours (whatever its
   mode), or a drive that refuses the change (a phone), counts as one that
   can't be private; a backup is never put back on
@@ -128,7 +128,7 @@ profile's kept to itself, and fixes, after the marketplace's review.
   input; Codex's request goes on its input, like Claude Code's and Grok's;
   an agent opened in a terminal starts with a line naming a file (600) its
   request is in; a backup's list of profiles goes on its input; a meeting's
-  title stays with its block. And everything Uber Notebook writes is yours
+  title stays with its block. And everything Sunshine writes is yours
   alone (600 and 700): the files helper writes so, every program it runs
   writes with `umask 077`, and a file you save or copy where you choose is
   written new beside it and put in its place, checked, so one that was
@@ -178,7 +178,7 @@ The first version.
   ("at 1" is 1 pm, not 1 am tomorrow). In the calendar and in `@` dates.
 - **Times on a 12-hour clock, or 24.** Times were only ever 13:00. Now
   Settings → Writing → Times has a Clock: **1:30 pm** (the default) or
-  **13:30**, for every time Uber Notebook shows: the calendar, events,
+  **13:30**, for every time Sunshine shows: the calendar, events,
   agendas, reminders, "Edited", page history, backups, meetings, emails,
   and a template's `{{time}}`. Typed either way, a time is read. An event's
   time boxes have a list to pick from (every 15 minutes, on your clock)
@@ -249,17 +249,17 @@ The first version.
   as you moved, blinking: on them the hover is theirs, not the block's.
   They stay while the pointer's on them now, on every kind of block.
 - **Every agent can read the skill in the panel.** The panel's prompt told
-  agents "only Uber Notebook's commands run here (no mktemp, cat or rm)",
+  agents "only Sunshine's commands run here (no mktemp, cat or rm)",
   meant for what they write; Codex, which reads files only with its shell,
   took it as no reading at all and stopped. It now names a way that works
-  in any sandbox, `omarchy-shell uber-notebook-agent skill` (and `help`),
+  in any sandbox, `omarchy-shell sunshine-agent skill` (and `help`),
   besides the file, and says only how to write what a command takes.
 - **A file from outside the agent's folder: asked, not refused.** When the
   panel's agent gives a command a file from elsewhere, you're asked in the
   panel (*Allow once*, or *Always from* its folder, which Settings → AI
   lists and takes back; never your home folder itself or a hidden one), and
-  it's done when you say yes. Grok no longer asks you about each of Uber
-  Notebook's own commands it runs (one alone, nothing chained to it), or
+  it's done when you say yes. Grok no longer asks you about each of Sunshine's
+  own commands it runs (one alone, nothing chained to it), or
   about writing its own files in its conversation's folder, as Claude Code
   doesn't.
 - **A picture Grok makes goes on the page.** Grok's image tool saves what
@@ -278,16 +278,16 @@ The first version.
 - **A menu's hint stays beside its line.** A long one (a model's
   description in the model menu) is cut short in the room left beside what
   the line does, never over it, and shown whole on hover.
-- **Pages first.** Uber Notebook opens in Pages (the first time; then where
+- **Pages first.** Sunshine opens in Pages (the first time; then where
   you were), and a quick note goes to the Pages Inbox unless you choose the
   Quick notes notebook. The notebooks stay as they are: Pages is where new
   things come.
-- **Omanote is now Uber Notebook.** The command is `omarchy-shell
-  uber-notebook`, the plugin `marcho78.uber-notebook`, the agents' skill
-  `uber-notebook`, and new notes go in `~/Documents/Uber Notebook` (a
+- **Omanote is now Sunshine.** The command is `omarchy-shell
+  sunshine`, the plugin `xavier.sunshine`, the agents' skill
+  `sunshine`, and new notes go in `~/Documents/Sunshine` (a
   profile keeps the folder it has). Notes written as Omanote work as they
   did: their `omanote://` links (to pages, dates, reminders, people and
-  tags) are read like the new `uber-notebook://` ones, and a Markdown copy
+  tags) are read like the new `sunshine://` ones, and a Markdown copy
   made then is still recognized.
 
 ### Added
@@ -301,7 +301,7 @@ The first version.
 - **Claude Code and Grok ask you, in the panel, for what's beyond their
   rules**: a web page, a web search, a command, one of your connectors'
   tools, a file elsewhere (Grok over its agent protocol, in its sandbox,
-  which lets it read Uber Notebook's skill too, Always-approve off for these
+  which lets it read Sunshine's skill too, Always-approve off for these
   runs). What it is comes from the tool, never
   from what it's given. A command is shown whole, every line in sight:
   *Allow this command*, *Allow shell for this conversation* or *No*
@@ -318,14 +318,14 @@ The first version.
   the top says so, with *Make my own profile* (the welcome screen again);
   the profile menu has *Start screen…* too. Esc, Cancel or *Back to the
   demo* closes it.
-- **Uber Notebook's name and icon** at the top of Pages' sidebar and the
+- **Sunshine's name and icon** at the top of Pages' sidebar and the
   shelf (a click: Settings → About).
 - **Claude, Grok and Codex side by side**, first, as tiles in the agent box
   and Settings → AI, each with who makes it and whether it's installed:
   they work right here; the other agents, under them, open in a terminal.
 - **The skill for any AI**: Settings → AI → *Use with any AI* copies
-  Uber Notebook's skill, saves a copy where you say, or shows its file, and
-  `omarchy-shell uber-notebook skill` prints it, for an AI that can run
+  Sunshine's skill, saves a copy where you say, or shows its file, and
+  `omarchy-shell sunshine skill` prints it, for an AI that can run
   commands on this computer.
 
 - **A terminal instead, whenever you like**: *In a terminal* beside *Ask* in
@@ -502,8 +502,8 @@ The first version.
   click; Summarize asks your agent for the summary, decisions and to-dos;
   a meeting voxtype recorded on its own can be brought in; meeting mode
   turned on from the meeting or Settings → Audio (in effect once voxtype
-  restarts: log out and back in, or restart its service yourself; Uber
-  Notebook says so until it has);
+  restarts: log out and back in, or restart its service yourself; Sunshine
+  says so until it has);
   dictation (Ctrl+Shift+D, the microphone at the top of a page, `/dictate`,
   and the microphone on the quick note, clicked or held while you speak):
   voxtype writes what you said where your cursor is;
@@ -525,7 +525,7 @@ The first version.
   ticks, code languages (and code exactly as written, tabs and all),
   pictures, links between the pages, and Notion's ids. Markdown pasted into
   a page becomes blocks. A page is a JSON file named by its UUID in the Pages folder.
-- **A picture picker of Uber Notebook's own**: your pictures shown as pictures
+- **A picture picker of Sunshine's own**: your pictures shown as pictures
   (newest first, folders first, Pictures, Downloads, Desktop and Home a
   click away), several chosen at once for a gallery (click, Shift+click a
   run, Ctrl+A), one for `/image`; Qt's own file dialog takes one file at a
@@ -541,13 +541,13 @@ The first version.
   page (and fixes one whose page is gone).
 - **Pictures**: a handle on each side of a picture (under the pointer)
   sizes it, its width shown as it's dragged, a double-click the page's
-  width; a picture is shown large in Uber Notebook (←/→ for the others, Esc),
+  width; a picture is shown large in Sunshine (←/→ for the others, Esc),
   not in another app. **Galleries** (`/gallery`): pictures in a grid, 2 to
   4 to a row, picked several at once or dropped, moved, captioned, taken
   out, taller or shorter by the bottom edge, shown large, in the Library,
   with colors. A click in the calendar's event editor no longer clicks the
   day under it too.
-- **Calendar files and contact cards open in Uber Notebook**: an `.ics` (an
+- **Calendar files and contact cards open in Sunshine**: an `.ics` (an
   email's attachment, a file on a page, one dropped, or *Import .ics…* in
   the calendar's ⋯) shows its events, with *Add to calendar* (none added
   twice); a `.vcf` attachment puts its people in People; a file whose only
@@ -558,8 +558,8 @@ The first version.
   group with a line about it; Esc closes Settings opened from Pages (the
   page kept the keys before).
 - **Backups**: the open profile, or all of them, in one `.tar.gz` (any
-  archive tool opens it: an `uber-notebook-backup.json` and each profile's
-  folder), in `~/Documents/Uber Notebook Backups` or a folder you choose, whole
+  archive tool opens it: an `sunshine-backup.json` and each profile's
+  folder), in `~/Documents/Sunshine Backups` or a folder you choose, whole
   or not at all; automatic ones daily or weekly (off to start with), the
   oldest past 3 to 50 to the trash, never the ones you make. **Restore**
   says what's in a backup, then puts each profile back as a new profile in
@@ -567,13 +567,13 @@ The first version.
   the first run can restore one, for a new computer. A file that isn't a
   backup, or holds links or reaches outside its folders, is refused;
   `backup`, `backups` and `restoreBackup` for agents.
-- **Updates**: Uber Notebook asks GitHub for its newest release a minute after
+- **Updates**: Sunshine asks GitHub for its newest release a minute after
   it starts and once a day (Settings → About; off, only when you ask);
   a newer one shows at the foot of Pages' sidebar, in the shelf's corner
-  and by About, a click from its release notes (read in Uber Notebook, without
+  and by About, a click from its release notes (read in Sunshine, without
   pictures or HTML), with the command that installs it (`omarchy plugin
-  update marcho78.uber-notebook`), to copy and run in a terminal, where it
-  shows what changes and asks first (Uber Notebook never installs anything
+  update xavier.sunshine`), to copy and run in a terminal, where it
+  shows what changes and asks first (Sunshine never installs anything
   itself); *Release notes* for the version you have, from `CHANGELOG.md`;
   `appVersion`, `checkUpdate` and `releaseNotes` for agents.
 - **Follow me on X** (@devsec_ai) at the foot of Pages' sidebar, in the
@@ -585,7 +585,7 @@ The first version.
   them, makes a new one (a name, and the folder its notes go in) or opens
   Settings' Profiles (rename, another folder, open the folder, take one off
   the list, start the demo over); the first run asks for your first profile
-  (or the demo) and makes nothing anywhere until then; an Uber Notebook from
+  (or the demo) and makes nothing anywhere until then; an Sunshine from
   before profiles opens as it was, its folder a profile ("Personal"); a new
   profile starts empty, with the templates; `profiles`, `profile`,
   `addProfile`, `renameProfile`, `profileFolder`, `removeProfile`, `demo`
@@ -597,7 +597,7 @@ The first version.
   sketch, a reading list, a recipe in columns, a journal with a button, a
   page of people, a cheatsheet), the people and events they name, dated from
   that day, and six templates; **Templates** in the sidebar is a page of
-  cards (yours, then Uber Notebook's), each with what it's for (a line written at
+  cards (yours, then Sunshine's), each with what it's for (a line written at
   the top of a template of yours), found by its name or what it's for, a
   click a new page from it; written as Markdown in `starter/`
   (`dev/starter` builds them in). The Library has someone, or a link, once
@@ -622,7 +622,7 @@ The first version.
   `linkStyle`: fills, outlines, the words' color, thicker or dashed lines,
   bold), kept readable on a light or a dark page. LaTeX and Mermaid are
   colored as they're written.
-- **Pictures, out of Uber Notebook**: Copy (onto the clipboard, to paste in
+- **Pictures, out of Sunshine**: Copy (onto the clipboard, to paste in
   any app; a JPEG, WebP or BMP as a PNG when ffmpeg is installed) and Save a
   copy… (where you say, named for its page or caption) on a picked
   picture's bar, in Pages and in notebooks, and where it's shown large
@@ -657,7 +657,7 @@ The first version.
   whole tree. The `sidebarHidden` and `sidebarFolded` settings, for agents
   and scripts too.
 - **Commands for AI agents and scripts**, over the Omarchy shell's IPC (no
-  MCP server): `omarchy-shell uber-notebook help`, `list`, `find`, `read`, `add`,
+  MCP server): `omarchy-shell sunshine help`, `list`, `find`, `read`, `add`,
   `addTo`, `append` and `trash`, answered in JSON, with pages in and out as
   Markdown (links to pages, dates and reminders too), new pages in an Inbox, and
   the app doing every write; `blocks`, `replace` and `insertAfter` change a
@@ -679,15 +679,15 @@ The first version.
   for the Notebooks; boards, bookmarks, links to pages, galleries, people,
   agendas and events read and written as fenced code (```` ```board ```` and
   the like). A
-  version of a page is kept in its history before a command changes it. A skill (`skills/uber-notebook/SKILL.md`), linked into the
-  skill folders of the agents Omarchy supports while Uber Notebook runs, teaches them
+  version of a page is kept in its history before a command changes it. A skill (`skills/sunshine/SKILL.md`), linked into the
+  skill folders of the agents Omarchy supports while Sunshine runs, teaches them
   how to use the commands.
 - **Ask your agent** from Pages: Ctrl+J, `/agent`, a block's menu, the toolbar
   over selected words or the page's menu hand what you'd like (with the page,
   the blocks or words you picked) to Omarchy's default coding agent, whichever
   you chose with `omarchy default agent`; its changes show up on the page as
   it works, each one a step you can undo. Claude Code, Grok and Codex work
-  right in Uber Notebook, without a terminal: a panel on the page shows each
+  right in Sunshine, without a terminal: a panel on the page shows each
   step they take and their answer (as it's written, for Claude Code and
   Grok), with Stop; if one can't run there, the panel says why and offers a
   terminal instead (a meeting's Summarize goes the same way). A reply at
@@ -703,12 +703,12 @@ The first version.
   notes only through the commands, and the skill now says how to make a page
   look good (callouts and their colors, toggles, dividers, highlights,
   colored words, block colors, an icon and a cover), so they don't go
-  looking through Uber Notebook's code: the same request took Grok 78 tool
+  looking through Sunshine's code: the same request took Grok 78 tool
   calls before, 7 after. The other agents run in their
   own terminal (Omarchy's agent window), so what they say comes back there
-  rather than in Uber Notebook. **A new page** instead of this one: the
+  rather than in Sunshine. **A new page** instead of this one: the
   switch at the top of the box (or Ctrl+J with no page open, from the
-  calendar, People...); Uber Notebook makes the page first, at the top of
+  calendar, People...); Sunshine makes the page first, at the top of
   Pages or inside the page you're on, opens it, and the agent titles it and
   writes it there as you watch; if it couldn't (it failed, or you stopped
   it) and the page is still empty when its panel's closed, the page goes and
@@ -719,7 +719,7 @@ The first version.
 - **Find** on a page (Ctrl+F), and **search** across every notebook from the
   shelf.
 - **Quick notes**: Super+Alt+N (or right-click the bar icon, or
-  `omarchy-shell uber-notebook quick "text"`) puts a sticky note up anywhere; kept,
+  `omarchy-shell sunshine quick "text"`) puts a sticky note up anywhere; kept,
   it becomes a page in the Quick notes notebook, or (Settings, or a click on
   the note's foot) a page in the Pages Inbox, its text read as Markdown.
 - **Files**: a folder per notebook, a JSON file per page, pictures beside
@@ -749,20 +749,20 @@ The first version.
   following a link, only a plain file, as a new file. A link in its folder
   to a file elsewhere (a key, say) is refused.
 - **Your agent, in the panel, reads and changes your notes as you ask, and
-  nothing contacts a site for it without your yes.** While one works, Uber
-  Notebook's commands read and change your notes (pages, People, the
-  calendar, templates), not Uber Notebook's settings, profiles or backups;
+  nothing contacts a site for it without your yes.** While one works, Sunshine's
+  commands read and change your notes (pages, People, the
+  calendar, templates), not Sunshine's settings, profiles or backups;
   files they take come only from its folder, read by a helper first. A link
-  it adds is kept as its link: Uber Notebook contacts the site (for its title
+  it adds is kept as its link: Sunshine contacts the site (for its title
   and picture) only after you answer in the panel, *Allow once*, *Always for
   that site* or *No*; redirects and pictures only from sites it may contact.
   **Settings → AI** lists the sites you've allowed, for each agent, to take
   back; an agent can't change them. Agents are found where they're
   installed, checked, and run by their full path.
 - **Nothing installs itself**: no *Update now*, no `installUpdate` command;
-  Uber Notebook shows the `omarchy plugin update` command to run yourself.
+  Sunshine shows the `omarchy plugin update` command to run yourself.
 - **Your notes are read and written by a helper kept running for their
-  folder** (`bin/uber-notebook-files serve`): never through a link, only a
+  folder** (`bin/sunshine-files serve`): never through a link, only a
   plain file within its size, each save a new file flushed to the disk and
   put in place. A file that can't be read is said and never saved over
   (before, it could be taken for one that isn't there). If the helper doesn't
@@ -775,7 +775,7 @@ The first version.
 - **Archives counted before they're made**: every folder and every entry,
   a zip's directory before it's read (zip64's too), and all a backup
   unpacks to; the helper at most 4 GB of memory. An import unzips on disk
-  (`~/.cache/uber-notebook`), not in the session's memory. A link in a
+  (`~/.cache/sunshine`), not in the session's memory. A link in a
   backup (one synced into a profile) is left out when it's put back, and
   said, instead of making the whole backup unrestorable; a sparse file
   refuses it.
@@ -796,14 +796,14 @@ The first version.
   loads from anywhere gets past), then Chromium or LibreOffice with a
   profile of its own and no network at all.
 - **Archives** (a zip you import, a backup you put back) are opened by a small
-  helper (`bin/uber-notebook-files`, Python, isolated): nothing in them can land
+  helper (`bin/sunshine-files`, Python, isolated): nothing in them can land
   outside its folder, be a link or a device, or take more than its room; a
   backup is put back only if it's still the file looked into.
 - **Text from elsewhere stays text**: a page's formatting can't carry a
-  picture or a style Uber Notebook wouldn't write; what you paste (Ctrl+V, or
+  picture or a style Sunshine wouldn't write; what you paste (Ctrl+V, or
   a middle click) is read with `wl-paste` and cleaned before Qt reads it, so a
   page copied from the web can't make it fetch its pictures; links go only to the web,
-  email or Uber Notebook; an agent's answer and release notes are drawn
+  email or Sunshine; an agent's answer and release notes are drawn
   without fetching anything; an email's HTML is rebuilt from a short list of
   tags.
 - **Budgets** on what can be slow or big: equations ("Too big to draw"),
