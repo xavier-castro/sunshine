@@ -1,0 +1,92 @@
+#!/bin/bash
+# Runs every test suite. Needs node and lua; the editor tests need Qt's
+# qmltestrunner (qt6-declarative) and run offscreen.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+# A raw line or paragraph separator in JavaScript ends the line it's on.
+if grep -rlP '[\x{2028}\x{2029}]' --include='*.js' --include='*.qml' . >/dev/null; then
+  echo "raw U+2028/U+2029 in:" >&2
+  grep -rlP '[\x{2028}\x{2029}]' --include='*.js' --include='*.qml' . >&2
+  exit 1
+fi
+
+node tests/settings.test.cjs
+node tests/quickqueue.test.cjs
+node tests/html.test.cjs
+node tests/blocks.test.cjs
+node tests/papers.test.cjs
+node tests/library.test.cjs
+node tests/markdown.test.cjs
+node tests/templates.test.cjs
+node tests/workspace.test.cjs
+node tests/dates.test.cjs
+node tests/import.test.cjs
+node tests/emoji.test.cjs
+node tests/highlight.test.cjs
+node tests/agent.test.cjs
+node tests/mindmap.test.cjs
+node tests/colors.test.cjs
+node tests/table.test.cjs
+node tests/history.test.cjs
+node tests/sketch.test.cjs
+node tests/mirror.test.cjs
+node tests/tags.test.cjs
+node tests/drag.test.cjs
+node tests/sidebar.test.cjs
+node tests/equations.test.cjs
+node tests/diagram.test.cjs
+node tests/notes.test.cjs
+node tests/audio.test.cjs
+node tests/meeting.test.cjs
+node tests/usertemplates.test.cjs
+node tests/calendar.test.cjs
+node tests/moreblocks.test.cjs
+node tests/collection.test.cjs
+node tests/contacts.test.cjs
+node tests/email.test.cjs
+node tests/starter.test.cjs
+node tests/profiles.test.cjs
+node tests/backups.test.cjs
+node tests/updates.test.cjs
+node tests/manifest.test.cjs
+node tests/clickthrough.test.cjs
+node tests/legacy.test.cjs
+node tests/env.test.cjs
+node tests/scope.test.cjs
+node tests/permissions.test.cjs
+node tests/files.test.cjs
+node tests/export.test.cjs
+node tests/markdownview.test.cjs
+node tests/overlays.test.cjs
+node tests/help.test.cjs
+lua tests/hypr.test.lua
+
+# Running programs (Run.qml, Stream.qml) for real, in a Quickshell started
+# offscreen (nothing is shown), each test from a copy that imports this
+# folder by its full path. Each prints PASS or FAIL lines, then DONE.
+shell=/usr/bin/quickshell
+if [[ -x $shell ]]; then
+  tmp=$(/usr/bin/mktemp -d)
+  trap '/usr/bin/rm -rf -- "$tmp"' EXIT
+  for t in tests/shell/*.qml; do
+    /usr/bin/sed "s|@PLUGIN@|file://$PWD|" "$t" > "$tmp/$(/usr/bin/basename "$t")"
+    out=$(UBER_NOTEBOOK_TEST_SECRET=s3cret BASH_ENV=/dev/null TAR_OPTIONS=-v QT_QPA_PLATFORM=offscreen /usr/bin/timeout 120 "$shell" -p "$tmp/$(/usr/bin/basename "$t")" 2>&1 | /usr/bin/sed 's/\x1b\[[0-9;]*m//g') || true
+    if echo "$out" | grep -q "FAIL" || ! echo "$out" | grep -q "DONE"; then
+      echo "$out" | grep -E "PASS|FAIL|ERROR|DONE" >&2
+      echo "shell: $t failed" >&2
+      exit 1
+    fi
+    echo "shell: $(echo "$out" | grep -c "PASS") checks passed in $(/usr/bin/basename "$t")"
+  done
+else
+  echo "shell: skipped (no quickshell)"
+fi
+
+runner=/usr/lib/qt6/bin/qmltestrunner
+if [[ -x $runner ]]; then
+  out=$(QT_QPA_PLATFORM=offscreen QT_FORCE_STDERR_LOGGING=1 "$runner" -input tests/qml 2>&1) || { echo "$out" | grep -v '^QDEBUG' >&2; exit 1; }
+  echo "qml: $(echo "$out" | grep -o 'Totals: [0-9]* passed, [0-9]* failed' | tail -1)"
+else
+  echo "qml: skipped (no qmltestrunner)"
+fi

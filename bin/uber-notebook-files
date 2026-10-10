@@ -1,0 +1,2324 @@
+#!/usr/bin/python3 -IS
+# uber-notebook-files - the archives Uber Notebook opens: a zip of notes to
+# import (a Notion or Obsidian export), and a backup to look into and put
+# back. Run as /usr/bin/python3 -I -S <this file> <command> ... (isolated:
+# no user site, no environment), by Workspace.qml and Backups.qml.
+#
+# Everything is read from one open file (opened without following a link,
+# and only if it's a regular file), and written below a folder this made
+# itself, through folders opened without following links, as new files
+# (never over one that's there). Nothing in an archive can name a place
+# outside that folder, be a link or a device, or take more than the room it's
+# given (bytes and files, counted as they're written).
+#
+#   unzip <zip> <folder> <max bytes> <max files>
+#       The zip into <folder> (an empty folder of Uber Notebook's own), and
+#       the zips that were in it (Notion exports in parts) into the same
+#       folder, all within one budget. Prints JSON: { ok, files, bytes,
+#       skipped } or { ok: false, error }.
+#   inspect-backup <backup.tar.gz>
+#       What's in a backup: "readable:1", "types:<-d...>", "outside:<n>",
+#       "dots:<n>", "hash:<sha256 of the file>", "---", its
+#       uber-notebook-backup.json (at most 200 KB). "readable:0" when it
+#       isn't one.
+#   read <max bytes> <file> [<within>]
+#       A text file (a regular file, not a link to one, at most <max bytes>),
+#       as JSON: { ok: true, text } or { ok: false, error }. With <within>
+#       (an agent's folder), only a file in it, every step through no link.
+#   put <folder> <path>
+#       What's on its input as <path> in <folder> (a folder of yours): a new
+#       file put in place (a link there is replaced, never followed). "put".
+#       The folder itself is never a link (an agent's, for its sandbox file).
+#   put-copy <folder> <path>
+#       The same into the Markdown copy's folder, the one you chose: that
+#       folder may be a link (a vault kept elsewhere), as long as where it
+#       leads is a folder of yours; nothing below it is followed.
+#   create-owned <file> <text>
+#       A small file of Uber Notebook's own (its entry in the app launcher):
+#       made only where nothing is ("made"); one that's there already is left
+#       as it is ("same" when it's exactly that text, else "taken").
+#   remove-owned <file> <text>
+#       That file taken away only if it's still exactly that text, a plain
+#       file ("removed"); anything else there is left ("kept").
+#   unlink-link <link> <target> [<lock> [<run>]]
+#       A link of Uber Notebook's own (its skill, in an agent's folder) taken
+#       away only if it's a link to <target>, or to its skill in another
+#       place when <target> is its skill (an install before), ("removed",
+#       else "kept"). With <lock>: once the lock linking takes is free, so a
+#       link being made as Uber Notebook stops is taken away after it's made;
+#       with <run> (its run, stopping: when it started, 9 characters that
+#       sort, then a random part), that run marked stopped beside the lock
+#       (<lock>.stopped-<run>), under it, so a link that run asked for and
+#       hasn't made yet isn't made; and nothing taken away if a later run
+#       that hasn't stopped has linked or unlinked since (<lock>.active):
+#       those links are its. (Marks over a week old are cleared away.)
+#   serve <notes folder>
+#       Your notes, read and written for Uber Notebook as long as it runs:
+#       a request a line on its input (JSON: { id, op, ... }), an answer a
+#       line on its output ({ id, ok, ... } or { id, ok: false, error }).
+#       The folder's opened once (yours, a folder); every path in a request
+#       is below it, walked a folder at a time without following a link, to
+#       a plain file only. Requests:
+#         read  { paths, max, total } -> { files: { path: text }, missing,
+#               errors: { path: why } }  (a file over `max` bytes, or past
+#               `total` for all of them: an error)
+#         find  { dir, pattern, max, total } -> the same, for the files a
+#               pattern finds: "*<end>" (what's there ending so, folders
+#               aside) or "*/<name>" (that file in each of its folders); a
+#               link it finds is in `errors`, not left out as if not there
+#         write { path, text }  -> {}  (a new file beside it, written out to
+#               the disk, then put in its place: never over anything but a
+#               plain file, never through a link; after a power cut, the file
+#               as it was or as it is, never half of it)
+#         mkdir { path }        -> {}  (the folders, as needed)
+#   read-files <max bytes> <total bytes>
+#       Text files, their full paths a JSON list on its input: each a plain
+#       file (a link to one is followed, as for a file you name; never a pipe
+#       or a device, never waited on), at most <max bytes> (and, as it's
+#       sent, three times that), <total bytes> in all (three times, as sent). Prints JSON
+#       (ASCII only): { ok, files: { path: text }, missing, errors: { path:
+#       why } }.
+#   read-glob <folder> <pattern> <max bytes> <total bytes>
+#       The same, for what "*<end>" or "*/<name>" finds in <folder> (plain
+#       files, and folders, not through a link below it).
+#   to-json <max bytes>
+#       What's on its input (at most <max bytes>), as one JSON string, ASCII
+#       only (a program's words, through Quickshell without a character cut
+#       in two). Past <max bytes>: an error, nothing printed.
+#   ascii-lines [<max line> <max total>]
+#       Each line on its input (JSON, as agents print) again, ASCII only, as
+#       it comes; a line that isn't JSON as a JSON string. Counted as it
+#       comes, before it's escaped (escaping makes text up to six times
+#       longer): a line past <max line> bytes (4 MB) left out and said on its
+#       errors; past <max total> bytes (64 MB) in all, it stops, said, and
+#       ends 3.
+#   copy-picture <picture> <folder> <name> <max bytes> [<within>]
+#       A picture copied into <folder> (a folder of yours, not a link) as
+#       <name>, a new file (never over one that's there): only a plain file
+#       (never a pipe or a device; it isn't waited on), at most <max bytes>
+#       (counted as it's copied), that's a PNG, JPEG, GIF, WebP, BMP or an SVG
+#       that names nothing outside itself, at most 16384 pixels a side and
+#       64 million in all (what Qt would decode). With <within> (an agent's
+#       folder), the picture must be in it, every step opened without
+#       following a link. Prints JSON: { ok, name, width, height } or
+#       { ok: false, error }.
+#   copy-file <file> <folder> <name> <max bytes> <within>
+#       Any file the panel's agent gives (not a picture: an email, a video,
+#       a PDF...) copied the same way, from its folder <within>, every step
+#       opened without following a link: only a plain file, at most
+#       <max bytes>, into a new file. Prints JSON: { ok, name, size } or
+#       { ok: false, error }.
+#   mirror-apply <copy folder> <plan file>
+#       The Markdown copy's changes (Mirror.qml writes the plan, a file of
+#       its own, JSON: { ops: [{ op: "write", path, expect, text } or
+#       { op: "remove", path, expect }] }; it's read, then taken away), each
+#       made only to a file that's still as the copy wrote it: `expect` is
+#       its fingerprint ("s256:<hex>" of its bytes; "absent": none may be
+#       there). The file there is moved aside first (one rename: what was
+#       there then is what's checked), then put back if it's changed (it's
+#       yours now), or replaced (never over a file that's appeared since) or
+#       taken away. A fingerprint from before ("<hex>:<length>") is no
+#       proof: such a file is the copy's only if it's exactly what it would
+#       write. Every path below the folder, walked without following a
+#       link; folders it empties go. Prints JSON: { ok, written: { path:
+#       fingerprint }, removed: [path], kept: [path], failed: { path: why } }.
+#   export-html <assets folder> <work folder> <max bytes>
+#       A page made a document (Export.js wrote <work folder>/page.src.html,
+#       a folder of Uber Notebook's own) with its pictures put in, as
+#       <work folder>/page.html: each src="uber-notebook-asset:<name>" (in
+#       <assets folder>) and "uber-notebook-drawing:<name>" (in <work
+#       folder>/drawings), read without following a link, a plain file that's
+#       a PNG, JPEG, GIF, WebP, BMP or SVG (one that names nothing outside
+#       it), within <max bytes> in all; one that can't be is said in its
+#       place. Then every tag and attribute is checked against what Export.js
+#       writes: nothing that loads from anywhere (only data: pictures, links
+#       to the web, email or the document), or it's refused and nothing is
+#       written. Prints JSON: { ok, pictures, missing } or { ok: false, error }.
+#   save <file>
+#       What's on its input (at most 256 MB) as <file>, a file you chose to
+#       save (an export, a page's calendar or contacts): written new, yours
+#       alone (600), beside it in its folder, to the disk, then put in its
+#       place over what's there (a link there is replaced, never followed),
+#       and checked. So a file that was readable by others (644) before is
+#       never left so with your words in it. Prints its path, then "open" on
+#       a drive that can't keep files private (exFAT, some shares, a phone
+#       that refuses the change): saved, as you asked, and said.
+#   place <from> <file> replace|keep
+#       The same for a copy of the plain file <from> (a PDF or a Word file
+#       made of a page, a picture): "keep" never over a file that's there.
+#   probe <folder>
+#       Whether the drive <folder> is on keeps files private (a new file of
+#       its own, 600, looked at, then taken away), and which folder it is:
+#       JSON { keeps, id: "<device>:<inode>" } (another drive mounted at the
+#       same path is another id).
+#   make-private <folder>
+#       The files and folders named on its input (a JSON list of paths in
+#       <folder>: the Markdown copy's own, from before), and everything in
+#       those folders, made yours alone (files 600, folders 700): yours
+#       only, every step opened without following a link (the folder itself
+#       may be a link, to a folder of yours, as for put-copy; it isn't
+#       changed). Nothing else there is touched. Prints JSON: { ok, changed,
+#       left, keeps } (left: open to others, and not yours to change, or
+#       still so after; keeps: a new file of its own there stays 600, the
+#       drive keeps files private: tried with one, then taken away).
+#   lookup
+#       The addresses of the host named on its input (a link's, before its
+#       page or picture is fetched), one a line, as getent ahosts would print
+#       them first; its name on the input, never on a command line, where
+#       every account on the computer can read it.
+#   notify
+#       A desktop notification (a reminder, an event's alert), as JSON on its
+#       input: { summary, body, glyph, exec: [program, args...] }. Sent to
+#       org.freedesktop.Notifications on the session bus by this process
+#       itself, over the bus's socket (as omarchy-notification-send would,
+#       through busctl), so its words are never on a command line, where
+#       every account on the computer can read them. Prints the
+#       notification's id.
+#   restore-backup <backup.tar.gz> <pN> <folder> <sha256> <max bytes> <max files>
+#       One profile (pN/ in the backup) into a new folder: <folder>, or
+#       "<folder> 2"... if that's taken, never one that's there. The backup
+#       must still be the one inspected (its sha256); if it isn't, or
+#       anything fails, the new folder is taken away again. So it is on a
+#       drive that can't keep files private (the folder made 700 and
+#       looked at, and a new file tried there, before anything's put in
+#       it): "that drive can't keep your notes private: ...". Links and
+#       special files are left out ("left-out:<n>"); a sparse file refuses
+#       it. Prints the folder last.
+
+import base64
+import errno
+import gzip
+import hashlib
+import html.parser
+import json
+import os
+import re
+import resource
+import shutil
+import socket
+import stat
+import struct
+import sys
+import tarfile
+import zipfile
+import zlib
+
+MANIFEST = "uber-notebook-backup.json"
+CHUNK = 1024 * 1024
+
+
+class Refused(Exception):
+    pass
+
+
+def open_regular(path):
+    """A regular file, opened without following a link at its end."""
+    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | os.O_CLOEXEC)
+    if not stat.S_ISREG(os.fstat(fd).st_mode):
+        os.close(fd)
+        raise Refused("not a regular file")
+    return os.fdopen(fd, "rb")
+
+
+def parts_of(name):
+    """An archive member's path as its parts, or None when it isn't one
+    that stays where it's put (absolute, .., odd characters, too long)."""
+    if not name or len(name.encode("utf-8", "surrogateescape")) > 4096 or name.startswith("/"):
+        return None
+    parts = [p for p in name.split("/") if p != ""]
+    for p in parts:
+        if p in (".", "..") or len(p.encode("utf-8", "surrogateescape")) > 255:
+            return None
+        if any(ord(c) < 32 or ord(c) == 127 for c in p):
+            return None
+    return parts
+
+
+def open_dir(name, parent_fd):
+    return os.open(name, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC, dir_fd=parent_fd)
+
+
+def folder_for(root_fd, parts, budget=None):
+    """The folder at `parts` below root_fd, made as needed (each one made
+    counted in `budget`), every step opened without following a link. An
+    open fd the caller closes."""
+    fd = os.dup(root_fd)
+    try:
+        for p in parts:
+            try:
+                if budget is not None:
+                    # (Counted before it's made: the last one too many isn't.)
+                    try:
+                        os.stat(p, dir_fd=fd, follow_symlinks=False)
+                    except FileNotFoundError:
+                        budget.folder()
+                os.mkdir(p, 0o700, dir_fd=fd)
+            except FileExistsError:
+                pass
+            nfd = open_dir(p, fd)
+            os.close(fd)
+            fd = nfd
+        return fd
+    except BaseException:
+        os.close(fd)
+        raise
+
+
+class Budget:
+    """What an archive may make: bytes, and files and folders (each a file
+    of the filesystem's) counted together; and how many entries it may have
+    in all, made or skipped (four for each file it may make)."""
+
+    def __init__(self, max_bytes, max_files):
+        self.max_bytes = max_bytes
+        self.max_files = max_files
+        self.bytes = 0
+        self.files = 0
+        self.folders = 0
+        self.entries = 0
+
+    def file(self):
+        self.files += 1
+        if self.files + self.folders > self.max_files:
+            raise Refused("more than %d files" % self.max_files)
+
+    def folder(self):
+        self.folders += 1
+        if self.files + self.folders > self.max_files:
+            raise Refused("more than %d files" % self.max_files)
+
+    def entry(self):
+        self.entries += 1
+        if self.entries > 4 * self.max_files:
+            raise Refused("more than %d entries" % (4 * self.max_files))
+
+    def take(self, n):
+        self.bytes += n
+        if self.bytes > self.max_bytes:
+            raise Refused("more than %d bytes" % self.max_bytes)
+
+
+def write_new(dir_fd, name, source, budget):
+    """`source` (a file object) as a new file `name` in dir_fd."""
+    fd = os.open(name, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600, dir_fd=dir_fd)
+    try:
+        with os.fdopen(fd, "wb", closefd=False) as out:
+            while True:
+                chunk = source.read(CHUNK)
+                if not chunk:
+                    break
+                budget.take(len(chunk))
+                out.write(chunk)
+    except BaseException:
+        os.close(fd)
+        try:
+            os.unlink(name, dir_fd=dir_fd)
+        except OSError:
+            pass
+        raise
+    os.close(fd)
+
+
+# ---- your notes, as long as Uber Notebook runs -----------------------------------------------------
+
+def walk(root_fd, parts):
+    """The folder at `parts` below root_fd (none made), every step opened
+    without following a link. An open fd the caller closes."""
+    fd = os.dup(root_fd)
+    try:
+        for p in parts:
+            nfd = open_dir(p, fd)
+            os.close(fd)
+            fd = nfd
+        return fd
+    except BaseException:
+        os.close(fd)
+        raise
+
+
+def path_parts(path):
+    parts = parts_of(path) if isinstance(path, str) else None
+    if not parts:
+        raise Refused("not a path in the notes folder")
+    return parts
+
+
+def serve_read(root_fd, req):
+    limit = int(req.get("max", 32 * 1024 * 1024))
+    total = int(req.get("total", 256 * 1024 * 1024))
+    files, missing, errors = {}, [], {}
+    seen = 0
+    for path in req.get("paths", [])[:100000]:
+        try:
+            if seen > 3 * total:
+                raise Refused("more than %d bytes in all" % total)
+            parts = path_parts(path)
+            dfd = walk(root_fd, parts[:-1])
+            try:
+                fd = os.open(parts[-1], os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | os.O_CLOEXEC, dir_fd=dfd)
+            finally:
+                os.close(dfd)
+            with os.fdopen(fd, "rb") as f:
+                if not stat.S_ISREG(os.fstat(f.fileno()).st_mode):
+                    raise Refused("not a plain file")
+                data = f.read(limit + 1)
+            if len(data) > limit:
+                raise Refused("more than %d bytes" % limit)
+            text = data.decode("utf-8", "replace")
+            # (Counted as it's sent, escaped: text in any script is at most
+            # three times as long that way, a file of control bytes six;
+            # three times what it may be, at most.)
+            sent = len(json.dumps(text))
+            if sent > 3 * limit:
+                raise Refused("more than %d bytes as it's sent" % (3 * limit))
+            seen += sent
+            if seen > 3 * total:
+                raise Refused("more than %d bytes in all" % total)
+            files[path] = text
+        except FileNotFoundError:
+            missing.append(path)
+        except OSError as e:
+            errors[path] = "a link, not a file" if e.errno in (errno.ELOOP, errno.ENOTDIR) else (e.strerror or str(e))[:200]
+        except Refused as e:
+            errors[path] = str(e)[:200]
+    return {"files": files, "missing": missing, "errors": errors}
+
+
+def serve_write(root_fd, req):
+    parts = path_parts(req.get("path"))
+    data = str(req.get("text", "")).encode("utf-8", "surrogatepass")
+    dfd = walk(root_fd, parts[:-1])
+    try:
+        name = parts[-1]
+        try:
+            if not stat.S_ISREG(os.lstat(name, dir_fd=dfd).st_mode):
+                raise Refused("something that isn't a plain file is there")
+        except FileNotFoundError:
+            pass
+        tmp = ".%s.%s.tmp" % (name[:100], os.urandom(6).hex())
+        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600, dir_fd=dfd)
+        try:
+            view = memoryview(data)
+            while view:
+                n = os.write(fd, view)
+                view = view[n:]
+            os.fsync(fd)
+        except BaseException:
+            os.close(fd)
+            try:
+                os.unlink(tmp, dir_fd=dfd)
+            except OSError:
+                pass
+            raise
+        os.close(fd)
+        try:
+            os.rename(tmp, name, src_dir_fd=dfd, dst_dir_fd=dfd)
+        except BaseException:
+            try:
+                os.unlink(tmp, dir_fd=dfd)
+            except OSError:
+                pass
+            raise
+        # The rename itself on disk too: after a power cut, the page as it
+        # was or as it is, never neither. (A file system that can't is left
+        # to do what it does.)
+        try:
+            os.fsync(dfd)
+        except OSError:
+            pass
+        return {}
+    finally:
+        os.close(dfd)
+
+
+def serve_mkdir(root_fd, req):
+    parts = path_parts(req.get("path"))
+    fd = os.dup(root_fd)
+    try:
+        for p in parts:
+            try:
+                os.mkdir(p, 0o700, dir_fd=fd)
+            except FileExistsError:
+                pass
+            nfd = open_dir(p, fd)
+            os.close(fd)
+            fd = nfd
+    finally:
+        os.close(fd)
+    return {}
+
+
+def serve_find(root_fd, req):
+    pattern = str(req.get("pattern", ""))
+    base = req.get("dir", "")
+    parts = parts_of(base) if base else []
+    if parts is None:
+        raise Refused("not a path in the notes folder")
+    try:
+        dfd = walk(root_fd, parts)
+    except FileNotFoundError:
+        return {"files": {}, "missing": [], "errors": {}}
+    try:
+        prefix = "/".join(parts) + "/" if parts else ""
+        paths = []
+        if pattern.startswith("*/") and parts_of(pattern[2:]) and "/" not in pattern[2:]:
+            for name in sorted(os.listdir(dfd)):
+                try:
+                    mode = os.lstat(name, dir_fd=dfd).st_mode
+                    if (stat.S_ISDIR(mode) or stat.S_ISLNK(mode)) and parts_of(name):
+                        paths.append(prefix + name + "/" + pattern[2:])
+                except FileNotFoundError:
+                    pass
+        elif pattern.startswith("*") and "/" not in pattern and "*" not in pattern[1:]:
+            for name in sorted(os.listdir(dfd)):
+                try:
+                    if name.endswith(pattern[1:]) and parts_of(name) and not stat.S_ISDIR(os.lstat(name, dir_fd=dfd).st_mode):
+                        paths.append(prefix + name)
+                except FileNotFoundError:
+                    pass
+        else:
+            raise Refused("a pattern it doesn't take")
+    finally:
+        os.close(dfd)
+    found = serve_read(root_fd, {"paths": paths, "max": req.get("max", 32 * 1024 * 1024), "total": req.get("total", 256 * 1024 * 1024)})
+    found["missing"] = []
+    return found
+
+
+SERVE = {"read": serve_read, "find": serve_find, "write": serve_write, "mkdir": serve_mkdir}
+
+
+def cmd_serve(folder):
+    root_fd = os.open(folder, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+    info = os.fstat(root_fd)
+    if info.st_uid != os.getuid():
+        raise Refused("the notes folder isn't yours")
+    out = sys.stdout.buffer
+    for line in sys.stdin.buffer:
+        answer = {"id": None, "ok": False}
+        try:
+            req = json.loads(line)
+            if not isinstance(req, dict):
+                raise Refused("not a request")
+            answer["id"] = req.get("id")
+            op = SERVE.get(req.get("op"))
+            if op is None:
+                raise Refused("no such request")
+            answer.update(op(root_fd, req))
+            answer["ok"] = True
+        except FileNotFoundError:
+            answer["error"] = "not there"
+        except OSError as e:
+            answer["error"] = "a link, not a folder" if e.errno in (errno.ELOOP, errno.ENOTDIR) else (e.strerror or str(e))[:200]
+        except (Refused, ValueError, TypeError) as e:
+            answer["error"] = str(e)[:200]
+        # (ASCII only: Quickshell reads what it prints a piece at a time, each
+        # piece as UTF-8, so a character cut in two between pieces would come
+        # out wrong. JSON's \\u escapes can't be cut.)
+        out.write(json.dumps(answer, ensure_ascii=True).encode("ascii") + b"\n")
+        out.flush()
+
+
+# ---- a page made a document --------------------------------------------------------------------
+
+EXPORT_TAGS = {"html", "head", "meta", "title", "style", "body", "section", "div", "p", "span", "a", "strong", "em", "u",
+               "s", "sup", "sub", "code", "pre", "br", "mark", "h1", "h2", "h3", "blockquote", "ul", "ol", "li", "table",
+               "tr", "td", "th", "colgroup", "col", "img", "hr"}
+EXPORT_ATTRS = {"id", "class", "style", "href", "src", "alt", "width", "height", "charset", "http-equiv", "content"}
+EXPORT_CSP = "default-src 'none'; img-src data:; style-src 'unsafe-inline'"
+# What would load something, in a style.
+STYLE_LOADS = re.compile(r"url\s*\(|@import|image-set\s*\(|expression\s*\(|\\|behavior\s*:|-moz-binding", re.I)
+PICTURE_PLACE = re.compile(r'<img src="uber-notebook-(asset|drawing):([A-Za-z0-9][A-Za-z0-9._-]{0,120})"[^<>]*/>')
+DATA_PICTURE = re.compile(r"^data:image/(png|jpeg|gif|webp|bmp|svg\+xml);base64,[A-Za-z0-9+/]*={0,2}$")
+
+
+def picture_type(data):
+    if data.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "image/png"
+    if data.startswith(b"\xff\xd8\xff"):
+        return "image/jpeg"
+    if data[:6] in (b"GIF87a", b"GIF89a"):
+        return "image/gif"
+    if data[:4] == b"RIFF" and data[8:12] == b"WEBP":
+        return "image/webp"
+    if data[:2] == b"BM":
+        return "image/bmp"
+    head = data[:2048].lstrip().lower()
+    if head.startswith(b"<svg") or (head.startswith(b"<?xml") and b"<svg" in head):
+        return "image/svg+xml"
+    return ""
+
+
+def picture_size(data, kind):
+    """A picture's width and height in pixels, from its header, or None."""
+    try:
+        if kind == "image/png" and data[12:16] == b"IHDR":
+            return int.from_bytes(data[16:20], "big"), int.from_bytes(data[20:24], "big")
+        if kind == "image/gif":
+            return int.from_bytes(data[6:8], "little"), int.from_bytes(data[8:10], "little")
+        if kind == "image/bmp":
+            return abs(int.from_bytes(data[18:22], "little", signed=True)), abs(int.from_bytes(data[22:26], "little", signed=True))
+        if kind == "image/webp":
+            chunk = data[12:16]
+            if chunk == b"VP8 ":
+                return int.from_bytes(data[26:28], "little") & 0x3fff, int.from_bytes(data[28:30], "little") & 0x3fff
+            if chunk == b"VP8L":
+                bits = int.from_bytes(data[21:25], "little")
+                return (bits & 0x3fff) + 1, ((bits >> 14) & 0x3fff) + 1
+            if chunk == b"VP8X":
+                return int.from_bytes(data[24:27], "little") + 1, int.from_bytes(data[27:30], "little") + 1
+        if kind == "image/jpeg":
+            i = 2
+            while i + 9 < len(data):
+                if data[i] != 0xff:
+                    i += 1
+                    continue
+                marker = data[i + 1]
+                if marker in (0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7, 0xc9, 0xca, 0xcb, 0xcd, 0xce, 0xcf):
+                    return int.from_bytes(data[i + 7:i + 9], "big"), int.from_bytes(data[i + 5:i + 7], "big")
+                if marker in (0xd8, 0x01) or 0xd0 <= marker <= 0xd7:
+                    i += 2
+                    continue
+                i += 2 + int.from_bytes(data[i + 2:i + 4], "big")
+        if kind == "image/svg+xml":
+            head = data[:4096].decode("utf-8", "replace")
+            tag = re.search(r"<svg\b[^>]*>", head)
+            if tag:
+                w = re.search(r'\swidth="([\d.]+)(px)?"', tag.group(0))
+                h = re.search(r'\sheight="([\d.]+)(px)?"', tag.group(0))
+                if w and h:
+                    return float(w.group(1)), float(h.group(1))
+                vb = re.search(r'viewBox="[-\d.]+[ ,]+[-\d.]+[ ,]+([\d.]+)[ ,]+([\d.]+)"', tag.group(0))
+                if vb:
+                    return float(vb.group(1)), float(vb.group(2))
+    except (ValueError, IndexError):
+        return None
+    return None
+
+
+# A sheet's room for a picture, in CSS pixels: A4 or Letter less the margins,
+# and no taller than about half a sheet.
+PAGE_WIDTH = 660
+PAGE_HEIGHT = 450
+
+
+def fitted(size, style, drawing):
+    """The width and height a picture is shown at (its proportions kept):
+    within the width its style asks for (a share of the page, or pixels; a
+    drawing at half the pixels it was drawn at) and the height it allows."""
+    w, h = size
+    if not (w > 0 and h > 0):
+        return None
+    share = re.search(r"(?:^|;)\s*width:\s*([\d.]+)(%|px)", style)
+    if share and share.group(2) == "%":
+        box = PAGE_WIDTH * min(100.0, float(share.group(1))) / 100
+    elif share:
+        box = min(PAGE_WIDTH, float(share.group(1)))
+    else:
+        box = min(PAGE_WIDTH, w / 2 if drawing else w)
+    most = re.search(r"(?:^|;)\s*max-height:\s*([\d.]+)px", style)
+    tall = min(PAGE_HEIGHT, float(most.group(1))) if most else PAGE_HEIGHT
+    scale = min(box / w, tall / h)
+    return max(1, round(w * scale)), max(1, round(h * scale))
+
+
+def svg_is_closed(data):
+    """An SVG that names nothing outside itself (links only to #ids within)."""
+    text = data.decode("utf-8", "replace")
+    if re.search(r"<!ENTITY|<!DOCTYPE|<script|<foreignObject|\bon[a-z]+\s*=", text, re.I):
+        return False
+    for m in re.finditer(r"(?:href|src)\s*=\s*([\"'])(.*?)\1", text, re.I | re.S):
+        if not m.group(2).strip().startswith("#"):
+            return False
+    for m in re.finditer(r"url\s*\(\s*([\"']?)(.*?)\1\s*\)", text, re.I | re.S):
+        if not m.group(2).strip().startswith("#"):
+            return False
+    return not re.search(r"@import|image-set\s*\(", text, re.I)
+
+
+class ExportCheck(html.parser.HTMLParser):
+    """Every tag and attribute as Export.js writes them, and nothing that
+    loads from anywhere: else `problem` says what."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.problem = ""
+        self.in_style = False
+
+    def refuse(self, why):
+        if not self.problem:
+            self.problem = why
+
+    def handle_starttag(self, tag, attrs):
+        if tag not in EXPORT_TAGS:
+            self.refuse("a <%s> in it" % tag[:20])
+            return
+        self.in_style = tag == "style"
+        a = {}
+        for name, value in attrs:
+            if name not in EXPORT_ATTRS:
+                self.refuse("an attribute %s in it" % name[:20])
+                return
+            a[name] = value or ""
+        if tag == "meta" and not (a == {"charset": "utf-8"} or a == {"http-equiv": "Content-Security-Policy", "content": EXPORT_CSP}):
+            self.refuse("a <meta> it doesn't write")
+        if "content" in a and tag != "meta" or "http-equiv" in a and tag != "meta" or "charset" in a and tag != "meta":
+            self.refuse("an attribute out of place")
+        if "src" in a and (tag != "img" or not DATA_PICTURE.match(a["src"])):
+            self.refuse("a picture from elsewhere")
+        if tag == "img" and "src" in a and a["src"].startswith("data:image/svg+xml") and not svg_is_closed(base64.b64decode(a["src"].split(",", 1)[1])):
+            self.refuse("a drawing that names something elsewhere")
+        if "href" in a and (tag != "a" or not re.match(r"^(#[A-Za-z0-9_-]{1,80}|https?://[^\s\"'<>]{1,2000}|mailto:[^\s\"'<>]{1,500})$", a["href"], re.I)):
+            self.refuse("a link it doesn't write")
+        if "style" in a and STYLE_LOADS.search(a["style"]):
+            self.refuse("a style that loads something")
+
+    def handle_startendtag(self, tag, attrs):
+        self.handle_starttag(tag, attrs)
+        self.in_style = False
+
+    def handle_endtag(self, tag):
+        if tag == "style":
+            self.in_style = False
+
+    def handle_data(self, data):
+        if self.in_style and STYLE_LOADS.search(data):
+            self.refuse("a style that loads something")
+
+    def handle_decl(self, decl):
+        if decl.lower() != "doctype html":
+            self.refuse("a declaration it doesn't write")
+
+    def handle_pi(self, data):
+        self.refuse("an instruction in it")
+
+    def unknown_decl(self, data):
+        self.refuse("a declaration it doesn't write")
+
+
+def cmd_export_html(assets, work, max_bytes):
+    budget = int(max_bytes)
+    work_fd = os.open(work, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC)
+    try:
+        if os.fstat(work_fd).st_uid != os.getuid():
+            raise Refused("that folder isn't yours")
+        fd = os.open("page.src.html", os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | os.O_CLOEXEC, dir_fd=work_fd)
+        with os.fdopen(fd, "rb") as f:
+            if not stat.S_ISREG(os.fstat(f.fileno()).st_mode):
+                raise Refused("not a plain file")
+            source = f.read(64 * 1024 * 1024 + 1)
+        if len(source) > 64 * 1024 * 1024:
+            raise Refused("the document is too big")
+        text = source.decode("utf-8")
+        folders = {}
+        try:
+            folders["asset"] = os.open(assets, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+        except OSError:
+            folders["asset"] = None
+        try:
+            folders["drawing"] = open_dir("drawings", work_fd)
+        except OSError:
+            folders["drawing"] = None
+        used = [0]
+        counts = {"pictures": 0, "missing": 0}
+        cache = {}
+
+        def put_in(m):
+            key = (m.group(1), m.group(2))
+            if key not in cache:
+                # (Given only the room left: a picture past it is never
+                # read, so what's kept is within the document's budget.)
+                cache[key] = picture_data(folders[m.group(1)], m.group(2), max(0, budget - used[0]))
+            data, size = cache[key]
+            # (Charged each time it's put in, not once: the same picture a
+            # hundred times is a hundred pictures in the document.)
+            if data and used[0] + len(data) > budget:
+                data = ""
+            if data:
+                used[0] += len(data)
+            if not data:
+                counts["missing"] += 1
+                return '<span class="faint">(a picture that couldn\'t be put in)</span>'
+            counts["pictures"] += 1
+            alt = re.search(r'\salt="([^"<>]*)"', m.group(0))
+            style = re.search(r'\sstyle="([^"<>]*)"', m.group(0))
+            style = style.group(1) if style else ""
+            # Its size, worked out here, so a Word file keeps its proportions.
+            shown = fitted(size, style, m.group(1) == "drawing") if size else None
+            if shown:
+                style = ";".join(x for x in style.split(";") if x.strip() and not re.match(r"\s*(width|height|max-height|max-width|object-fit)\s*:", x))
+            return ('<img src="' + data + '"' + (' alt="' + alt.group(1) + '"' if alt else "")
+                    + (' width="%d" height="%d"' % shown if shown else "") + (' style="' + style + '"' if style else "") + " />")
+
+        try:
+            out = PICTURE_PLACE.sub(put_in, text)
+        finally:
+            for v in folders.values():
+                if v is not None:
+                    os.close(v)
+        # (The document itself, within the budget and its text's room.)
+        if len(out) > budget + 2 * len(text) + 1024 * 1024:
+            raise Refused("the document would be too big")
+        check = ExportCheck()
+        check.feed(out)
+        check.close()
+        if check.problem:
+            raise Refused("not a document Uber Notebook wrote: " + check.problem)
+        data = out.encode("utf-8")
+        fd = os.open("page.html", os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600, dir_fd=work_fd)
+        with os.fdopen(fd, "wb") as f:
+            f.write(data)
+        print(json.dumps({"ok": True, "pictures": counts["pictures"], "missing": counts["missing"]}))
+    finally:
+        os.close(work_fd)
+
+
+def picture_data(dir_fd, name, room):
+    """A picture in that folder as (a data: address, its size or None), or
+    ("", None) (not there, a link, not a plain file, not a picture, past the
+    room left)."""
+    if dir_fd is None or not parts_of(name) or "/" in name:
+        return "", None
+    try:
+        fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | os.O_CLOEXEC, dir_fd=dir_fd)
+    except OSError:
+        return "", None
+    with os.fdopen(fd, "rb") as f:
+        info = os.fstat(f.fileno())
+        if not stat.S_ISREG(info.st_mode) or info.st_size * 4 // 3 + 64 > room:
+            return "", None
+        data = f.read(info.st_size + 1)
+    kind = picture_type(data)
+    if not kind or len(data) > info.st_size or (kind == "image/svg+xml" and not svg_is_closed(data)):
+        return "", None
+    url = "data:" + kind + ";base64," + base64.b64encode(data).decode("ascii")
+    return (url, picture_size(data, kind)) if len(url) <= room else ("", None)
+
+
+# ---- a picture copied in -----------------------------------------------------------------------
+
+PICTURE_SIDE = 16384
+PICTURE_AREA = 64 * 1024 * 1024
+
+
+def open_within(path, within):
+    """`path` opened for reading, every step from the folder `within`
+    without following a link; Refused when it isn't in it."""
+    base = os.path.normpath(within)
+    full = os.path.normpath(path)
+    # ("/": every step from the root, none through a link.)
+    prefix = base if base == "/" else base + "/"
+    if not full.startswith(prefix):
+        raise Refused("not in that folder")
+    parts = parts_of(full[len(prefix):])
+    if not parts:
+        raise Refused("not in that folder")
+    fd = os.open(base, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC)
+    try:
+        for p in parts[:-1]:
+            nfd = open_dir(p, fd)
+            os.close(fd)
+            fd = nfd
+        return os.open(parts[-1], os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | os.O_CLOEXEC, dir_fd=fd)
+    except OSError as e:
+        if e.errno in (errno.ELOOP, errno.ENOTDIR):
+            raise Refused("a link, not a file in that folder")
+        raise
+    finally:
+        os.close(fd)
+
+
+def cmd_copy_picture(source, folder, name, max_bytes, within=None):
+    limit = int(max_bytes)
+    if not parts_of(name) or "/" in name or name.startswith("."):
+        raise Refused("not a name for a file")
+    # (A link to a picture you picked is followed; never a pipe or a device,
+    # and it isn't waited on: O_NONBLOCK, then only a plain file.)
+    src = open_within(source, within) if within else os.open(source, os.O_RDONLY | os.O_NONBLOCK | os.O_CLOEXEC)
+    try:
+        info = os.fstat(src)
+        if not stat.S_ISREG(info.st_mode):
+            raise Refused("not a plain file")
+        if info.st_size > limit:
+            raise Refused("more than %d bytes" % limit)
+        head = os.pread(src, 1024 * 1024, 0)
+        kind = picture_type(head)
+        if not kind:
+            raise Refused("not a picture")
+        if kind == "image/svg+xml":
+            whole = os.pread(src, limit + 1, 0)
+            if len(whole) > limit or not svg_is_closed(whole):
+                raise Refused("a drawing that names something outside it")
+        size = picture_size(head, kind)
+        if kind != "image/svg+xml" and (not size or size[0] > PICTURE_SIDE or size[1] > PICTURE_SIDE or size[0] * size[1] > PICTURE_AREA):
+            raise Refused("a picture too big to show (at most %d pixels a side)" % PICTURE_SIDE)
+        copy_into(src, folder, name, limit)
+    finally:
+        os.close(src)
+    print(json.dumps({"ok": True, "name": name, "width": size[0] if size else 0, "height": size[1] if size else 0}))
+
+
+def copy_into(src, folder, name, limit):
+    """What `src` (open) holds, from its start, into a new file `name` in
+    `folder` (a folder of yours, not a link): never over one that's there,
+    at most `limit` bytes, counted as it's copied; taken away if it fails.
+    The number of bytes copied."""
+    dfd = os.open(folder, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC)
+    try:
+        if os.fstat(dfd).st_uid != os.getuid():
+            raise Refused("that folder isn't yours")
+        out = os.open(name, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600, dir_fd=dfd)
+        copied = 0
+        try:
+            os.lseek(src, 0, os.SEEK_SET)
+            while True:
+                chunk = os.read(src, CHUNK)
+                if not chunk:
+                    break
+                copied += len(chunk)
+                if copied > limit:
+                    raise Refused("more than %d bytes" % limit)
+                view = memoryview(chunk)
+                while view:
+                    view = view[os.write(out, view):]
+        except BaseException:
+            os.close(out)
+            try:
+                os.unlink(name, dir_fd=dfd)
+            except OSError:
+                pass
+            raise
+        os.close(out)
+        return copied
+    finally:
+        os.close(dfd)
+
+
+def cmd_copy_file(source, folder, name, max_bytes, within):
+    limit = int(max_bytes)
+    if not parts_of(name) or "/" in name or name.startswith("."):
+        raise Refused("not a name for a file")
+    src = open_within(source, within)
+    try:
+        info = os.fstat(src)
+        if not stat.S_ISREG(info.st_mode):
+            raise Refused("not a plain file")
+        if info.st_size > limit:
+            raise Refused("more than %d bytes" % limit)
+        copied = copy_into(src, folder, name, limit)
+    finally:
+        os.close(src)
+    print(json.dumps({"ok": True, "name": name, "size": copied}))
+
+
+# ---- the Markdown copy --------------------------------------------------------------------------
+
+def fingerprint_of(fd):
+    h = hashlib.sha256()
+    while True:
+        chunk = os.read(fd, CHUNK)
+        if not chunk:
+            return "s256:" + h.hexdigest()
+        h.update(chunk)
+
+
+def mirror_path(path):
+    parts = parts_of(path) if isinstance(path, str) else None
+    if not parts or len(parts) < 2 or parts[0] not in ("Pages", "Notebooks", "sketches") or not re.search(r"\.(md|svg)$", parts[-1]):
+        return None
+    return parts
+
+
+def held_fingerprint(dfd, name):
+    """The fingerprint of the plain file `name` in dfd (not through a link),
+    or None (not one)."""
+    try:
+        fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | os.O_CLOEXEC, dir_fd=dfd)
+    except OSError:
+        return None
+    try:
+        if not stat.S_ISREG(os.fstat(fd).st_mode):
+            return None
+        return fingerprint_of(fd)
+    finally:
+        os.close(fd)
+
+
+def put_back(dfd, aside, name):
+    """What was moved aside back where it was (never over what's appeared
+    there since: then it stays aside, beside it, kept)."""
+    try:
+        if stat.S_ISDIR(os.lstat(aside, dir_fd=dfd).st_mode):
+            # (A folder can't be linked: renamed back, if nothing's there.)
+            try:
+                os.lstat(name, dir_fd=dfd)
+            except FileNotFoundError:
+                os.rename(aside, name, src_dir_fd=dfd, dst_dir_fd=dfd)
+                return
+            raise FileExistsError(name)
+        os.link(aside, name, src_dir_fd=dfd, dst_dir_fd=dfd, follow_symlinks=False)
+        os.unlink(aside, dir_fd=dfd)
+    except OSError:
+        try:
+            os.rename(aside, name + " (kept)", src_dir_fd=dfd, dst_dir_fd=dfd)
+        except OSError:
+            pass
+
+
+def mirror_op(root_fd, op):
+    parts = mirror_path(op.get("path"))
+    if parts is None:
+        raise Refused("not a file of the copy's")
+    expect = str(op.get("expect", ""))
+    kind = op.get("op")
+    if kind == "write":
+        data = str(op.get("text", "")).encode("utf-8", "surrogatepass")
+        mine = "s256:" + hashlib.sha256(data).hexdigest()
+        dfd = folder_for(root_fd, parts[:-1])
+    elif kind == "remove":
+        mine = None
+        try:
+            dfd = walk(root_fd, parts[:-1])
+        except FileNotFoundError:
+            return ("removed", None)
+    else:
+        raise Refused("no such change")
+    name = parts[-1]
+    tag = os.urandom(6).hex()
+    try:
+        tmp = None
+        if kind == "write":
+            tmp = ".uber-notebook-new-%s" % tag
+            fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600, dir_fd=dfd)
+            try:
+                view = memoryview(data)
+                while view:
+                    view = view[os.write(fd, view):]
+            finally:
+                os.close(fd)
+        try:
+            aside = ".uber-notebook-aside-%s" % tag
+            try:
+                os.rename(name, aside, src_dir_fd=dfd, dst_dir_fd=dfd)
+            except FileNotFoundError:
+                aside = None
+            if aside is not None:
+                there = held_fingerprint(dfd, aside)
+                ours = there is not None and ((expect.startswith("s256:") and there == expect) or (mine is not None and there == mine))
+                if not ours or (kind == "write" and expect == "absent"):
+                    put_back(dfd, aside, name)
+                    return ("kept", None)
+                os.unlink(aside, dir_fd=dfd)
+            if kind == "remove":
+                return ("removed", None)
+            try:
+                os.link(tmp, name, src_dir_fd=dfd, dst_dir_fd=dfd, follow_symlinks=False)
+            except FileExistsError:
+                return ("kept", None)
+            return ("written", mine)
+        finally:
+            if tmp is not None:
+                try:
+                    os.unlink(tmp, dir_fd=dfd)
+                except OSError:
+                    pass
+    finally:
+        os.close(dfd)
+
+
+def empty_folders_gone(root_fd, folders):
+    """Folders of the copy's left empty, taken away (deepest first)."""
+    for parts in sorted(folders, key=len, reverse=True):
+        for k in range(len(parts), 0, -1):
+            try:
+                pfd = walk(root_fd, parts[:k - 1])
+            except OSError:
+                break
+            try:
+                os.rmdir(parts[k - 1], dir_fd=pfd)
+            except OSError:
+                break
+            finally:
+                os.close(pfd)
+
+
+def cmd_mirror_apply(folder, plan_file):
+    with open_regular(plan_file) as f:
+        raw = f.read(512 * 1024 * 1024 + 1)
+    os.unlink(plan_file)
+    if len(raw) > 512 * 1024 * 1024:
+        raise Refused("the plan is too big")
+    plan = json.loads(raw.decode("utf-8", "surrogatepass"))
+    root_fd = os.open(folder, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+    out = {"ok": True, "written": {}, "removed": [], "kept": [], "failed": {}}
+    emptied = []
+    try:
+        if os.fstat(root_fd).st_uid != os.getuid():
+            raise Refused("that folder isn't yours")
+        for op in plan.get("ops", [])[:200000]:
+            path = op.get("path") if isinstance(op, dict) else None
+            try:
+                what, fp = mirror_op(root_fd, op)
+                if what == "written":
+                    out["written"][path] = fp
+                elif what == "removed":
+                    out["removed"].append(path)
+                    emptied.append(mirror_path(path)[:-1])
+                else:
+                    out["kept"].append(path)
+            except (OSError, Refused, ValueError, TypeError) as e:
+                out["failed"][str(path)] = (getattr(e, "strerror", None) or str(e))[:200]
+        empty_folders_gone(root_fd, emptied)
+    finally:
+        os.close(root_fd)
+    print(json.dumps(out, ensure_ascii=True))
+
+
+# ---- text for Quickshell, ASCII only -------------------------------------------------------------
+
+def read_text_files(paths, limit, total):
+    files, missing, errors = {}, [], {}
+    seen = 0
+    for path in paths[:100000]:
+        if not isinstance(path, str) or not path.startswith("/") or "\x00" in path:
+            continue
+        try:
+            if seen > 3 * total:
+                raise Refused("more than %d bytes in all" % total)
+            fd = os.open(path, os.O_RDONLY | os.O_NONBLOCK | os.O_CLOEXEC)
+            with os.fdopen(fd, "rb") as f:
+                if not stat.S_ISREG(os.fstat(f.fileno()).st_mode):
+                    raise Refused("not a plain file")
+                data = f.read(limit + 1)
+            if len(data) > limit:
+                raise Refused("more than %d bytes" % limit)
+            text = data.decode("utf-8", "replace")
+            sent = len(json.dumps(text))
+            if sent > 3 * limit:
+                raise Refused("more than %d bytes as it's sent" % (3 * limit))
+            seen += sent
+            if seen > 3 * total:
+                raise Refused("more than %d bytes in all" % total)
+            files[path] = text
+        except FileNotFoundError:
+            missing.append(path)
+        except IsADirectoryError:
+            missing.append(path)
+        except (OSError, Refused) as e:
+            errors[path] = (getattr(e, "strerror", None) or str(e))[:200]
+    return {"ok": True, "files": files, "missing": missing, "errors": errors}
+
+
+def cmd_read_files(max_bytes, total_bytes):
+    raw = sys.stdin.buffer.read(16 * 1024 * 1024 + 1)
+    if len(raw) > 16 * 1024 * 1024:
+        raise Refused("too many paths")
+    paths = json.loads(raw.decode("utf-8", "surrogatepass") or "[]")
+    if not isinstance(paths, list):
+        raise Refused("not a list of paths")
+    print(json.dumps(read_text_files(paths, int(max_bytes), int(total_bytes))))
+
+
+def cmd_read_glob(folder, pattern, max_bytes, total_bytes):
+    if not folder.startswith("/"):
+        raise Refused("not a folder's full path")
+    try:
+        dfd = os.open(folder, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+    except FileNotFoundError:
+        print(json.dumps({"ok": True, "files": {}, "missing": [], "errors": {}}))
+        return
+    paths = []
+    try:
+        names = sorted(os.listdir(dfd))[:100000]
+        if pattern.startswith("*/") and parts_of(pattern[2:]) and "/" not in pattern[2:]:
+            for name in names:
+                try:
+                    if stat.S_ISDIR(os.lstat(name, dir_fd=dfd).st_mode) and parts_of(name):
+                        paths.append(folder.rstrip("/") + "/" + name + "/" + pattern[2:])
+                except FileNotFoundError:
+                    pass
+        elif pattern.startswith("*") and "/" not in pattern and "*" not in pattern[1:]:
+            for name in names:
+                if name.endswith(pattern[1:]) and parts_of(name) and not name.startswith("."):
+                    try:
+                        if not stat.S_ISDIR(os.lstat(name, dir_fd=dfd).st_mode):
+                            paths.append(folder.rstrip("/") + "/" + name)
+                    except FileNotFoundError:
+                        pass
+        else:
+            raise Refused("a pattern it doesn't take")
+    finally:
+        os.close(dfd)
+    # (Below the folder, no link followed: a link it finds is said, not read.)
+    out = read_text_files([], int(max_bytes), int(total_bytes))
+    files = []
+    for p in paths:
+        try:
+            if stat.S_ISLNK(os.lstat(p).st_mode) or stat.S_ISLNK(os.lstat(os.path.dirname(p)).st_mode):
+                out["errors"][p] = "a link, not a file"
+                continue
+        except FileNotFoundError:
+            continue
+        files.append(p)
+    got = read_text_files(files, int(max_bytes), int(total_bytes))
+    got["errors"].update(out["errors"])
+    got["missing"] = []
+    print(json.dumps(got))
+
+
+def cmd_to_json(max_bytes):
+    limit = int(max_bytes)
+    data = sys.stdin.buffer.read(limit + 1)
+    if len(data) > limit:
+        raise Refused("more than %d bytes" % limit)
+    print(json.dumps(data.decode("utf-8", "replace")))
+
+
+def cmd_ascii_lines(max_line=4 * 1024 * 1024, max_total=64 * 1024 * 1024):
+    most = int(max_line)
+    total_most = int(max_total)
+    out = sys.stdout.buffer
+    part = b""
+    skipping = False
+    seen = 0
+    src = sys.stdin.buffer.raw if hasattr(sys.stdin.buffer, "raw") else sys.stdin.buffer
+
+    def left_out():
+        sys.stderr.write("left out a line longer than %d MB\n" % max(1, most // (1024 * 1024)))
+        sys.stderr.flush()
+    while True:
+        chunk = src.read(65536)
+        if not chunk:
+            break
+        seen += len(chunk)
+        if seen > total_most:
+            sys.stderr.write("printed more than %d MB\n" % max(1, total_most // (1024 * 1024)))
+            sys.stderr.flush()
+            return 3
+        part += chunk
+        while True:
+            nl = part.find(b"\n")
+            if nl < 0:
+                break
+            line, part = part[:nl], part[nl + 1:]
+            if skipping:
+                skipping = False
+                continue
+            if len(line) > most:
+                left_out()
+                continue
+            text = line.decode("utf-8", "replace")
+            try:
+                again = json.dumps(json.loads(text), ensure_ascii=True, separators=(",", ":"))
+            except ValueError:
+                again = json.dumps(text)
+            out.write(again.encode("ascii") + b"\n")
+            out.flush()
+        if len(part) > most:
+            part = b""
+            if not skipping:
+                left_out()
+            skipping = True
+    if part and not skipping:
+        text = part.decode("utf-8", "replace")
+        try:
+            again = json.dumps(json.loads(text), ensure_ascii=True, separators=(",", ":"))
+        except ValueError:
+            again = json.dumps(text)
+        out.write(again.encode("ascii") + b"\n")
+        out.flush()
+
+
+# ---- a text file -------------------------------------------------------------------------------
+
+def cmd_read(max_bytes, path, within=None):
+    limit = int(max_bytes)
+    try:
+        # (An agent's: only from its folder, every step through no link.)
+        if within:
+            fd = open_within(path, within)
+            if not stat.S_ISREG(os.fstat(fd).st_mode):
+                os.close(fd)
+                raise Refused("not a plain file")
+            f = os.fdopen(fd, "rb")
+        else:
+            f = open_regular(path)
+        with f:
+            if os.fstat(f.fileno()).st_size > limit:
+                raise Refused("more than %d bytes" % limit)
+            data = f.read(limit + 1)
+            if len(data) > limit:
+                raise Refused("more than %d bytes" % limit)
+    except FileNotFoundError:
+        print(json.dumps({"ok": False, "error": "there's no file there"}))
+        return
+    except OSError as e:
+        if e.errno == errno.ELOOP:
+            print(json.dumps({"ok": False, "error": "that's a link: give the file itself"}))
+            return
+        print(json.dumps({"ok": False, "error": (e.strerror or str(e))[:200]}))
+        return
+    except Refused as e:
+        print(json.dumps({"ok": False, "error": str(e)[:200]}))
+        return
+    print(json.dumps({"ok": True, "text": data.decode("utf-8", "replace")}))
+
+
+def cmd_put(folder, path, follow_top=False):
+    """A file of Uber Notebook's own in a folder of its own (an agent's
+    sandbox profile), what's on its input: every folder below opened without
+    following a link (made as needed), the file written new beside it, then
+    put in its place, over whatever's there (a link included: the link is
+    what's replaced, never what it points to). Prints "put"."""
+    parts = parts_of(path)
+    if not parts:
+        raise Refused("not a path in that folder")
+    data = sys.stdin.buffer.read(1024 * 1024 + 1)
+    if len(data) > 1024 * 1024:
+        raise Refused("too big")
+    root = os.open(folder, os.O_RDONLY | os.O_DIRECTORY | (0 if follow_top else os.O_NOFOLLOW) | os.O_CLOEXEC)
+    try:
+        if os.fstat(root).st_uid != os.getuid():
+            raise Refused("that folder isn't yours")
+        dfd = folder_for(root, parts[:-1])
+    finally:
+        os.close(root)
+    try:
+        tmp = ".uber-notebook-new-%s" % os.urandom(6).hex()
+        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600, dir_fd=dfd)
+        try:
+            view = memoryview(data)
+            while view:
+                view = view[os.write(fd, view):]
+        finally:
+            os.close(fd)
+        try:
+            os.rename(tmp, parts[-1], src_dir_fd=dfd, dst_dir_fd=dfd)
+        except BaseException:
+            try:
+                os.unlink(tmp, dir_fd=dfd)
+            except OSError:
+                pass
+            raise
+    finally:
+        os.close(dfd)
+    print("put")
+
+
+# ---- files of Uber Notebook's own ---------------------------------------------------------------
+
+def parent_of(path):
+    """(the folder's fd, the name in it) for an absolute path."""
+    folder, name = os.path.split(path)
+    if not path.startswith("/") or not name or name in (".", ".."):
+        raise Refused("not a file's full path")
+    return os.open(folder, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC), name
+
+
+def holds_exactly(dfd, name, data):
+    """Whether `name` in dfd is a plain file (not a link) holding `data`."""
+    try:
+        fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | os.O_CLOEXEC, dir_fd=dfd)
+    except OSError:
+        return False, None
+    try:
+        st = os.fstat(fd)
+        if not stat.S_ISREG(st.st_mode) or st.st_size != len(data):
+            return False, st
+        with os.fdopen(fd, "rb", closefd=False) as f:
+            return f.read(len(data) + 1) == data, st
+    finally:
+        os.close(fd)
+
+
+def cmd_create_owned(path, text):
+    data = text.encode("utf-8")
+    dfd, name = parent_of(path)
+    try:
+        try:
+            fd = os.open(name, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC, 0o644, dir_fd=dfd)
+        except FileExistsError:
+            same, _ = holds_exactly(dfd, name, data)
+            print("same" if same else "taken")
+            return
+        with os.fdopen(fd, "wb") as f:
+            f.write(data)
+            f.flush()
+            os.fsync(f.fileno())
+        print("made")
+    finally:
+        os.close(dfd)
+
+
+def take_aside(dfd, name):
+    """`name` in dfd moved aside, one rename (what was there then is what's
+    checked, not what's there by the time it's taken away): its new name,
+    or None (nothing there)."""
+    aside = ".uber-notebook-aside-%s" % os.urandom(6).hex()
+    try:
+        os.rename(name, aside, src_dir_fd=dfd, dst_dir_fd=dfd)
+    except FileNotFoundError:
+        return None
+    return aside
+
+
+def cmd_remove_owned(path, text):
+    dfd, name = parent_of(path)
+    try:
+        aside = take_aside(dfd, name)
+        same = aside is not None and holds_exactly(dfd, aside, text.encode("utf-8"))[0]
+        if same:
+            os.unlink(aside, dir_fd=dfd)
+            print("removed")
+        else:
+            if aside is not None:
+                put_back(dfd, aside, name)
+            print("kept")
+    finally:
+        os.close(dfd)
+
+
+SKILL_END = "/marcho78.uber-notebook/skills/uber-notebook"
+
+
+def skill_lock(path):
+    """The lock its skill's links are made under (Store.qml's script, by
+    flock), held (or, after 10 seconds, or if it can't be opened, gone on
+    without): an fd, closed as this ends."""
+    try:
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_APPEND | os.O_CLOEXEC | os.O_NOFOLLOW, 0o600)
+    except OSError:
+        return None
+    import fcntl
+    import time
+    until = time.monotonic() + 10
+    while True:
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            return fd
+        except BlockingIOError:
+            if time.monotonic() > until:
+                return fd
+            time.sleep(0.05)
+        except OSError:
+            return fd
+
+
+def read_mark(path):
+    """A run's id written beside the skill lock, or "" (none, or not one)."""
+    try:
+        fd = os.open(path, os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW)
+    except OSError:
+        return ""
+    try:
+        text = os.read(fd, 64).decode("ascii", "replace").strip()
+    except OSError:
+        return ""
+    finally:
+        os.close(fd)
+    return text if re.fullmatch(r"[a-z0-9]{1,40}", text) else ""
+
+
+def mark_stopped(lock, run):
+    """`run` marked stopped beside the lock (its own mark, never another's);
+    marks over a week old cleared away."""
+    try:
+        os.close(os.open(lock + ".stopped-" + run, os.O_WRONLY | os.O_CREAT | os.O_CLOEXEC | os.O_NOFOLLOW, 0o600))
+    except OSError:
+        pass
+    folder, base = os.path.split(lock)
+    try:
+        names = os.listdir(folder or ".")
+    except OSError:
+        return
+    import time
+    old = time.time() - 7 * 86400
+    for name in names:
+        if not name.startswith(base + ".stopped-") or name == base + ".stopped-" + run:
+            continue
+        try:
+            st = os.lstat(os.path.join(folder, name))
+            if stat.S_ISREG(st.st_mode) and st.st_mtime < old:
+                os.unlink(os.path.join(folder, name))
+        except OSError:
+            pass
+
+
+def cmd_unlink_link(path, target, lock="", run=""):
+    if lock:
+        skill_lock(lock)
+        if re.fullmatch(r"[a-z0-9]{10,40}", run):
+            mark_stopped(lock, run)
+            active = read_mark(lock + ".active")
+            # (A later run, not stopped, going on: its links, left. One
+            # before this one, or one that's stopped, or this one: taken out.)
+            if active and active != run and active[:9] > run[:9] and not os.path.lexists(lock + ".stopped-" + active):
+                print("kept")
+                return
+    dfd, name = parent_of(path)
+    try:
+        aside = take_aside(dfd, name)
+        try:
+            to = os.readlink(aside, dir_fd=dfd) if aside is not None else None
+            # (Or its skill in another place: an install before, wherever it was.)
+            ours = to is not None and (to == target or (target.endswith(SKILL_END) and to.endswith(SKILL_END)))
+        except OSError:
+            ours = False
+        if ours:
+            os.unlink(aside, dir_fd=dfd)
+            print("removed")
+        else:
+            if aside is not None:
+                put_back(dfd, aside, name)
+            print("kept")
+    finally:
+        os.close(dfd)
+
+
+# ---- a zip of notes ---------------------------------------------------------------------------
+
+def is_link(info):
+    return stat.S_ISLNK((info.external_attr >> 16) & 0o177777)
+
+
+def unzip_into(zf, root_fd, budget, skipped):
+    for info in zf.infolist():
+        budget.entry()
+        parts = parts_of(info.filename)
+        if parts is None:
+            skipped["names"] += 1
+            continue
+        if is_link(info):
+            skipped["links"] += 1
+            continue
+        kind = stat.S_IFMT((info.external_attr >> 16) & 0o177777)
+        if kind and kind not in (stat.S_IFREG, stat.S_IFDIR):
+            skipped["special"] += 1
+            continue
+        if not parts:
+            continue
+        if info.is_dir():
+            try:
+                os.close(folder_for(root_fd, parts, budget))
+            except OSError:
+                skipped["names"] += 1
+            continue
+        budget.file()
+        try:
+            dfd = folder_for(root_fd, parts[:-1], budget)
+        except OSError:
+            skipped["names"] += 1
+            continue
+        try:
+            with zf.open(info) as source:
+                write_new(dfd, parts[-1], source, budget)
+        except FileExistsError:
+            skipped["taken"] += 1
+        except (OSError, zipfile.BadZipFile, zipfile.LargeZipFile, EOFError, NotImplementedError, RuntimeError):
+            skipped["unreadable"] += 1
+        finally:
+            os.close(dfd)
+
+
+def zip_directory(f):
+    """A zip's entries and its central directory's size, from the record at
+    its end (zip64's too), before zipfile reads (and keeps) all of it."""
+    end = f.seek(0, os.SEEK_END)
+    tail_at = max(0, end - (65535 + 22))
+    f.seek(tail_at)
+    tail = f.read(end - tail_at)
+    at = tail.rfind(b"PK\x05\x06")
+    if at < 0 or at + 22 > len(tail):
+        raise zipfile.BadZipFile("not a zip")
+    entries = int.from_bytes(tail[at + 10:at + 12], "little")
+    size = int.from_bytes(tail[at + 12:at + 16], "little")
+    # (zip64's record, whenever its locator is there, whatever the classic
+    # one says: zipfile reads the directory it names.)
+    loc = at - 20
+    has64 = loc >= 0 and tail[loc:loc + 4] == b"PK\x06\x07"
+    if has64 or entries == 0xFFFF or size == 0xFFFFFFFF:
+        if not has64:
+            raise zipfile.BadZipFile("not a zip")
+        f.seek(int.from_bytes(tail[loc + 8:loc + 16], "little"))
+        rec = f.read(56)
+        if len(rec) < 56 or rec[:4] != b"PK\x06\x06":
+            raise zipfile.BadZipFile("not a zip")
+        # (The classic record's 0xFFFF and 0xFFFFFFFF only say "see zip64".)
+        e64 = int.from_bytes(rec[32:40], "little")
+        s64 = int.from_bytes(rec[40:48], "little")
+        entries = e64 if entries == 0xFFFF else max(entries, e64)
+        size = s64 if size == 0xFFFFFFFF else max(size, s64)
+    f.seek(0)
+    return entries, size
+
+
+def open_zip(f, budget):
+    """zipfile on `f`, once its directory's known to be within `budget`
+    (as many entries as it may have, 1 KB of directory each at most)."""
+    entries, size = zip_directory(f)
+    room = 4 * budget.max_files - budget.entries
+    if entries > room or size > max(1, room) * 1024:
+        raise Refused("more than %d entries" % (4 * budget.max_files))
+    return zipfile.ZipFile(f)
+
+
+def cmd_unzip(path, folder, max_bytes, max_files):
+    budget = Budget(int(max_bytes), int(max_files))
+    skipped = {"names": 0, "links": 0, "special": 0, "taken": 0, "unreadable": 0}
+    root_fd = os.open(folder, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC)
+    try:
+        with open_regular(path) as f, open_zip(f, budget) as zf:
+            unzip_into(zf, root_fd, budget, skipped)
+        # Zips that were in it, at its top (an export in parts): into the
+        # same folder, within the same budget, then gone.
+        for name in sorted(os.listdir(root_fd)):
+            if not name.lower().endswith(".zip"):
+                continue
+            try:
+                fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | os.O_CLOEXEC, dir_fd=root_fd)
+            except OSError:
+                continue
+            if not stat.S_ISREG(os.fstat(fd).st_mode):
+                os.close(fd)
+                continue
+            try:
+                with os.fdopen(fd, "rb") as inner, open_zip(inner, budget) as zf:
+                    unzip_into(zf, root_fd, budget, skipped)
+            except zipfile.BadZipFile:
+                skipped["unreadable"] += 1
+                continue
+            os.unlink(name, dir_fd=root_fd)
+    finally:
+        os.close(root_fd)
+    print(json.dumps({"ok": True, "files": budget.files, "bytes": budget.bytes, "skipped": skipped}))
+
+
+# ---- a backup ---------------------------------------------------------------------------------
+
+class Hashing:
+    """A file read through, its sha256 kept as it's read."""
+
+    def __init__(self, f):
+        self.f = f
+        self.h = hashlib.sha256()
+
+    def read(self, n=-1):
+        data = self.f.read(n)
+        self.h.update(data)
+        return data
+
+    def rest(self):
+        while True:
+            data = self.f.read(CHUNK)
+            if not data:
+                return self.h.hexdigest()
+            self.h.update(data)
+
+
+class Bounded:
+    """What a backup unpacks to, read through: at most `limit` bytes in all,
+    and no one read asking for more than that (a header claiming gigabytes
+    is refused, not read into memory)."""
+
+    def __init__(self, f, limit):
+        self.f = f
+        self.left = limit
+
+    def read(self, n=-1):
+        if n is None or n < 0 or n > self.left + 1:
+            n = self.left + 1
+        data = self.f.read(n)
+        self.left -= len(data)
+        if self.left < 0:
+            raise Refused("it unpacks to more than it may")
+        return data
+
+
+def tar_members(src, limit, most):
+    """A .tar.gz's members, one at a time (none kept once passed: tarfile
+    would keep them all), from at most `limit` bytes unpacked and `most`
+    members. Yields (tarfile, member)."""
+    with gzip.GzipFile(fileobj=src, mode="rb") as gz, tarfile.open(fileobj=Bounded(gz, limit), mode="r|") as tf:
+        n = 0
+        while True:
+            m = tf.next()
+            if m is None:
+                return
+            n += 1
+            if n > most:
+                raise Refused("more than %d entries" % most)
+            yield tf, m
+            tf.members = []
+
+
+# What a backup may unpack to while it's looked into (all its profiles).
+INSPECT_BYTES = 256 * 1024 * 1024 * 1024
+INSPECT_MEMBERS = 8000000
+
+TYPES = {tarfile.REGTYPE: "-", tarfile.AREGTYPE: "-", tarfile.DIRTYPE: "d", tarfile.SYMTYPE: "l", tarfile.LNKTYPE: "h",
+         tarfile.CHRTYPE: "c", tarfile.BLKTYPE: "b", tarfile.FIFOTYPE: "p", tarfile.CONTTYPE: "-"}
+
+
+def belongs(name):
+    """A name a backup holds: its manifest, or pN and what's in it."""
+    parts = parts_of(name)
+    if parts is None or not parts:
+        return False
+    if parts == [MANIFEST]:
+        return True
+    head = parts[0]
+    return len(head) in (2, 3) and head[0] == "p" and head[1:].isdigit()
+
+
+def cmd_inspect(path):
+    try:
+        with open_regular(path) as f:
+            src = Hashing(f)
+            types = set()
+            outside = 0
+            dots = 0
+            manifest = b""
+            for tf, m in tar_members(src, INSPECT_BYTES, INSPECT_MEMBERS):
+                # (A sparse file: its holes would be written out whole, far
+                # more than the backup's size. Uber Notebook's never have one.)
+                types.add("S" if m.issparse() else TYPES.get(m.type, "?"))
+                raw = m.name
+                if parts_of(raw) is None:
+                    if ".." in raw.split("/"):
+                        dots += 1
+                    else:
+                        outside += 1
+                elif not belongs(raw):
+                    outside += 1
+                if raw.strip("/") == MANIFEST and m.isreg():
+                    manifest = tf.extractfile(m).read(200000)
+            digest = src.rest()
+    except (OSError, Refused, tarfile.TarError, EOFError, zlib.error, gzip.BadGzipFile):
+        print("readable:0")
+        return
+    print("readable:1")
+    print("types:" + "".join(sorted(types)))
+    print("outside:%d" % outside)
+    print("dots:%d" % dots)
+    print("hash:" + digest)
+    print("---")
+    sys.stdout.write(manifest.decode("utf-8", "replace"))
+
+
+def new_folder(base):
+    """A new folder: base, or "base 2"..., made here (never one that's
+    there). (parent fd, its name)."""
+    parent, name = os.path.split(base.rstrip("/"))
+    if not parent or not name or parts_of(name) is None:
+        raise Refused("not a folder's full path")
+    pfd = os.open(parent, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+    for i in range(1, 1000):
+        candidate = name if i == 1 else "%s %d" % (name, i)
+        try:
+            os.mkdir(candidate, 0o700, dir_fd=pfd)
+            return pfd, candidate
+        except FileExistsError:
+            continue
+    os.close(pfd)
+    raise Refused("no free name for the folder")
+
+
+# (A restore refused where your notes can't be kept private: Backups.js
+# knows it by these words.)
+NOT_PRIVATE = "that drive can't keep your notes private: another account on this computer could read them there"
+
+
+def cmd_restore(path, member, base, expected, max_bytes, max_files):
+    if not (len(member) in (2, 3) and member[0] == "p" and member[1:].isdigit()):
+        raise Refused("not a profile in a backup")
+    budget = Budget(int(max_bytes), int(max_files))
+    pfd, name = new_folder(base)
+    done = False
+    found = False
+    # Links and special files (a link synced in, say): left out, counted.
+    left_out = 0
+    made = None
+    try:
+        root_fd = open_dir(name, pfd)
+        made = os.fstat(root_fd)
+        try:
+            # (Never a profile's notes on a drive that can't keep them
+            # private (~/Documents a link to an exFAT, FAT or NTFS
+            # partition, a share): the new folder made yours alone and
+            # looked at, and a new file of its own tried there, before
+            # anything's put in it. If not, refused, and the folder goes.)
+            try:
+                os.fchmod(root_fd, 0o700)
+                # (Yours too: a share that takes every account for the same
+                # one makes it 700 and its owner someone else.)
+                st = os.fstat(root_fd)
+                keeps = st.st_uid == os.getuid() and not st.st_mode & 0o077 and _keeps_private(root_fd)
+            except OSError as e:
+                # (A drive that refuses the change.)
+                if e.errno not in (errno.EPERM, errno.ENOTSUP, errno.EOPNOTSUPP, errno.ENOSYS):
+                    raise
+                keeps = False
+            if not keeps:
+                raise Refused(NOT_PRIVATE)
+            with open_regular(path) as f:
+                src = Hashing(f)
+                # (All of it unpacked, the other profiles too: at most four
+                # times what one may be, with a header's room for four
+                # entries a file, and four entries for each file.)
+                for tf, m in tar_members(src, 4 * budget.max_bytes + 4 * budget.max_files * 1024 + 1024 * 1024, 4 * budget.max_files):
+                    parts = parts_of(m.name)
+                    if parts is None or len(parts) < 1 or parts[0] != member:
+                        continue
+                    found = True
+                    inner = parts[1:]
+                    if not inner:
+                        continue
+                    if m.isdir():
+                        os.close(folder_for(root_fd, inner, budget))
+                    elif m.isreg() and m.issparse():
+                        raise Refused("a sparse file in it")
+                    elif m.isreg():
+                        budget.file()
+                        dfd = folder_for(root_fd, inner[:-1], budget)
+                        try:
+                            write_new(dfd, inner[-1], tf.extractfile(m), budget)
+                            os.utime(inner[-1], (m.mtime, m.mtime), dir_fd=dfd, follow_symlinks=False)
+                        finally:
+                            os.close(dfd)
+                    else:
+                        left_out += 1
+                digest = src.rest()
+        finally:
+            os.close(root_fd)
+        if digest != expected:
+            raise Refused("the backup changed after it was looked at")
+        if not found:
+            raise Refused("that profile isn't in the backup")
+        done = True
+    finally:
+        if not done and made is not None:
+            # (Only the folder this made: moved aside, then taken away only
+            # if it's still that one, by its device and inode, without
+            # following links in it; anything else put back as it was.)
+            aside = take_aside(pfd, name)
+            if aside is not None:
+                now = os.lstat(aside, dir_fd=pfd)
+                if stat.S_ISDIR(now.st_mode) and (now.st_dev, now.st_ino) == (made.st_dev, made.st_ino):
+                    shutil.rmtree(aside, dir_fd=pfd, ignore_errors=True)
+                else:
+                    put_back(pfd, aside, name)
+        os.close(pfd)
+    print("left-out:%d" % left_out)
+    print(os.path.join(os.path.dirname(base.rstrip("/")), name))
+
+
+# What the archive commands may take of memory (a backstop: what they read
+# is bounded besides).
+ARCHIVE_MEMORY = 4 * 1024 * 1024 * 1024
+
+
+# ---- a notification, over the session bus ----------------------------------------
+
+class _Wire:
+    """D-Bus's wire format, little-endian, aligned from the start of what it writes."""
+    def __init__(self):
+        self.b = bytearray()
+
+    def pad(self, n):
+        self.b += b"\0" * (-len(self.b) % n)
+
+    def byte(self, v):
+        self.b.append(v)
+
+    def u32(self, v):
+        self.pad(4)
+        self.b += struct.pack("<I", v)
+
+    def i32(self, v):
+        self.pad(4)
+        self.b += struct.pack("<i", v)
+
+    def string(self, text):
+        data = text.encode("utf-8")
+        self.u32(len(data))
+        self.b += data + b"\0"
+
+    def signature(self, sig):
+        data = sig.encode("ascii")
+        self.byte(len(data))
+        self.b += data + b"\0"
+
+    def array(self, align, write):
+        """An array: its length in bytes, then its elements, each `align`-aligned."""
+        self.u32(0)
+        at = len(self.b) - 4
+        self.pad(align)
+        start = len(self.b)
+        write()
+        struct.pack_into("<I", self.b, at, len(self.b) - start)
+
+
+def _bus_message(serial, dest, path, iface, member, sig="", body=b""):
+    w = _Wire()
+    w.b += b"l\x01\x00\x01"  # little-endian, a method call, no flags, version 1
+    w.u32(len(body))
+    w.u32(serial)
+    fields = [(1, "o", path), (2, "s", iface), (3, "s", member), (6, "s", dest)]
+    if sig:
+        fields.append((8, "g", sig))
+
+    def each():
+        for code, vsig, value in fields:
+            w.pad(8)
+            w.byte(code)
+            w.signature(vsig)
+            if vsig == "g":
+                w.signature(value)
+            else:
+                w.string(value)
+    w.array(8, each)
+    w.pad(8)
+    return bytes(w.b) + body
+
+
+def _bus_path():
+    """The session bus's socket: DBUS_SESSION_BUS_ADDRESS's unix:path= (or abstract=), else
+    $XDG_RUNTIME_DIR/bus."""
+    for part in os.environ.get("DBUS_SESSION_BUS_ADDRESS", "").split(";"):
+        kind, _, rest = part.partition(":")
+        if kind != "unix":
+            continue
+        opts = dict(kv.split("=", 1) for kv in rest.split(",") if "=" in kv)
+        unescape = lambda v: re.sub(r"%([0-9A-Fa-f]{2})", lambda m: chr(int(m.group(1), 16)), v)
+        if opts.get("path"):
+            return unescape(opts["path"])
+        if opts.get("abstract"):
+            return "\0" + unescape(opts["abstract"])
+    run = os.environ.get("XDG_RUNTIME_DIR", "")
+    if run.startswith("/"):
+        return run + "/bus"
+    raise Refused("there's no session bus")
+
+
+def _bus_read(sock, want):
+    """Messages off the bus until the answer to call `want`: its body, or Refused with its error."""
+    buf = b""
+
+    def need(n):
+        nonlocal buf
+        while len(buf) < n:
+            chunk = sock.recv(65536)
+            if not chunk:
+                raise Refused("the session bus closed")
+            buf += chunk
+
+    while True:
+        need(16)
+        end = "<" if buf[0:1] == b"l" else ">"
+        kind = buf[1]
+        body_len, _, fields_len = struct.unpack(end + "III", buf[4:16])
+        if body_len > 1 << 20 or fields_len > 1 << 16:
+            raise Refused("a message too big from the session bus")
+        head = 16 + fields_len + (-(16 + fields_len) % 8)
+        need(head + body_len)
+        msg, buf = buf[:head + body_len], buf[head + body_len:]
+        reply_to, error = None, ""
+        i = 16
+        while i < 16 + fields_len:
+            i += -i % 8
+            code = msg[i]
+            n = msg[i + 1]
+            vsig = msg[i + 2:i + 2 + n].decode("ascii", "replace")
+            i += 3 + n
+            if vsig in ("s", "o"):
+                i += -i % 4
+                (ln,) = struct.unpack(end + "I", msg[i:i + 4])
+                value = msg[i + 4:i + 4 + ln].decode("utf-8", "replace")
+                i += 5 + ln
+            elif vsig == "g":
+                ln = msg[i]
+                value = msg[i + 1:i + 1 + ln].decode("ascii", "replace")
+                i += 2 + ln
+            elif vsig == "u":
+                i += -i % 4
+                (value,) = struct.unpack(end + "I", msg[i:i + 4])
+                i += 4
+            else:
+                raise Refused("a message the session bus sent that this can't read")
+            if code == 5:
+                reply_to = value
+            elif code == 4:
+                error = value
+        if reply_to != want:
+            continue  # a signal, or the answer to Hello
+        if kind == 3:
+            raise Refused("the notification wasn't sent: " + (error or "an error")[:200])
+        if kind == 2:
+            return msg[head:], end
+
+
+def _bus_text(value, most):
+    """A string D-Bus takes: at most `most` characters, no NUL, valid UTF-8."""
+    return str(value if isinstance(value, str) else "").replace("\0", "")[:most].encode("utf-8", "replace").decode("utf-8")
+
+
+def _save_private(dest, write, replace=True):
+    """`write(fd)` into a new file yours alone beside `dest`, then put in its
+    place (or, not `replace`, only where nothing is), checked private."""
+    if not isinstance(dest, str) or not dest.startswith("/") or dest.endswith("/"):
+        raise Refused("not a full path")
+    folder, name = os.path.split(dest)
+    if not parts_of(name) or len(parts_of(name)) != 1:
+        raise Refused("not a file name")
+    dfd = os.open(folder or "/", os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+    try:
+        tmp = ".uber-notebook-new-%s" % os.urandom(6).hex()
+        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600, dir_fd=dfd)
+        refused = False
+        try:
+            try:
+                # (A drive that can't keep modes (exFAT, some shares) takes
+                # the change and keeps them as they were; one that refuses
+                # it (a phone, through gvfs) says so. Known before anything's
+                # written; still saved, as you asked, and said: "open".)
+                try:
+                    os.fchmod(fd, 0o600)
+                except OSError:
+                    refused = True
+                st0 = os.fstat(fd)
+                if not stat.S_ISREG(st0.st_mode):
+                    raise Refused("not a plain file")
+                write(fd)
+                os.fsync(fd)
+            finally:
+                os.close(fd)
+            if replace:
+                os.rename(tmp, name, src_dir_fd=dfd, dst_dir_fd=dfd)
+            else:
+                try:
+                    os.link(tmp, name, src_dir_fd=dfd, dst_dir_fd=dfd, follow_symlinks=False)
+                except FileExistsError:
+                    raise Refused("there's a file there already")
+                os.unlink(tmp, dir_fd=dfd)
+        except BaseException:
+            try:
+                os.unlink(tmp, dir_fd=dfd)
+            except OSError:
+                pass
+            raise
+        st = os.stat(name, dir_fd=dfd, follow_symlinks=False)
+        if not stat.S_ISREG(st.st_mode):
+            raise Refused("it isn't a plain file there")
+    finally:
+        os.close(dfd)
+    print(dest)
+    if refused or st0.st_mode & 0o077 or st.st_mode & 0o077:
+        print("open")
+
+
+def _write_all(fd, data):
+    view = memoryview(data)
+    while view:
+        view = view[os.write(fd, view):]
+
+
+def cmd_save(dest):
+    limit = 256 * 1024 * 1024
+    data = sys.stdin.buffer.read(limit + 1)
+    if len(data) > limit:
+        raise Refused("too big")
+    _save_private(dest, lambda fd: _write_all(fd, data))
+
+
+def cmd_place(source, dest, how):
+    if how not in ("replace", "keep"):
+        raise Refused("replace or keep")
+    src = os.open(source, os.O_RDONLY | os.O_NONBLOCK | os.O_CLOEXEC)
+    try:
+        if not stat.S_ISREG(os.fstat(src).st_mode):
+            raise Refused("not a plain file")
+
+        def copy(fd):
+            while True:
+                chunk = os.read(src, 1024 * 1024)
+                if not chunk:
+                    break
+                _write_all(fd, chunk)
+        _save_private(dest, copy, how == "replace")
+    finally:
+        os.close(src)
+
+
+def _keeps_private(root_fd):
+    # (A drive that refuses the change (a phone, through gvfs) doesn't keep
+    # files private either: neither the Markdown copy nor a profile put back
+    # is kept there, and that's what's said.)
+    probe = ".uber-notebook-probe-%s" % os.urandom(6).hex()
+    pfd = os.open(probe, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600, dir_fd=root_fd)
+    try:
+        try:
+            os.fchmod(pfd, 0o600)
+        except OSError as e:
+            if e.errno in (errno.EPERM, errno.ENOTSUP, errno.EOPNOTSUPP, errno.ENOSYS):
+                return False
+            raise
+        return not os.fstat(pfd).st_mode & 0o077
+    finally:
+        os.close(pfd)
+        os.unlink(probe, dir_fd=root_fd)
+
+
+def cmd_probe(folder):
+    root_fd = os.open(folder, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+    try:
+        st = os.fstat(root_fd)
+        if st.st_uid != os.getuid():
+            raise Refused("not a folder of yours")
+        keeps = _keeps_private(root_fd)
+        print(json.dumps({"keeps": keeps, "id": "%d:%d" % (st.st_dev, st.st_ino)}))
+    finally:
+        os.close(root_fd)
+
+
+def cmd_make_private(folder):
+    data = sys.stdin.buffer.read(16 * 1024 * 1024 + 1)
+    if len(data) > 16 * 1024 * 1024:
+        raise Refused("too many names")
+    names = json.loads(data.decode("utf-8"))
+    if not isinstance(names, list):
+        raise Refused("not a list")
+    me = os.getuid()
+    count = {"changed": 0, "left": 0, "seen": 0}
+
+    def private(fd):
+        st = os.fstat(fd)
+        if not st.st_mode & 0o077:
+            return
+        if st.st_uid != me:
+            count["left"] += 1
+            return
+        try:
+            os.fchmod(fd, stat.S_IMODE(st.st_mode) & 0o700)
+        except OSError:
+            count["left"] += 1
+            return
+        # (Checked after: a drive that can't keep modes takes the chmod and
+        # keeps them as they were.)
+        if os.fstat(fd).st_mode & 0o077:
+            count["left"] += 1
+        else:
+            count["changed"] += 1
+
+    def tree(dfd, depth):
+        # (A folder, and all that's in it, never through a link.)
+        private(dfd)
+        if depth > 64:
+            return
+        for entry in os.listdir(dfd):
+            count["seen"] += 1
+            if count["seen"] > 500000:
+                raise Refused("too much in it")
+            try:
+                fd = os.open(entry, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | os.O_CLOEXEC, dir_fd=dfd)
+            except OSError:
+                continue  # a link, gone, or not ours to open: left as it is
+            try:
+                mode = os.fstat(fd).st_mode
+                if stat.S_ISDIR(mode):
+                    tree(fd, depth + 1)
+                elif stat.S_ISREG(mode):
+                    private(fd)
+            finally:
+                os.close(fd)
+
+    root_fd = os.open(folder, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+    try:
+        if os.fstat(root_fd).st_uid != me:
+            raise Refused("not a folder of yours")
+        # (Whether the drive keeps files private at all: a new file of its
+        # own, 600, looked at, then taken away. An empty folder on an exFAT
+        # stick would otherwise pass.)
+        keeps = _keeps_private(root_fd)
+        if not keeps:
+            count["left"] += 1
+        for name in names[:100000]:
+            parts = parts_of(name) if isinstance(name, str) else None
+            if not parts:
+                continue
+            fd = os.dup(root_fd)
+            try:
+                for part in parts[:-1]:
+                    nfd = open_dir(part, fd)
+                    os.close(fd)
+                    fd = nfd
+                ffd = os.open(parts[-1], os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | os.O_CLOEXEC, dir_fd=fd)
+                try:
+                    mode = os.fstat(ffd).st_mode
+                    if stat.S_ISDIR(mode):
+                        tree(ffd, 0)
+                    elif stat.S_ISREG(mode):
+                        private(ffd)
+                finally:
+                    os.close(ffd)
+            except OSError:
+                pass  # gone, a link, or not a file or folder: left as it is
+            finally:
+                os.close(fd)
+    finally:
+        os.close(root_fd)
+    print(json.dumps({"ok": True, "changed": count["changed"], "left": count["left"], "keeps": keeps}))
+
+
+def cmd_lookup():
+    host = sys.stdin.buffer.read(256).decode("utf-8", "replace").strip()
+    if not re.fullmatch(r"[A-Za-z0-9.-]{1,253}|\[[0-9A-Fa-f:.]{2,45}\]", host):
+        raise Refused("not a host name")
+    host = host.strip("[]")
+    seen = []
+    for family, _, _, _, addr in socket.getaddrinfo(host, None, 0, socket.SOCK_STREAM):
+        if family in (socket.AF_INET, socket.AF_INET6) and addr[0] not in seen:
+            seen.append(addr[0])
+    if not seen:
+        raise Refused("no address")
+    for a in seen:
+        print(a)
+
+
+def cmd_notify():
+    data = sys.stdin.buffer.read(64 * 1024 + 1)
+    if len(data) > 64 * 1024:
+        raise Refused("more than 64 KB")
+    req = json.loads(data.decode("utf-8"))
+    if not isinstance(req, dict):
+        raise Refused("not a notification")
+    summary = _bus_text(req.get("summary"), 300)
+    body = _bus_text(req.get("body"), 2000)
+    glyph = _bus_text(req.get("glyph"), 8)
+    argv = req.get("exec") or []
+    if not isinstance(argv, list) or not all(isinstance(a, str) and a for a in argv) or len(argv) > 16:
+        raise Refused("exec: a list of words")
+    argv = [_bus_text(a, 200) for a in argv]
+
+    b = _Wire()
+    b.string("Uber Notebook")  # app_name
+    b.u32(0)  # replaces_id
+    b.string("")  # app_icon
+    b.string(summary)
+    b.string(body)
+    b.array(4, lambda: None)  # actions: none (a click runs omarchy-exec-argv)
+    hints = [("urgency", "y", 1)]
+    if glyph:
+        hints.append(("omarchy-glyph", "s", glyph))
+    if argv:
+        hints.append(("omarchy-exec-argv", "s", json.dumps(argv, separators=(",", ":"), ensure_ascii=False)))
+
+    def each():
+        for key, vsig, value in hints:
+            b.pad(8)
+            b.string(key)
+            b.signature(vsig)
+            if vsig == "y":
+                b.byte(value)
+            else:
+                b.string(value)
+    b.array(8, each)
+    b.i32(-1)  # expire_timeout: the server's own
+
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM | socket.SOCK_CLOEXEC)
+    sock.settimeout(5)
+    try:
+        sock.connect(_bus_path())
+        sock.sendall(b"\0AUTH EXTERNAL " + str(os.getuid()).encode("ascii").hex().encode("ascii") + b"\r\n")
+        line = b""
+        while not line.endswith(b"\r\n"):
+            chunk = sock.recv(1)
+            if not chunk or len(line) > 512:
+                raise Refused("the session bus didn't let this in")
+            line += chunk
+        if not line.startswith(b"OK "):
+            raise Refused("the session bus didn't let this in")
+        sock.sendall(b"BEGIN\r\n")
+        sock.sendall(_bus_message(1, "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "Hello"))
+        sock.sendall(_bus_message(2, "org.freedesktop.Notifications", "/org/freedesktop/Notifications",
+                                  "org.freedesktop.Notifications", "Notify", "susssasa{sv}i", bytes(b.b)))
+        answer, end = _bus_read(sock, 2)
+        print(struct.unpack(end + "I", answer[:4])[0] if len(answer) >= 4 else 0)
+    except socket.timeout:
+        raise Refused("the session bus didn't answer")
+    except struct.error:
+        raise Refused("a message the session bus sent that this can't read")
+    finally:
+        sock.close()
+
+
+def main(argv):
+    if argv[1:2] in (["unzip"], ["inspect-backup"], ["restore-backup"], ["export-html"]):
+        try:
+            soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+            cap = ARCHIVE_MEMORY if hard == resource.RLIM_INFINITY else min(ARCHIVE_MEMORY, hard)
+            resource.setrlimit(resource.RLIMIT_AS, (cap, hard))
+        except (ValueError, OSError):
+            pass
+    try:
+        if len(argv) == 6 and argv[1] == "unzip":
+            cmd_unzip(argv[2], argv[3], argv[4], argv[5])
+        elif len(argv) in (4, 5) and argv[1] == "read":
+            cmd_read(*argv[2:])
+        elif len(argv) == 4 and argv[1] == "put":
+            cmd_put(argv[2], argv[3])
+        elif len(argv) == 4 and argv[1] == "put-copy":
+            cmd_put(argv[2], argv[3], True)
+        elif len(argv) == 4 and argv[1] == "create-owned":
+            cmd_create_owned(argv[2], argv[3])
+        elif len(argv) == 4 and argv[1] == "remove-owned":
+            cmd_remove_owned(argv[2], argv[3])
+        elif len(argv) in (4, 5, 6) and argv[1] == "unlink-link":
+            cmd_unlink_link(*argv[2:])
+        elif len(argv) == 3 and argv[1] == "inspect-backup":
+            cmd_inspect(argv[2])
+        elif len(argv) in (6, 7) and argv[1] == "copy-picture":
+            cmd_copy_picture(*argv[2:])
+        elif len(argv) == 7 and argv[1] == "copy-file":
+            cmd_copy_file(*argv[2:])
+        elif len(argv) == 4 and argv[1] == "mirror-apply":
+            cmd_mirror_apply(argv[2], argv[3])
+        elif len(argv) == 4 and argv[1] == "read-files":
+            cmd_read_files(argv[2], argv[3])
+        elif len(argv) == 6 and argv[1] == "read-glob":
+            cmd_read_glob(argv[2], argv[3], argv[4], argv[5])
+        elif len(argv) == 3 and argv[1] == "to-json":
+            cmd_to_json(argv[2])
+        elif len(argv) in (2, 4) and argv[1] == "ascii-lines":
+            return cmd_ascii_lines(*argv[2:]) or 0
+        elif len(argv) == 5 and argv[1] == "export-html":
+            cmd_export_html(argv[2], argv[3], argv[4])
+        elif len(argv) == 3 and argv[1] == "serve":
+            cmd_serve(argv[2])
+        elif len(argv) == 3 and argv[1] == "save":
+            cmd_save(argv[2])
+        elif len(argv) == 5 and argv[1] == "place":
+            cmd_place(argv[2], argv[3], argv[4])
+        elif len(argv) == 3 and argv[1] == "probe":
+            cmd_probe(argv[2])
+        elif len(argv) == 3 and argv[1] == "make-private":
+            cmd_make_private(argv[2])
+        elif len(argv) == 2 and argv[1] == "lookup":
+            cmd_lookup()
+        elif len(argv) == 2 and argv[1] == "notify":
+            cmd_notify()
+        elif len(argv) == 8 and argv[1] == "restore-backup":
+            cmd_restore(argv[2], argv[3], argv[4], argv[5], argv[6], argv[7])
+        else:
+            sys.stderr.write("usage: uber-notebook-files unzip|inspect-backup|restore-backup ...\n")
+            return 2
+    except (Refused, OSError, zipfile.BadZipFile, tarfile.TarError, EOFError, ValueError, zlib.error, MemoryError) as e:
+        if argv[1:2] in (["unzip"], ["export-html"], ["copy-picture"], ["copy-file"], ["read-files"], ["read-glob"]):
+            print(json.dumps({"ok": False, "error": (str(e) or ("it ran out of memory" if isinstance(e, MemoryError) else type(e).__name__))[:300]}))
+            return 1
+        sys.stderr.write(str(e)[:300] + "\n")
+        return 3
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

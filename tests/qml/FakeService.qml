@@ -1,0 +1,90 @@
+import QtQuick
+import "../../Defaults.js" as Defaults
+import "../../Settings.js" as Settings
+
+// The service's settings side, for tests and the dev harness.
+QtObject {
+  id: fake
+  property var store: null
+  property var user: ({})
+  // (Under `user`: the skill and reminder details asked about already, so
+  // neither the panel nor the strip is over a test's page; tst_setup's
+  // sets it to ({}).)
+  property var asked: ({ setupShown: true, setupSettled: ["skill", "reminders"] })
+  readonly property var settings: {
+    var u = JSON.parse(JSON.stringify(asked || {}))
+    for (var k in user) u[k] = user[k]
+    return Settings.merge(Defaults.DEFAULTS, u, Defaults.SCHEMA)
+  }
+  property string rootPath: "/tmp/uber-notebook-dev"
+  property string version: "1.0.0"
+  property string skillDir: "/tmp/uber-notebook-dev-plugin/skills/uber-notebook"
+  property string skillPath: "/tmp/uber-notebook-dev-plugin/skills/uber-notebook/SKILL.md"
+  // (The skill for any AI: copied, saved where you say, shown.)
+  property int skillCopied: 0
+  property int skillShown: 0
+  property string skillSaveTo: ""
+  function copySkill() { skillCopied++; return true }
+  function saveSkillCopy(done) { done(skillSaveTo, "") }
+  function showSkill() { skillShown++ }
+  // The Markdown copy (Mirror.qml), as Settings shows it.
+  property var mirror: QtObject { property string status: ""; property string problem: ""; property int files: 0; property var lastSync: null }
+  readonly property string mirrorPath: rootPath + "/Markdown"
+  function openMirror() {}
+
+  function setSetting(key, value) {
+    var changes = {}
+    changes[key] = value
+    setSettings(changes)
+  }
+  function setSettings(changes) {
+    // (As Service.qml: an opt-in turned on or off, not asked about again.)
+    changes = Settings.settleSetup(settings, changes)
+    var next = JSON.parse(JSON.stringify(user))
+    for (var k in changes) next[k] = changes[k]
+    user = next
+  }
+  // The skill and reminder details (Service.qml): what the strip asks about,
+  // one turned on, the strip dismissed, the panel shown.
+  readonly property var setupAsks: Settings.setupAsks(settings)
+  function turnOn(name) { var key = Settings.optInKey(name); if (key) setSetting(key, true) }
+  function dismissSetup() { setSetting("setupSettled", ["skill", "reminders"]) }
+  function setupSeen() { if (settings.setupShown !== true) setSetting("setupShown", true) }
+  property string home: "/tmp"
+  // Profiles (Profiles.qml), when a test has them (else none: no switch, no first run).
+  property var profiles: null
+  // What's open written before another profile opens (how many times), and
+  // the folder a pick gets ("" as if it was called off).
+  property int savedOpen: 0
+  function saveOpen() { savedOpen++ }
+  property string nextFolder: ""
+  property string pickedFolder: ""
+  function pickFolder(title, done) { pickedFolder = title; done(nextFolder) }
+  function shortcutNote(event) { return event === "toggle" ? "Super + N" : "Super + Alt + N" }
+  function pickPicture(done) { done("") }
+  // Where a copy goes: the name it started with, and the path "chosen".
+  property string saveName: ""
+  property string nextSave: ""
+  function pickSavePath(name, done) { saveName = name; done(nextSave) }
+  // The file a pick gets ("" as if it was called off), and what was asked for.
+  property string nextFile: ""
+  property string pickedKind: ""
+  property string pickedFrom: ""
+  function pickFile(kind, done, from) { pickedKind = kind; pickedFrom = from || ""; done(nextFile) }
+  // The pictures a pick gets ([] as if it was called off).
+  property var nextPictures: []
+  function pickPictures(done) { done(nextPictures) }
+  // The microphone (FakeRecorder.qml).
+  property var recorder: FakeRecorder { input: fake.settings.audioInput || ""; boost: fake.settings.audioBoost !== false }
+  // voxtype's meetings (FakeMeetings.qml).
+  property var meetings: FakeMeetings {}
+  // The update check (Updates.qml) and backups (Backups.qml), when a test has them.
+  property var updates: null
+  property var backups: null
+
+  // While an agent works in the panel (Service.qml: Scope.js): what it's
+  // limited to, or null.
+  property var agentScope: null
+  function beginAgentScope(agent, dir, id, grants, talk) { agentScope = { agent: agent, id: id, dir: dir, frozen: false, grants: grants || {}, talk: talk || "" } }
+  function endAgentScope() { agentScope = null }
+}
