@@ -14,6 +14,7 @@ function load(file) {
   vm.createContext(context);
   let source = fs.readFileSync(path.join(root, file), "utf8");
   source = source.replace(/^\.pragma library\s*$/m, "");
+  source = source.replace(/^\.primitive library\s*$/m, "");
   source = source.replace(/^\.import\s+"([^"]+)"\s+as\s+(\w+)\s*$/gm, (_, dep, name) => {
     context[name] = load(path.join(path.dirname(file), dep));
     return "";
