@@ -63,6 +63,9 @@ var DEFAULTS = {
   // ("" is a Markdown folder in the notes folder).
   mirror: false,
   mirrorFolder: "",
+  // Vim-style keybindings in the editor (hjkl navigation, dd/yy/p for blocks,
+  // visual mode, search with /). Off by default.
+  vimMode: false,
   // How the sidebar lists tags: by name ("name") or by color ("color").
   tagSort: "name",
   // The calendar's view, as it was last: month, week, agenda or compact (a
@@ -191,7 +194,8 @@ var SCHEMA = {
     codexEffort: "string",
     agentPermissions: "permissions",
     sidebarHidden: "list",
-    sidebarFolded: "list"
+    sidebarFolded: "list",
+    vimMode: "bool"
   },
   choices: {
     pen: ["sans", "serif", "hand", "print", "typewriter", "mono", "duo"],

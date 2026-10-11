@@ -855,6 +855,33 @@ Rectangle {
         onClicked: bar.view.openPeople("")
       }
     }
+    Rectangle {
+      id: kanbanRow
+      objectName: "kanbanTile"
+      visible: bar.shows("kanban")
+      width: parent.width
+      height: 34
+      radius: 8
+      color: bar.view.kanbanShown ? bar.theme.pressed : kanbanHover.hovered ? bar.theme.hover : Qt.alpha(bar.theme.text, 0.035)
+      Row {
+        anchors.centerIn: parent
+        spacing: 8
+        Icon { theme: bar.theme; text: bar.theme.icons.board; size: 17; color: bar.theme.muted }
+        Text {
+          anchors.verticalCenter: parent.verticalCenter
+          textFormat: Text.PlainText
+          text: "Kanban"
+          font.family: bar.theme.uiFont
+          font.pixelSize: 12
+          font.weight: bar.view.kanbanShown ? Font.DemiBold : Font.Normal
+          color: bar.theme.text
+        }
+      }
+      HoverHandler { id: kanbanHover; cursorShape: Qt.PointingHandCursor }
+      TapHandler { onTapped: bar.view.openKanban() }
+      TapHandler { acceptedButtons: Qt.RightButton; onTapped: bar.openItemMenu("kanban", kanbanRow) }
+      Tip { shown: kanbanHover.hovered; text: "Plan your tasks on a board" }
+    }
   }
 
   // ---- the middle, scrolling as one --------------------------------------------------------

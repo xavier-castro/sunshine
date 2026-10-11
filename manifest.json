@@ -5,7 +5,7 @@
   "version": "1.1.2",
   "author": "Xavier Castro",
   "license": "MIT",
-  "homepage": "https://github.com/xavier/sunshine",
+  "homepage": "https://github.com/xavier-castro/sunshine",
   "description": "Your notes in the Omarchy shell. Press Super+N (or click the notebook in the top bar) and Pages opens: a workspace of pages made of blocks, the Notion way, with to-dos, toggles, tables, boards, mind maps, sketches, equations, diagrams, pictures and files, and your AI agent (Claude Code, Grok or Codex) working on a page in a panel. Or paper notebooks that move to Pages in a click. Quick notes from anywhere with Super+Alt+N, search across everything, and plain files in ~/Documents/Sunshine.",
   "kinds": [
     "panel",

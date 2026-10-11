@@ -80,6 +80,13 @@ FocusScope {
   property bool peopleShown: false
   // Templates (yours and Sunshine's), in place of a page.
   property bool templatesShown: false
+  property bool kanbanShown: false
+  property var kanbanBoards: []
+  property string kanbanPageId: ""
+  property bool kanbanLoading: false
+  property int kanbanRequest: 0
+  property var kanbanCandidates: ({})
+  property int pageRequest: 0
   // An event just made from "More" with nothing in it yet (it goes if it's left empty).
   property string justMade: ""
 
@@ -118,7 +125,7 @@ FocusScope {
 
   // Pages shown: the page you were on last, else the first one.
   function activate() {
-    if (tagShown || libraryShown || peopleShown || templatesShown) return
+    if (tagShown || libraryShown || peopleShown || templatesShown || kanbanShown) return
     if (page) { focusPage(false); return }
     if (!workspace || !workspace.ready) { pendingActivate = true; return }
     workspace.ensureStarted()
@@ -135,6 +142,18 @@ FocusScope {
     // Another notes folder (Settings, or `omarchy-shell sunshine set folder`).
     function onFolderChanged() { view.leaveFolder() }
     function onRevisionChanged() {
+      if (view.kanbanShown) {
+        view.reconcileKanban()
+        var candidates = {}
+        var added = false
+        Object.keys(view.workspace.index.pages).forEach(function(id) {
+          if (!view.kanbanEligible(id)) return
+          candidates[id] = true
+          if (!view.kanbanCandidates[id]) added = true
+        })
+        view.kanbanCandidates = candidates
+        if (added) view.discoverKanban(false)
+      }
       if (view.pendingActivate && view.workspace.ready && view.visible) {
         view.pendingActivate = false
         view.activate()
@@ -144,20 +163,28 @@ FocusScope {
     // moved into it from elsewhere): shown as it is now.
     function onPageChanged(id) {
       if (view.page && view.page.id === id && !view.pageDirty) view.workspace.readPage(id, function(p) { if (p && view.page && view.page.id === id) view.show(p) })
+      if (view.kanbanShown) view.readKanbanBoard(id)
     }
+    function onSaved(id) { if (view.kanbanShown) view.readKanbanBoard(id) }
   }
 
   // Opens a page; `then`: "title" puts the cursor in its title, { block }
   // on that block. ("tag:<name>" in the history is a tag.)
   function open(id, fromHistory, then) {
     if (!workspace || !id) return
+    if (id === "kanban" || String(id).indexOf("kanban:") === 0) { openKanban(id === "kanban" ? "" : String(id).slice(7), fromHistory); return }
     if (String(id).indexOf("tag:") === 0) { openTag(String(id).slice(4), fromHistory); return }
     if (String(id).indexOf("calendar") === 0) { openCalendar(String(id).slice(9), fromHistory); return }
     if (String(id).indexOf("library") === 0) { openLibrary(String(id).slice(8), fromHistory); return }
     if (String(id).indexOf("people") === 0) { openPeople(String(id).slice(7), fromHistory); return }
     if (id === "templates") { openTemplates(fromHistory); return }
     commit()
+    leaveKanban()
+    var request = pageRequest
+    var gen = workspace.generation
+    var folder = workspace.folder
     workspace.readPage(id, function(p) {
+      if (!view.workspace || request !== view.pageRequest || gen !== view.workspace.generation || folder !== view.workspace.folder || view.switching) return
       if (!p) { view.toast("That page isn't there any more"); return }
       var e = view.workspace.index.pages[id]
       if (e) p.parent = e.parent
@@ -173,9 +200,185 @@ FocusScope {
       }
       view.expandTo(id)
       if (view.service) view.service.setSetting("lastPage", id)
-      if (then && then.block) Qt.callLater(function() { view.editor.focusBlock(then.block, 0) })
+      if (then && then.block) Qt.callLater(function() {
+        if (request === view.pageRequest && view.page && view.page.id === id) view.editor.focusBlock(then.block, 0)
+      })
       else view.focusPage(then === "title")
     })
+  }
+
+  function leaveKanban() {
+    pageRequest++
+    kanbanRequest++
+    kanbanLoading = false
+    kanbanShown = false
+  }
+
+  function kanbanEligible(id) {
+    var ix = workspace.index
+    return !!ix.pages[id] && !ix.pages[id].synced && !Workspace.inTrash(ix, id)
+      && !Workspace.inArchive(ix, id) && !Workspace.inTemplates(ix, id)
+  }
+
+  function kanbanEntry(p) {
+    if (!p || !kanbanEligible(p.id)) return null
+    var ids = Workspace.flatten(p).filter(function(b) { return b.type === "board" }).map(function(b) { return b.uid })
+    if (!ids.length) return null
+    return { pageId: p.id, title: workspace.index.pages[p.id].title || "Untitled", boardIds: ids,
+      path: Workspace.path(workspace.index, p.id).slice(0, -1).map(function(e) { return e.title || "Untitled" }).join(" / ") }
+  }
+
+  function sortKanban(entries) {
+    return entries.sort(function(a, b) { return a.title.toLowerCase().localeCompare(b.title.toLowerCase()) || a.pageId.localeCompare(b.pageId) })
+  }
+
+  function mergeKanbanPages(pages) {
+    var byId = {}
+    kanbanBoards.forEach(function(e) { byId[e.pageId] = e })
+    pages.forEach(function(p) {
+      var entry = view.kanbanEntry(view.workspace.written[p.id] || p)
+      if (entry) byId[p.id] = entry
+      else delete byId[p.id]
+    })
+    kanbanBoards = sortKanban(Object.keys(byId).map(function(id) { return byId[id] }))
+  }
+
+  function clearKanbanPage() {
+    pageRequest++
+    pageDirty = false
+    page = null
+    editor.load([])
+    findBar.reset()
+    kanbanPageId = ""
+    if (historyAt >= 0 && String(history[historyAt]).indexOf("kanban") === 0) {
+      var h = history.slice()
+      h[historyAt] = "kanban"
+      history = h
+    }
+  }
+
+  function reconcileKanban() {
+    if (!workspace || !kanbanShown) return
+    kanbanBoards = sortKanban(kanbanBoards.filter(function(e) { return view.kanbanEligible(e.pageId) }).map(function(e) {
+      return { pageId: e.pageId, title: view.workspace.index.pages[e.pageId].title || "Untitled", boardIds: e.boardIds,
+        path: Workspace.path(view.workspace.index, e.pageId).slice(0, -1).map(function(p) { return p.title || "Untitled" }).join(" / ") }
+    }))
+    if (kanbanPageId && !kanbanEligible(kanbanPageId)) { commit(); clearKanbanPage() }
+  }
+
+  function readKanbanBoard(id) {
+    var request = kanbanRequest
+    var gen = workspace.generation
+    var folder = workspace.folder
+    workspace.readPage(id, function(p) {
+      if (!view.workspace || !view.kanbanShown || request !== view.kanbanRequest || gen !== view.workspace.generation || folder !== view.workspace.folder || view.switching) return
+      if (p) view.mergeKanbanPages([p])
+      else view.kanbanBoards = view.kanbanBoards.filter(function(e) { return e.pageId !== id })
+      if (!view.kanbanBoards.some(function(e) { return e.pageId === id }) && view.kanbanPageId === id) {
+        if (view.page && view.page.id === id && view.editor.undoStack.length
+            && !view.editor.serialize().some(function(b) { return b.type === "board" })) {
+          view.leaveKanban()
+          view.kanbanPageId = ""
+          var h = view.history.slice()
+          if (view.historyAt >= 0) h[view.historyAt] = id
+          view.history = h
+        } else view.clearKanbanPage()
+      }
+    })
+  }
+
+  function discoverKanban(autoSelect) {
+    var request = ++kanbanRequest
+    var navigation = pageRequest
+    var gen = workspace.generation
+    var folder = workspace.folder
+    var ids = Object.keys(workspace.index.pages).filter(function(id) { return view.kanbanEligible(id) })
+    var candidates = {}
+    ids.forEach(function(id) { candidates[id] = true })
+    kanbanCandidates = candidates
+    var at = 0
+    kanbanBoards = []
+    kanbanLoading = true
+    function current() { return view.workspace && view.kanbanShown && !view.switching && request === view.kanbanRequest && gen === view.workspace.generation && folder === view.workspace.folder }
+    function next() {
+      if (!current()) return
+      if (at >= ids.length) {
+        view.reconcileKanban()
+        view.kanbanLoading = false
+        if (autoSelect && navigation === view.pageRequest && !view.page && view.kanbanBoards.length) view.openKanban(view.kanbanBoards[0].pageId, true)
+        return
+      }
+      var batch = ids.slice(at, at + 200)
+      at += batch.length
+      view.workspace.readPages(batch, function(pages) {
+        if (!current()) return
+        view.mergeKanbanPages(pages)
+        Qt.callLater(next)
+      })
+    }
+    next()
+  }
+
+  function openKanban(id, fromHistory) {
+    if (!workspace || !workspace.ready || switching) return
+    if (id === undefined && kanbanShown) { focusPage(false); return }
+    var refresh = !kanbanShown || kanbanLoading
+    var autoSelect = id === undefined && !fromHistory && !kanbanPageId
+    var selected = id === undefined ? kanbanPageId : String(id || "")
+    if (selected && !kanbanEligible(selected)) selected = ""
+    editor.parkFocus()
+    commit()
+    if (!selected && autoSelect && page && kanbanEntry(page)) selected = page.id
+    var samePage = page && page.id === selected && kanbanEntry(page)
+    leaveKanban()
+    tagShown = ""
+    calendarShown = false
+    libraryShown = false
+    peopleShown = false
+    templatesShown = false
+    kanbanShown = true
+    pendingActivate = false
+    if (!samePage) {
+      pageDirty = false
+      page = null
+      editor.load([])
+      findBar.reset()
+    }
+    kanbanPageId = selected
+    if (!fromHistory) {
+      history = history.slice(0, historyAt + 1).concat([selected ? "kanban:" + selected : "kanban"]).slice(-100)
+      historyAt = history.length - 1
+    }
+    if (refresh) discoverKanban(autoSelect)
+    if (!selected) { view.forceActiveFocus(); return }
+    if (samePage) { focusPage(false); return }
+    var request = pageRequest
+    var gen = workspace.generation
+    var folder = workspace.folder
+    workspace.readPage(selected, function(p) {
+      if (!view.workspace || !view.kanbanShown || request !== view.pageRequest || gen !== view.workspace.generation || folder !== view.workspace.folder || view.switching) return
+      if (!view.kanbanEntry(p)) { view.clearKanbanPage(); return }
+      p.parent = view.workspace.index.pages[selected].parent
+      view.show(p)
+      view.expandTo(selected)
+      if (fromHistory && view.historyAt >= 0 && view.history[view.historyAt] === "kanban") {
+        var h = view.history.slice()
+        h[view.historyAt] = "kanban:" + selected
+        view.history = h
+      }
+      view.focusPage(false)
+    })
+  }
+
+  function newKanban() {
+    if (!workspace || !workspace.ready || switching) return
+    editor.parkFocus()
+    commit()
+    var titles = Object.keys(workspace.index.pages).map(function(id) { return view.workspace.index.pages[id].title })
+    var title = "Tasks"
+    for (var n = 2; titles.indexOf(title) >= 0; n++) title = "Tasks " + n
+    var made = workspace.createPage({ title: title, format: { width: "full" }, blocks: [{ type: "board", data: Board.make(), indent: 0 }] })
+    if (made) openKanban(made.id)
   }
 
   // ---- buttons, files, videos, bookmarks, boards, synced blocks ------------------------------
@@ -273,7 +476,14 @@ FocusScope {
   // once, where it was; what's recorded, written out or made louder
   // meanwhile isn't put on it, and no recording starts.
   readonly property bool switching: !!(workspace && workspace.files && workspace.files.switching === true)
-  onSwitchingChanged: if (switching) { commit(); closeForSwitch() }
+  onSwitchingChanged: if (switching) {
+    commit()
+    leaveKanban()
+    kanbanPageId = ""
+    kanbanBoards = []
+    kanbanCandidates = ({})
+    closeForSwitch()
+  }
   // (What's open over the page is the profile before's: a version of a
   // page, an .ics file's events, an event, a person, a picture. Closed, as
   // it would close (what's typed in it kept where it was), never put into
@@ -693,6 +903,7 @@ FocusScope {
   function openCalendar(day, fromHistory) {
     if (!workspace) return
     commit()
+    leaveKanban()
     page = null
     editor.load([])
     pageDirty = false
@@ -801,6 +1012,7 @@ FocusScope {
   function openPeople(id, fromHistory) {
     if (!workspace) return
     commit()
+    leaveKanban()
     page = null
     editor.load([])
     pageDirty = false
@@ -870,6 +1082,7 @@ FocusScope {
   function openLibrary(kind, fromHistory) {
     if (!workspace) return
     commit()
+    leaveKanban()
     page = null
     editor.load([])
     pageDirty = false
@@ -893,6 +1106,7 @@ FocusScope {
     var n = Tags.clean(name)
     if (!workspace || !n) return
     commit()
+    leaveKanban()
     page = null
     editor.load([])
     pageDirty = false
@@ -1119,6 +1333,10 @@ FocusScope {
   // or is written into this one (a change not written yet is the old
   // folder's), and Pages opens on what's here: the examples, in an empty one.
   function leaveFolder() {
+    leaveKanban()
+    kanbanPageId = ""
+    kanbanBoards = []
+    kanbanCandidates = ({})
     // (What agents asked about here is for this folder's pages: not asked.)
     agentAsks = []
     // (An agent at work in this folder stops, and while it does, it can't
@@ -2862,6 +3080,7 @@ FocusScope {
   function openTemplates(fromHistory) {
     if (!workspace) return
     commit()
+    leaveKanban()
     page = null
     editor.load([])
     pageDirty = false
@@ -2957,11 +3176,11 @@ FocusScope {
         Item { width: 6; height: 1 }
         // The calendar shown, the Library, or People.
         Text {
-          visible: view.calendarShown || view.libraryShown || view.peopleShown || view.templatesShown
+          visible: view.calendarShown || view.libraryShown || view.peopleShown || view.templatesShown || (view.kanbanShown && view.page === null)
           anchors.verticalCenter: parent.verticalCenter
           leftPadding: 6
           textFormat: Text.PlainText
-          text: view.templatesShown ? "Templates" : view.peopleShown ? "People" : view.libraryShown ? "Library" : "Calendar"
+          text: view.kanbanShown ? "Kanban" : view.templatesShown ? "Templates" : view.peopleShown ? "People" : view.libraryShown ? "Library" : "Calendar"
           font.family: view.theme.uiFont
           font.pixelSize: 13
           color: view.theme.text
@@ -3080,10 +3299,10 @@ FocusScope {
           tip: view.dictating ? "Done dictating  Ctrl+Shift+D" : view.recorder && view.recorder.checked && !view.recorder.canTranscribe ? "Dictation needs voxtype (Omarchy's dictation)" : "Dictate: say it, and it's written where you are  Ctrl+Shift+D"
           onClicked: view.dictate()
         }
-        IconButton { visible: view.tagShown === "" && !view.calendarShown && !view.libraryShown && !view.peopleShown && !view.templatesShown; theme: view.theme; icon: view.theme.icons.search; size: 30; iconSize: 16; tip: "Find on this page  Ctrl+F"; checked: findBar.shown; onClicked: findBar.toggle() }
+        IconButton { visible: view.pageShown(); theme: view.theme; icon: view.theme.icons.search; size: 30; iconSize: 16; tip: "Find on this page  Ctrl+F"; checked: findBar.shown; onClicked: findBar.toggle() }
         IconButton {
           id: moreButton
-          visible: !view.calendarShown && !view.libraryShown && !view.peopleShown && !view.templatesShown
+          visible: !view.calendarShown && !view.libraryShown && !view.peopleShown && !view.templatesShown && (!view.kanbanShown || view.page !== null)
           theme: view.theme; icon: view.theme.icons.more; size: 30; iconSize: 16; tip: "Font, width, export, trash"
           active: view.page !== null
           onClicked: pageMenu.open()
@@ -3180,9 +3399,21 @@ FocusScope {
       view: view
     }
 
+    KanbanBar {
+      id: kanbanBar
+      objectName: "kanbanBar"
+      z: 3
+      anchors.top: topBar.bottom
+      width: parent.width
+      height: visible ? 54 : 0
+      visible: view.kanbanShown
+      theme: view.theme
+      view: view
+    }
+
     Flickable {
       id: flick
-      anchors.top: topBar.bottom
+      anchors.top: kanbanBar.bottom
       anchors.bottom: parent.bottom
       width: parent.width
       contentWidth: width
@@ -3790,7 +4021,7 @@ FocusScope {
 
     // No page open (none yet, or every one in the trash).
     Column {
-      visible: view.page === null && view.tagShown === "" && !view.calendarShown && !view.libraryShown && !view.peopleShown && !view.templatesShown && view.workspace !== null && view.workspace.ready
+      visible: view.page === null && view.tagShown === "" && !view.calendarShown && !view.libraryShown && !view.peopleShown && !view.templatesShown && !view.kanbanShown && view.workspace !== null && view.workspace.ready
       anchors.centerIn: parent
       spacing: 12
       Text {
@@ -3805,6 +4036,44 @@ FocusScope {
         anchors.horizontalCenter: parent.horizontalCenter
         theme: view.theme; icon: view.theme.icons.newPage; label: "New page"
         onClicked: view.newPage("")
+      }
+    }
+
+    Column {
+      objectName: "kanbanEmpty"
+      visible: view.kanbanShown && view.page === null
+      anchors.centerIn: parent
+      width: Math.min(420, parent.width - 48)
+      spacing: 12
+      Text {
+        width: parent.width
+        horizontalAlignment: Text.AlignHCenter
+        textFormat: Text.PlainText
+        text: view.kanbanLoading ? "Finding your boards…" : view.kanbanBoards.length ? "Choose a board" : "Plan what comes next"
+        font.family: view.theme.uiFont
+        font.pixelSize: 22
+        font.weight: Font.DemiBold
+        color: view.theme.text
+      }
+      Text {
+        width: parent.width
+        horizontalAlignment: Text.AlignHCenter
+        wrapMode: Text.Wrap
+        textFormat: Text.PlainText
+        text: view.kanbanLoading ? "" : view.kanbanBoards.length ? "Pick a board above, or start a new one." : "Keep upcoming tasks in To do, Doing and Done."
+        font.family: view.theme.uiFont
+        font.pixelSize: 14
+        color: view.theme.muted
+      }
+      IconButton {
+        objectName: "createKanban"
+        visible: !view.kanbanLoading
+        anchors.horizontalCenter: parent.horizontalCenter
+        theme: view.theme
+        icon: view.theme.icons.plus
+        label: "Create board"
+        active: view.workspace !== null && view.workspace.ready && !view.switching
+        onClicked: view.newKanban()
       }
     }
 

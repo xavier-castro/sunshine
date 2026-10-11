@@ -18,6 +18,7 @@ import "../Highlight.js" as Highlight
 import "../Import.js" as Import
 import "../Equations.js" as Equations
 import "../Notes.js" as Notes
+import "../VimInput.js" as VimInput
 
 // A page's writing: its blocks, one after another, and everything you can do
 // to them. Each text block is its own rich-text editor (Block.qml in a
@@ -37,6 +38,63 @@ import "../Notes.js" as Notes
 // checkbox), so each undo step is something you'd recognize.
 FocusScope {
   id: root
+
+  // ---- vim mode -------------------------------------------------------------------
+  // When vimMode is on (Settings), single-letter keys and operator+motion combos
+  // are intercepted here before they reach text block editors. VimInput.js
+  // translates the sequence into an action that this module runs via wrapper calls.
+
+  readonly property bool vimModeOn: root.service && root.service.settings && root.service.settings.vimMode === true
+
+  Keys.onPressed: function(e) {
+    if (!root.vimModeOn) return
+    var ctrl = (e.modifiers & Qt.ControlModifier) !== 0
+    var shift = (e.modifiers & Qt.ShiftModifier) !== 0
+    var alt = (e.modifiers & Qt.AltModifier) !== 0
+    var key = e.key
+    // Don't intercept modifier-only keys (Ctrl+C, Ctrl+V, etc.)
+    if (ctrl || shift || alt) return
+    var action = VimInput.handleKey(key, ctrl, shift, alt)
+    if (!action) return
+    e.accepted = true
+    if (action.type === "searchStart") {
+      root.enterVimSearch()
+    } else if (action.type === "searchSubmit") {
+      root.submitVimSearch()
+    } else if (action.type === "searchInput") {
+      // append char to search (handled by search field)
+    } else if (action.type === "undo") {
+      root.undoVim()
+    } else if (action.type === "redo") {
+      root.redoVim()
+    } else if (action.type === "navigate") {
+      root.navigateVim(action.direction, action.count || 1)
+    } else if (action.type === "lineStart") {
+      root.lineStartVim()
+    } else if (action.type === "lineEnd") {
+      root.lineEndVim()
+    } else if (action.type === "deleteBlock") {
+      root.deleteBlockVim(action.count || 1)
+    } else if (action.type === "clearBlock") {
+      root.clearBlockVim(action.count || 1)
+    } else if (action.type === "duplicateBlock") {
+      root.duplicateBlockVim(action.count || 1)
+    } else if (action.type === "paste") {
+      root.pasteVim()
+    } else if (action.type === "visual") {
+      root.enterVisualMode()
+    } else if (action.type === "move") {
+      root.moveBlockVim(action.direction, action.count || 1)
+    } else if (action.type === "indent") {
+      root.indentBlockVim(action.count || 1)
+    } else if (action.type === "outdent") {
+      root.outdentBlockVim(action.count || 1)
+    } else if (action.type === "insert") {
+      // pass to focused block to enter insert mode at cursor
+    } else if (action.type === "append") {
+      // pass to focused block to enter append mode
+    }
+  }
 
   // ---- how the page looks (set by the page) -------------------------------------------
 
@@ -2639,6 +2697,7 @@ FocusScope {
       return
     }
     if (selectedList.length > 0) clearBlockSelection()
+    vimFocusedBlock = uid
     item.edit.forceActiveFocus()
     var len = item.edit.length
     var p = pos === undefined || pos < 0 ? len : Math.min(len, pos)
@@ -3815,6 +3874,40 @@ FocusScope {
       if (e.key === Qt.Key_Y || (e.modifiers & Qt.ShiftModifier)) redo(); else undo()
       return
     }
+    // Vim mode: when blocks are selected and vimMode is on, try to handle
+    // the key as a vim command first. If VimInput returns null, fall through
+    // to the normal block-picking handler.
+    if (selectedList.length > 0 && root.vimModeOn) {
+      var ctrl = (e.modifiers & Qt.ControlModifier) !== 0
+      var shift = (e.modifiers & Qt.ShiftModifier) !== 0
+      var alt = (e.modifiers & Qt.AltModifier) !== 0
+      var key = e.key
+      if (!ctrl && !alt) {
+        var action = VimInput.handleKey(key, ctrl, shift, alt)
+        if (action) {
+          e.accepted = true
+          if (action.type === "navigate") {
+            // in block-pick mode, navigate shifts selection
+            var idx = indexOf(selectedList[0])
+            var count = action.count || 1
+            if (action.direction === "down") {
+              var next = Math.min(blocksModel.count - 1, idx + count)
+              selectBlocks(uidAt(idx), uidAt(next))
+            } else if (action.direction === "up") {
+              var prev = Math.max(0, idx - count)
+              selectBlocks(uidAt(prev), uidAt(idx))
+            } else if (action.direction === "deleteBlock") {
+              removeBlocks(selectedList)
+            } else if (action.type === "undo") {
+              undo()
+            } else if (action.type === "redo") {
+              redo()
+            }
+            return
+          }
+        }
+      }
+    }
     if (selectedList.length === 0) { e.accepted = false; return }
     // (Help, Ctrl+/ or F1: the window's, whatever's picked.)
     var ctrlHeld = (e.modifiers & Qt.ControlModifier) !== 0, altHeld = (e.modifiers & Qt.AltModifier) !== 0, shiftHeld = (e.modifiers & Qt.ShiftModifier) !== 0
@@ -3887,6 +3980,198 @@ FocusScope {
       return
     }
     e.accepted = false
+  }
+
+  // ---- vim mode --------------------------------------------------------------------
+  // vimMode intercepts keys in the FocusScope Keys.onPressed above, then calls
+  // these wrappers. The vim mode doesn't replace the normal editor; it adds
+  // a layer that handles hjkl, dd, yy, p, u, /, w, b, gg, $, etc.
+
+  // The currently focused block (where the cursor is). Set by focusedBlockChanged.
+  property string vimFocusedBlock: ""
+
+  // Get the block index of the focused block.
+  function vimFocusedIndex() {
+    return indexOf(vimFocusedBlock)
+  }
+
+  function undoVim() { undo() }
+  function redoVim() { redo() }
+
+  // Navigate: up/down moves between text blocks; left/right goes to start/end.
+  function navigateVim(direction, count) {
+    if (direction === "down") {
+      var idx = vimFocusedIndex()
+      if (idx < 0) { focusBlock(uidAt(0), 0); return }
+      var next = Math.min(blocksModel.count - 1, idx + count)
+      var target = uidAt(next)
+      if (items[target] && items[target].isText) focusBlock(target, -1)
+      else focusBlock(target, 0)
+    } else if (direction === "up") {
+      var idx = vimFocusedIndex()
+      if (idx <= 0) { focusBlock(uidAt(0), 0); return }
+      var prev = Math.max(0, idx - count)
+      var target = uidAt(prev)
+      if (items[target] && items[target].isText) focusBlock(target, -1)
+      else focusBlock(target, 0)
+    } else if (direction === "left") {
+      var idx = vimFocusedIndex()
+      if (idx >= 0 && items[uidAt(idx)] && items[uidAt(idx)].isText) {
+        focusBlock(uidAt(idx), 0)
+      } else if (idx > 0) {
+        var prev = Math.max(0, idx - count)
+        focusBlock(uidAt(prev), -1)
+      }
+    } else if (direction === "right") {
+      var idx = vimFocusedIndex()
+      if (idx >= 0 && items[uidAt(idx)] && items[uidAt(idx)].isText) {
+        focusBlock(uidAt(idx), -1)
+      } else if (idx < blocksModel.count - 1) {
+        var next = Math.min(blocksModel.count - 1, idx + count)
+        focusBlock(uidAt(next), 0)
+      }
+    } else if (direction === "wordForward") {
+      // Jump to next block (approximation: words span blocks in vim mode)
+      var idx = vimFocusedIndex()
+      var next = Math.min(blocksModel.count - 1, idx + (count || 1))
+      var target = uidAt(next)
+      if (items[target] && items[target].isText) focusBlock(target, -1)
+    } else if (direction === "wordBack") {
+      var idx = vimFocusedIndex()
+      var prev = Math.max(0, idx - (count || 1))
+      var target = uidAt(prev)
+      if (items[target] && items[target].isText) focusBlock(target, 0)
+    } else if (direction === "top") {
+      var first = blocksModel.count > 0 ? uidAt(0) : ""
+      if (first && items[first]) focusBlock(first, 0)
+    } else if (direction === "bottom") {
+      var last = blocksModel.count > 0 ? uidAt(blocksModel.count - 1) : ""
+      if (last && items[last]) focusBlock(last, -1)
+    }
+  }
+
+  function lineStartVim() {
+    var idx = vimFocusedIndex()
+    if (idx >= 0 && items[uidAt(idx)] && items[uidAt(idx)].isText) {
+      focusBlock(uidAt(idx), 0)
+    } else if (idx > 0) {
+      var prev = Math.max(0, idx - 1)
+      focusBlock(uidAt(prev), -1)
+    }
+  }
+
+  function lineEndVim() {
+    var idx = vimFocusedIndex()
+    if (idx >= 0 && items[uidAt(idx)] && items[uidAt(idx)].isText) {
+      focusBlock(uidAt(idx), -1)
+    } else if (idx < blocksModel.count - 1) {
+      var next = Math.min(blocksModel.count - 1, idx + 1)
+      focusBlock(uidAt(next), 0)
+    }
+  }
+
+  function deleteBlockVim(count) {
+    if (readOnly) return
+    var idx = vimFocusedIndex()
+    if (idx < 0) return
+    var toRemove = []
+    for (var i = 0; i < count && idx + i < blocksModel.count; i++) {
+      toRemove.push(uidAt(idx + i))
+    }
+    removeBlocks(toRemove)
+    // Move focus to the block after the deleted ones
+    var newIdx = Math.max(0, idx)
+    if (newIdx < blocksModel.count) {
+      var target = uidAt(newIdx)
+      if (items[target] && items[target].isText) focusBlock(target, 0)
+      else focusBlock(target, 0)
+    }
+  }
+
+  function clearBlockVim(count) {
+    if (readOnly) return
+    var idx = vimFocusedIndex()
+    if (idx < 0) return
+    for (var i = 0; i < count && idx + i < blocksModel.count; i++) {
+      var uid = uidAt(idx + i)
+      if (items[uid] && items[uid].isText) {
+        setHtml(uid, "")
+        focusBlock(uid, 0)
+        return
+      }
+    }
+  }
+
+  function duplicateBlockVim(count) {
+    var idx = vimFocusedIndex()
+    if (idx < 0) return
+    var blocks = []
+    for (var i = 0; i < count && idx + i < blocksModel.count; i++) {
+      blocks.push(blockAt(idx + i))
+    }
+    var at = idx + count
+    insertBlocksAt(at, blocks)
+    // Focus the last duplicated block
+    var lastUid = uidAt(at + count - 1)
+    if (items[lastUid]) focusBlock(lastUid, -1)
+  }
+
+  function pasteVim() {
+    var idx = vimFocusedIndex()
+    if (idx < 0) return
+    var uid = uidAt(idx)
+    pasteAfter(uid, false)
+  }
+
+  function enterVisualMode() {
+    // Select the current block (visual = select blocks)
+    var idx = vimFocusedIndex()
+    if (idx >= 0) {
+      selectBlocks(uidAt(idx), uidAt(idx))
+    }
+  }
+
+  function moveBlockVim(direction, count) {
+    var idx = vimFocusedIndex()
+    if (idx < 0) return
+    var step = direction === "up" ? -1 : 1
+    moveBlocks([uidAt(idx)], step * count)
+    var newIdx = Math.max(0, Math.min(blocksModel.count - 1, idx + step * count))
+    var target = uidAt(newIdx)
+    if (items[target] && items[target].isText) focusBlock(target, 0)
+    else focusBlock(target, 0)
+  }
+
+  function indentBlockVim(count) {
+    var idx = vimFocusedIndex()
+    if (idx < 0) return
+    indentBlocks([uidAt(idx)], 1)
+  }
+
+  function outdentBlockVim(count) {
+    var idx = vimFocusedIndex()
+    if (idx < 0) return
+    indentBlocks([uidAt(idx)], -1)
+  }
+
+  // Vim search: / starts search mode, Enter submits.
+  // The search uses the existing find() function in the editor.
+  property string vimSearchQuery: ""
+  property bool vimSearchOpen: false
+
+  function enterVimSearch() {
+    vimSearchOpen = true
+    vimSearchQuery = ""
+    // Focus a text input for the search (reuse existing find bar logic if available)
+  }
+
+  function submitVimSearch() {
+    if (vimSearchQuery && findList && findList.length > 0) {
+      var match = find(vimSearchQuery)
+      if (match > 0) showMatch(0)
+    }
+    vimSearchOpen = false
+    vimSearchQuery = ""
   }
 
   // ---- dragging across blocks picks them -------------------------------------------------

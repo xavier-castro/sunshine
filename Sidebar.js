@@ -11,6 +11,7 @@ var ITEMS = [
   { id: "calendar", label: "Calendar", place: "top" },
   { id: "library", label: "Library", place: "top" },
   { id: "people", label: "People", place: "top" },
+  { id: "kanban", label: "Kanban", place: "top" },
   { id: "today", label: "Today", place: "sections" },
   { id: "favorites", label: "Favorites", place: "sections" },
   { id: "projects", label: "Projects", place: "sections" },

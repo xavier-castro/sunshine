@@ -181,7 +181,7 @@ you haven't set it up), with the model you picked for it.
 ## Install
 
 ```bash
-omarchy plugin add https://github.com/xavier/sunshine.git --enable
+omarchy plugin add https://github.com/xavier-castro/sunshine.git --enable
 ```
 
 That's all: no setup step, and your Hyprland config is not touched. Sunshine
